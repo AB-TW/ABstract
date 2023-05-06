@@ -1,3 +1,5 @@
+[![ci](https://github.com/pc-dong/ABstract/actions/workflows/gradle.yml/badge.svg)](https://github.com/pc-dong/ABstract/actions/gradle.yml)
+
 # ABstract
 An scaffold project for AB testing 
 
