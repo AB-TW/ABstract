@@ -70,3 +70,13 @@ pmd {
 
 check.dependsOn 'pmdMain'
 check.dependsOn 'pmdTest'
+
+task installGitHooks(type: Copy) {
+    from new File(rootProject.rootDir, 'config/git-hook/')
+    into {
+        new File(rootProject.rootDir, '.git/hooks')
+    }
+    fileMode 0755
+}
+
+compileJava.dependsOn installGitHooks
