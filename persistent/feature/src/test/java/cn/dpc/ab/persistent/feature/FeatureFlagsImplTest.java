@@ -35,15 +35,13 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_add_success() {
-        FeatureFlag featureFlag = createFeatureFlag("featureKey1");
-
+    void should_add_success() {
         when(repository.save(any(FeatureFlagDb.class))).thenAnswer(invocation -> {
             FeatureFlagDb featureFlagDb = invocation.getArgument(0);
             return Mono.just(featureFlagDb);
         });
 
-        featureFlags.add(featureFlag)
+        featureFlags.add(createFeatureFlag("featureKey1"))
                 .as(StepVerifier::create)
                 .expectNextMatches(config -> config.getId().featureKey().equals("featureKey1")
                         && config.getDescription().updatedAt() != null
@@ -53,7 +51,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_add_return_error_when_repository_save_error() {
+    void should_add_return_error_when_repository_save_error() {
         FeatureFlag featureFlag = createFeatureFlag("featureKey1");
 
         when(repository.save(any(FeatureFlagDb.class))).thenReturn(Mono.error(new DuplicateKeyException("save error")));
@@ -65,7 +63,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_update_success() {
+    void should_update_success() {
         String featureKey = "featureKey1";
         FeatureFlag featureFlag = createFeatureFlag(featureKey);
         FeatureFlagDb db = FeatureFlagDb.from(featureFlag);
@@ -87,7 +85,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_update_throw_error_when_featureFlag_not_found() {
+    void should_update_throw_error_when_featureFlag_not_found() {
         String featureKey = "not_exist";
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
@@ -100,7 +98,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_enable_success() {
+    void should_enable_success() {
         String featureKey = "featureKey1";
         FeatureFlag featureFlag = createFeatureFlag(featureKey);
         FeatureFlagDb db = FeatureFlagDb.from(featureFlag);
@@ -117,7 +115,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_enable_return_error_when_featureFlag_not_exist() {
+    void should_enable_return_error_when_featureFlag_not_exist() {
         String featureKey = "not_exist";
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
@@ -128,7 +126,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_disable_success() {
+    void should_disable_success() {
         String featureKey = "featureKey1";
         FeatureFlag featureFlag = createFeatureFlag(featureKey);
         FeatureFlagDb db = FeatureFlagDb.from(featureFlag);
@@ -145,7 +143,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_disable_return_error_when_featureFlag_not_exist() {
+    void should_disable_return_error_when_featureFlag_not_exist() {
         String featureKey = "not_exist";
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
@@ -156,7 +154,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_get_all_success() {
+    void should_get_all_success() {
         when(repository.findAll()).thenReturn(Flux.just(FeatureFlagTestUtil.createFeatureFlagDb("featureKey1"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
@@ -168,7 +166,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_get_all_return_empty_when_no_record() {
+    void should_get_all_return_empty_when_no_record() {
         when(repository.findAll()).thenReturn(Flux.empty());
 
         featureFlags.getAll(FilterParams.builder().key("3").build())
@@ -178,7 +176,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_get_success() {
+    void should_get_success() {
         String featureKey = "featureKey1";
         when(repository.findById(anyString())).thenReturn(Mono.just(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)));
 
@@ -189,7 +187,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_get_return_empty_when_id_not_exist() {
+    void should_get_return_empty_when_id_not_exist() {
         String featureKey = "not_exist";
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
@@ -200,7 +198,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_subCollection_return_empty_when_no_record() {
+    void should_subCollection_return_empty_when_no_record() {
         when(repository.findAll()).thenReturn(Flux.empty());
 
         featureFlags.subCollection(FilterParams.builder().build(), 0, 10)
@@ -210,7 +208,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_subCollection_return_success() {
+    void should_subCollection_return_success() {
         when(repository.findAll()).thenReturn(Flux.just(FeatureFlagTestUtil.createFeatureFlagDb("featureKey1"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
@@ -222,7 +220,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_subCollection_return_success_when_filter_by_key() {
+    void should_subCollection_return_success_when_filter_by_key() {
         when(repository.findAll()).thenReturn(Flux.just(FeatureFlagTestUtil.createFeatureFlagDb("featureKey1"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
@@ -234,7 +232,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_size_return_0_when_no_record() {
+    void should_size_return_0_when_no_record() {
         when(repository.findAll()).thenReturn(Flux.empty());
 
         featureFlags.size(FilterParams.builder().build())
@@ -244,7 +242,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_size_return_size_number() {
+    void should_size_return_size_number() {
         when(repository.findAll()).thenReturn(Flux.just(FeatureFlagTestUtil.createFeatureFlagDb("featureKey1"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
@@ -256,7 +254,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_size_return_size_number_with_filter_params() {
+    void should_size_return_size_number_with_filter_params() {
         when(repository.findAll()).thenReturn(Flux.just(FeatureFlagTestUtil.createFeatureFlagDb("featureKey1"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
@@ -269,7 +267,7 @@ class FeatureFlagsImplTest {
 
 
     @Test
-    public void should_enabled_success() {
+    void should_enabled_success() {
         when(repository.findAll()).thenReturn(Flux.just(createFeatureFlagDb("featureKey1", true),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 createFeatureFlagDb("featureKey3", true)));
@@ -281,7 +279,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_enabled_return_empty_when_no_record() {
+    void should_enabled_return_empty_when_no_record() {
         when(repository.findAll()).thenReturn(Flux.empty());
 
         featureFlags.enabled(FilterParams.builder().build())
@@ -291,7 +289,7 @@ class FeatureFlagsImplTest {
     }
 
     @Test
-    public void should_enabled_return_with_filter() {
+    void should_enabled_return_with_filter() {
         when(repository.findAll()).thenReturn(Flux.just(createFeatureFlagDb("featureKey1", true),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 createFeatureFlagDb("featureKey3", true)));

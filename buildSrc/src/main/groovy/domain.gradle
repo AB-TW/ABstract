@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'jacoco'
     id 'checkstyle'
+    id 'pmd'
 }
 
 group 'cn.dpc.ab'
@@ -57,3 +58,15 @@ checkstyleTest {
 
 check.dependsOn 'checkstyleMain'
 check.dependsOn 'checkstyleTest'
+
+pmd {
+    toolVersion = '6.52.0'
+    sourceSets = [sourceSets.main]
+    ruleSets = ["${rootDir}/config/pmd/pmd-ruleset.xml"]
+    rulesMinimumPriority = 3
+    ignoreFailures = false
+    consoleOutput = true
+}
+
+check.dependsOn 'pmdMain'
+check.dependsOn 'pmdTest'

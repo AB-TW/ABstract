@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.test.StepVerifier;
 
-import static cn.dpc.ab.persistent.feature.FeatureFlagTestUtil.createFeatureFlagDb;
-
 
 class FeatureFlagDbRepositoryTest extends RepositoryTestBase {
     @Autowired
@@ -26,7 +24,7 @@ class FeatureFlagDbRepositoryTest extends RepositoryTestBase {
     }
 
     @Test
-    public void should_save_FeatureFlag_success() {
+    void should_save_FeatureFlag_success() {
         var featureKey = "featureKey1";
         repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey))
                 .as(StepVerifier::create)
@@ -35,7 +33,7 @@ class FeatureFlagDbRepositoryTest extends RepositoryTestBase {
     }
 
     @Test
-    public void should_add_same_featureKey_fail() {
+    void should_add_same_featureKey_fail() {
         var featureKey = "featureKey1";
         repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)).block();
 
@@ -46,7 +44,7 @@ class FeatureFlagDbRepositoryTest extends RepositoryTestBase {
     }
 
     @Test
-    public void should_update_same_featureKey_fail() {
+    void should_update_same_featureKey_fail() {
         var featureKey = "featureKey1";
         FeatureFlagDb db = repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)).block();
 
@@ -60,7 +58,7 @@ class FeatureFlagDbRepositoryTest extends RepositoryTestBase {
     }
 
     @Test
-    public void should_getById_success() {
+    void should_getById_success() {
         var featureKey = "featureKey1";
         repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)).block();
 
@@ -71,7 +69,7 @@ class FeatureFlagDbRepositoryTest extends RepositoryTestBase {
     }
 
     @Test
-    public void should_findAll_success() {
+    void should_findAll_success() {
         repository.save(FeatureFlagTestUtil.createFeatureFlagDb("key1")).block();
         repository.save(FeatureFlagTestUtil.createFeatureFlagDb("key2")).block();
         repository.save(FeatureFlagTestUtil.createFeatureFlagDb("key3")).block();

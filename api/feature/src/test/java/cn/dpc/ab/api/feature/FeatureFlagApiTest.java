@@ -33,7 +33,7 @@ class FeatureFlagApiTest {
     FeatureFlags featureFlags;
 
     @Test
-    public void should_getAll_success_when_no_records() {
+    void should_getAll_success_when_no_records() {
         when(featureFlags.getAll(Mockito.any())).thenReturn(Flux.empty());
 
         webClient.get()
@@ -46,7 +46,7 @@ class FeatureFlagApiTest {
     }
 
     @Test
-    public void should_getAll_success_when_has_records() {
+    void should_getAll_success_when_has_records() {
         when(featureFlags.getAll(Mockito.any())).thenReturn(Flux.just(createFeatureFlag("featureKey1"),
                 createFeatureFlag("featureKey2")));
 
@@ -64,7 +64,7 @@ class FeatureFlagApiTest {
     }
 
     @Test
-    public void should_add_feature_flag_success() {
+    void should_add_feature_flag_success() {
         when(featureFlags.add(Mockito.any())).thenReturn(Mono.just(createFeatureFlag("featureKey1")));
 
         webClient.post()
@@ -74,13 +74,12 @@ class FeatureFlagApiTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(FeatureFlagResponse.class)
-                .value(response -> {
-                    assertEquals(response.getFeatureKey(), "featureKey1");
-                });
+                .value(response ->
+                        assertEquals(response.getFeatureKey(), "featureKey1", "feature key should be featureKey1"));
     }
 
     @Test
-    public void should_add_feature_flag_failed_when_feature_key_is_duplicated() {
+    void should_add_feature_flag_failed_when_feature_key_is_duplicated() {
         when(featureFlags.add(Mockito.any())).thenReturn(Mono.error(new DuplicateKeyException("feature key is duplicated")));
 
         webClient.post()
@@ -90,8 +89,6 @@ class FeatureFlagApiTest {
                 .expectStatus()
                 .isBadRequest();
     }
-
-
 
 
     public static FeatureFlag createFeatureFlag(String featureKey) {
