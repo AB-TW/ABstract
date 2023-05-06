@@ -53,3 +53,7 @@ docker-compose up -d
 
 ./gradlew bootrun
 ```
+
+## 模型
+
+![domain](resource/domain.png)
