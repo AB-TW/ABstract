@@ -30,7 +30,7 @@ public class GlobalErrorHandler {
     public ExceptionResponse handleIllegalArgumentException(IllegalArgumentException exception) {
 
         String message = exception.getMessage();
-        log.error("VALIDATION_ERROR", exception);
+        logException(exception);
         return new ExceptionResponse(message);
     }
 
@@ -45,7 +45,7 @@ public class GlobalErrorHandler {
     public ExceptionResponse handleDuplicateKeyException(DuplicateKeyException exception) {
 
         String message = exception.getMessage();
-        log.error("VALIDATION_ERROR", exception);
+        logException(exception);
         return new ExceptionResponse(message);
     }
 
@@ -60,7 +60,7 @@ public class GlobalErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionResponse handleWebExchangeBindException(WebExchangeBindException exception) {
         String message = exception.getAllErrors().get(0).getDefaultMessage();
-        log.error("VALIDATION_ERROR", exception);
+        logException(exception);
         return new ExceptionResponse(message);
     }
 
@@ -73,7 +73,7 @@ public class GlobalErrorHandler {
     @ExceptionHandler(RecordNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionResponse handleRecordNotFoundException(RecordNotFoundException exception) {
-        log.error("VALIDATION_ERROR", exception);
+        logException(exception);
         return new ExceptionResponse(exception.getMessage());
     }
 
@@ -88,8 +88,12 @@ public class GlobalErrorHandler {
     public ExceptionResponse handleRuntimeException(RuntimeException exception) {
 
         String message = exception.getMessage();
-        log.error("VALIDATION_ERROR", exception);
+        logException(exception);
         return new ExceptionResponse(message);
+    }
+
+    private static void logException(Exception exception) {
+        log.error("VALIDATION_ERROR", exception);
     }
 
     /**

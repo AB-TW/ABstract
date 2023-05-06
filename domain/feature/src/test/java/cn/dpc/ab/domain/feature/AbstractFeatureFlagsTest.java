@@ -9,7 +9,7 @@ import reactor.test.StepVerifier;
 class AbstractFeatureFlagsTest {
 
     @Test
-    public void should_update_success() {
+    void should_update_success() {
         FeatureFlags featureFlags = new MockSuccessFeatureFlags();
         FeatureFlag.FeatureFlagId id = new FeatureFlag.FeatureFlagId("featureKey");
         FeatureFlag.FeatureFlagDescription description = FeatureFlag.FeatureFlagDescription.builder()
@@ -23,7 +23,7 @@ class AbstractFeatureFlagsTest {
     }
 
     @Test
-    public void should_update_return_error_when_id_not_exist() {
+    void should_update_return_error_when_id_not_exist() {
         FeatureFlags featureFlags = new MockNotFoundFeatureFlags();
         FeatureFlag.FeatureFlagId id = new FeatureFlag.FeatureFlagId("featureKey");
         FeatureFlag.FeatureFlagDescription description = FeatureFlag.FeatureFlagDescription.builder()
@@ -38,7 +38,7 @@ class AbstractFeatureFlagsTest {
     }
 
     @Test
-    public void should_enable_success() {
+    void should_enable_success() {
         FeatureFlags featureFlags = new MockSuccessFeatureFlags();
         FeatureFlag.FeatureFlagId id = new FeatureFlag.FeatureFlagId("featureKey");
 
@@ -48,7 +48,7 @@ class AbstractFeatureFlagsTest {
     }
 
     @Test
-    public void should_enable_return_error_when_id_not_exist() {
+    void should_enable_return_error_when_id_not_exist() {
         FeatureFlags featureFlags = new MockNotFoundFeatureFlags();
         FeatureFlag.FeatureFlagId id = new FeatureFlag.FeatureFlagId("featureKey");
 
@@ -59,7 +59,7 @@ class AbstractFeatureFlagsTest {
     }
 
     @Test
-    public void should_disable_success() {
+    void should_disable_success() {
         FeatureFlags featureFlags = new MockSuccessFeatureFlags();
         FeatureFlag.FeatureFlagId id = new FeatureFlag.FeatureFlagId("featureKey");
 
@@ -69,7 +69,7 @@ class AbstractFeatureFlagsTest {
     }
 
     @Test
-    public void should_disable_return_error_when_id_not_exist() {
+    void should_disable_return_error_when_id_not_exist() {
         FeatureFlags featureFlags = new MockNotFoundFeatureFlags();
         FeatureFlag.FeatureFlagId id = new FeatureFlag.FeatureFlagId("featureKey");
 
