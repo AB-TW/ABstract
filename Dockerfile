@@ -1,6 +1,7 @@
 FROM openjdk:17.0.1-jdk-slim
 
 COPY main/build/libs/main-1.0-SNAPSHOT.jar /app/ABstract.jar
+COPY frontend/dist /app/static
 
 WORKDIR /app
 

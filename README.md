@@ -56,6 +56,14 @@ docker-compose up -d
 ./gradlew bootrun
 ```
 
+### Build Image
+
+```shell
+./gradlew build
+./gradlew npmBuild
+docker build -t a_bstract/abstract:latest .
+```
+
 ## 模型
 
 ![domain](resource/domain.png)
