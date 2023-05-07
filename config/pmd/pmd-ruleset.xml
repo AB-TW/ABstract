@@ -8,7 +8,6 @@
     <rule ref="category/java/bestpractices.xml/AbstractClassWithoutAbstractMethod" />
     <rule ref="category/java/bestpractices.xml/AccessorClassGeneration" />
     <rule ref="category/java/bestpractices.xml/AccessorMethodGeneration" />
-    <rule ref="category/java/bestpractices.xml/AvoidDuplicateLiterals" />
     <rule ref="category/java/bestpractices.xml/AvoidFieldNameMatchingMethodName" />
     <rule ref="category/java/bestpractices.xml/AvoidInstantiatingObjectsInLoops" />
     <rule ref="category/java/bestpractices.xml/AvoidLiteralsInIfCondition" />
