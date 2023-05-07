@@ -1,5 +1,5 @@
-  # github action workflow file, use gradle wrapper to build
-name: Java CI with Gradle
+# github action workflow file, use gradle wrapper to build
+name: Build
 on:
   push:
     branches: [ "main" ]
@@ -23,12 +23,7 @@ jobs:
           run: chmod +x gradlew
         - name: Build with Gradle
           run: ./gradlew build
-#        - name: Test with Gradle
-#          run: ./gradlew test
-#        - name: Publish with Gradle
-#          run: ./gradlew publish
-#        - name: Upload artifact
-#          uses: actions/upload-artifact@v2
-#          with:
-#            name: build
-#            path: build/libs
+        - name: Build frontend with Gradle
+          run: ./gradlew npmBuild
+        - name: Build Docker image
+          run: docker build -t a_bstract/abstract:latest .

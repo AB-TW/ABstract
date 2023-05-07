@@ -47,7 +47,6 @@
 import {
   Document,
   Menu as IconMenu,
-  Location,
   Setting,
 } from '@element-plus/icons-vue'
 
