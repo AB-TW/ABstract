@@ -1,6 +1,6 @@
 package cn.dpc.ab.api.feature.dto;
 
-import cn.dpc.ab.domain.feature.FeatureFlag;
+import cn.dpc.ab.domain.feature.Feature;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
@@ -29,23 +29,23 @@ public class FeatureFlagResponse {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 
-    private FeatureFlag.FeatureTemplate template;
+    private Feature.FeatureTemplate template;
 
     /**
      * Creates a FeatureFlagResponse from a FeatureFlag.
      *
-     * @param featureFlag the FeatureFlag to convert
+     * @param feature the FeatureFlag to convert
      * @return the FeatureFlagResponse
      */
-    public static FeatureFlagResponse from(FeatureFlag featureFlag) {
+    public static FeatureFlagResponse from(Feature feature) {
         return FeatureFlagResponse.builder()
-                .featureKey(featureFlag.getId().featureKey())
-                .name(featureFlag.getDescription().name())
-                .description(featureFlag.getDescription().description())
-                .enabled(featureFlag.getDescription().enabled())
-                .createdAt(featureFlag.getDescription().createdAt())
-                .updatedAt(featureFlag.getDescription().updatedAt())
-                .template(featureFlag.getDescription().template())
+                .featureKey(feature.getId().featureKey())
+                .name(feature.getDescription().name())
+                .description(feature.getDescription().description())
+                .enabled(feature.getDescription().enabled())
+                .createdAt(feature.getDescription().createdAt())
+                .updatedAt(feature.getDescription().updatedAt())
+                .template(feature.getDescription().template())
                 .build();
     }
 }

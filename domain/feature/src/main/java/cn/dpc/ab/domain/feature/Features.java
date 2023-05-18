@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 /**
  * FeatureFlags provides an interface for managing feature flags.
  */
-public interface FeatureFlags {
+public interface Features {
 
 
     /**
@@ -22,7 +22,7 @@ public interface FeatureFlags {
      * @param id the id of the feature flag to get
      * @return a Mono that completes when the feature flag has been retrieved
      */
-    Mono<FeatureFlag> get(FeatureFlag.FeatureFlagId id);
+    Mono<Feature> get(Feature.FeatureId id);
 
     /**
      * Get all feature flags.
@@ -30,7 +30,7 @@ public interface FeatureFlags {
      * @param params the filter params
      * @return a Flux that emits all feature flags
      */
-    Flux<FeatureFlag> getAll(FilterParams params);
+    Flux<Feature> getAll(FilterParams params);
 
     /**
      * Get a sub-collection of feature flags.
@@ -40,7 +40,7 @@ public interface FeatureFlags {
      * @param to     the end index of the sub-collection
      * @return a Flux that emits a sub-collection of feature flags
      */
-    Flux<FeatureFlag> subCollection(FilterParams params, int from, int to);
+    Flux<Feature> subCollection(FilterParams params, int from, int to);
 
     /**
      * Get the size of a sub-collection of feature flags.
@@ -56,16 +56,16 @@ public interface FeatureFlags {
      * @param params the filter params
      * @return a Flux that emits all enabled feature flags
      */
-    Flux<FeatureFlag> enabled(FilterParams params);
+    Flux<Feature> enabled(FilterParams params);
 
 
     /**
      * add a feature flag.
      *
-     * @param featureFlag the feature flag to add
+     * @param feature the feature flag to add
      * @return a Mono that completes when the feature flag has been added
      */
-    Mono<FeatureFlag> add(FeatureFlag featureFlag);
+    Mono<Feature> add(Feature feature);
 
     /**
      * Update a feature flag.
@@ -74,7 +74,7 @@ public interface FeatureFlags {
      * @param description the new description of the feature flag
      * @return a Mono that completes when the feature flag has been updated
      */
-    Mono<Void> update(FeatureFlag.FeatureFlagId id, FeatureFlag.FeatureFlagDescription description);
+    Mono<Void> update(Feature.FeatureId id, Feature.FeatureDescription description);
 
     /**
      * Enable a feature flag.
@@ -82,7 +82,7 @@ public interface FeatureFlags {
      * @param id the id of the feature flag to enable
      * @return a Mono that completes when the feature flag has been enabled
      */
-    Mono<Void> enable(FeatureFlag.FeatureFlagId id);
+    Mono<Void> enable(Feature.FeatureId id);
 
     /**
      * Disable a feature flag.
@@ -90,5 +90,5 @@ public interface FeatureFlags {
      * @param id the id of the feature flag to disable
      * @return a Mono that completes when the feature flag has been disabled
      */
-    Mono<Void> disable(FeatureFlag.FeatureFlagId id);
+    Mono<Void> disable(Feature.FeatureId id);
 }

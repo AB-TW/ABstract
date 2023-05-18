@@ -3,8 +3,8 @@ package cn.dpc.ab.api.feature;
 import cn.dpc.ab.api.TestConfiguration;
 import cn.dpc.ab.api.feature.dto.FeatureFlagRequest;
 import cn.dpc.ab.api.feature.dto.FeatureFlagResponse;
-import cn.dpc.ab.domain.feature.FeatureFlag;
-import cn.dpc.ab.domain.feature.FeatureFlags;
+import cn.dpc.ab.domain.feature.Feature;
+import cn.dpc.ab.domain.feature.Features;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -24,17 +24,17 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(value = FeatureFlagApi.class, properties = "spring.main.lazy-initialization=true")
 @ContextConfiguration(classes = TestConfiguration.class)
-class FeatureFlagApiTest {
+class FeatureApiTest {
 
     @Autowired
     WebTestClient webClient;
 
     @MockBean
-    FeatureFlags featureFlags;
+    Features features;
 
     @Test
     void should_getAll_success_when_no_records() {
-        when(featureFlags.getAll(Mockito.any())).thenReturn(Flux.empty());
+        when(features.getAll(Mockito.any())).thenReturn(Flux.empty());
 
         webClient.get()
                 .uri("/feature-flags")
@@ -47,7 +47,7 @@ class FeatureFlagApiTest {
 
     @Test
     void should_getAll_success_when_has_records() {
-        when(featureFlags.getAll(Mockito.any())).thenReturn(Flux.just(createFeatureFlag("featureKey1"),
+        when(features.getAll(Mockito.any())).thenReturn(Flux.just(createFeatureFlag("featureKey1"),
                 createFeatureFlag("featureKey2")));
 
         webClient.get()
@@ -65,7 +65,7 @@ class FeatureFlagApiTest {
 
     @Test
     void should_add_feature_flag_success() {
-        when(featureFlags.add(Mockito.any())).thenReturn(Mono.just(createFeatureFlag("featureKey1")));
+        when(features.add(Mockito.any())).thenReturn(Mono.just(createFeatureFlag("featureKey1")));
 
         webClient.post()
                 .uri("/feature-flags")
@@ -80,7 +80,7 @@ class FeatureFlagApiTest {
 
     @Test
     void should_add_feature_flag_failed_when_feature_key_is_duplicated() {
-        when(featureFlags.add(Mockito.any())).thenReturn(Mono.error(new DuplicateKeyException("feature key is duplicated")));
+        when(features.add(Mockito.any())).thenReturn(Mono.error(new DuplicateKeyException("feature key is duplicated")));
 
         webClient.post()
                 .uri("/feature-flags")
@@ -91,9 +91,9 @@ class FeatureFlagApiTest {
     }
 
 
-    public static FeatureFlag createFeatureFlag(String featureKey) {
-        return new FeatureFlag(new FeatureFlag.FeatureFlagId(featureKey),
-                FeatureFlag.FeatureFlagDescription.builder()
+    public static Feature createFeatureFlag(String featureKey) {
+        return new Feature(new Feature.FeatureId(featureKey),
+                Feature.FeatureDescription.builder()
                         .description("description")
                         .name("name")
                         .enabled(false)

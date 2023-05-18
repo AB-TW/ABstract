@@ -12,17 +12,17 @@ import java.util.List;
  */
 @AllArgsConstructor
 @Getter
-public class FeatureFlag {
-    private FeatureFlagId id;
-    private FeatureFlagDescription description;
+public class Feature {
+    private FeatureId id;
+    private FeatureDescription description;
 
     /**
      * Enable a feature flag.
      *
      * @return a Mono that completes when the feature flag has been enabled
      */
-    public FeatureFlag enable() {
-        this.description = new FeatureFlagDescription(description.name(),
+    public Feature enable() {
+        this.description = new FeatureDescription(description.name(),
                 description.description(),
                 description.template(),
                 true,
@@ -38,8 +38,8 @@ public class FeatureFlag {
      * @param description the new description of the feature flag
      * @return a Mono that completes when the feature flag has been updated
      */
-    public FeatureFlag update(FeatureFlagDescription description) {
-        this.description = new FeatureFlagDescription(description.name(),
+    public Feature update(FeatureDescription description) {
+        this.description = new FeatureDescription(description.name(),
                 description.description(),
                 description.template(),
                 description.enabled(),
@@ -54,8 +54,8 @@ public class FeatureFlag {
      *
      * @return a Mono that completes when the feature flag has been disabled
      */
-    public FeatureFlag disable() {
-        this.description = new FeatureFlagDescription(description.name(),
+    public Feature disable() {
+        this.description = new FeatureDescription(description.name(),
                 description.description(),
                 description.template(),
                 false,
@@ -70,15 +70,15 @@ public class FeatureFlag {
      * FeatureFlagId represents the id of a feature flag.
      */
     @Builder
-    public record FeatureFlagId(String featureKey) {
+    public record FeatureId(String featureKey) {
     }
 
     /**
      * FeatureFlagDescription represents the description of a feature flag.
      */
     @Builder
-    public record FeatureFlagDescription(String name, String description, FeatureTemplate template, boolean enabled,
-                                         LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public record FeatureDescription(String name, String description, FeatureTemplate template, boolean enabled,
+                                     LocalDateTime createdAt, LocalDateTime updatedAt) {
     }
 
     /**

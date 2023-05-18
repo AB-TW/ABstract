@@ -9,7 +9,7 @@ import reactor.core.publisher.Flux;
  * FeatureFlagDBRepository provides a skeleton implementation of the FeatureFlagDBRepository interface.
  */
 @ScanConsistency(query = QueryScanConsistency.REQUEST_PLUS)
-public interface FeatureFlagDbRepository extends ReactiveCrudRepository<FeatureFlagDb, String> {
+public interface FeatureFlagDbRepository extends ReactiveCrudRepository<FeatureDb, String> {
 
-    Flux<FeatureFlagDb> findAll();
+    Flux<FeatureDb> findAll();
 }

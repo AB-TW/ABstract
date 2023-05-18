@@ -1,7 +1,7 @@
 package cn.dpc.ab.persistent.feature.db;
 
-import cn.dpc.ab.domain.feature.FeatureFlag;
-import cn.dpc.ab.domain.feature.FeatureFlag.FeatureFlagDescription;
+import cn.dpc.ab.domain.feature.Feature;
+import cn.dpc.ab.domain.feature.Feature.FeatureDescription;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
@@ -21,7 +21,7 @@ import static org.springframework.data.couchbase.core.mapping.id.GenerationStrat
  */
 @Document
 @Data
-public class FeatureFlagDb {
+public class FeatureDb {
 
     @Version
     private long version;
@@ -37,7 +37,7 @@ public class FeatureFlagDb {
     private String featureKey;
 
     @Field
-    private FeatureFlagDescription description;
+    private FeatureDescription description;
 
 
     public static String idFromFeatureKey(String featureKey) {
@@ -47,19 +47,19 @@ public class FeatureFlagDb {
     /**
      * Creates a FeatureFlagDb from a FeatureFlag.
      *
-     * @param featureFlag the FeatureFlag
+     * @param feature the FeatureFlag
      * @return the FeatureFlagDb
      */
-    public static FeatureFlagDb from(FeatureFlag featureFlag) {
-        FeatureFlagDb db = new FeatureFlagDb();
-        db.setId(idFromFeatureKey(featureFlag.getId().featureKey()));
-        db.setFeatureKey(featureFlag.getId().featureKey());
-        db.setDescription(from(featureFlag.getDescription()));
+    public static FeatureDb from(Feature feature) {
+        FeatureDb db = new FeatureDb();
+        db.setId(idFromFeatureKey(feature.getId().featureKey()));
+        db.setFeatureKey(feature.getId().featureKey());
+        db.setDescription(from(feature.getDescription()));
         return db;
     }
 
-    private static FeatureFlagDescription from(FeatureFlagDescription description) {
-        return FeatureFlagDescription.builder()
+    private static FeatureDescription from(FeatureDescription description) {
+        return FeatureDescription.builder()
                 .name(description.name())
                 .description(description.description())
                 .enabled(description.enabled())
@@ -69,8 +69,8 @@ public class FeatureFlagDb {
                 .build();
     }
 
-    public FeatureFlag to() {
-        return new FeatureFlag(FeatureFlag.FeatureFlagId.builder().featureKey(this.getFeatureKey()).build(),
+    public Feature to() {
+        return new Feature(Feature.FeatureId.builder().featureKey(this.getFeatureKey()).build(),
                 this.getDescription());
     }
 }
