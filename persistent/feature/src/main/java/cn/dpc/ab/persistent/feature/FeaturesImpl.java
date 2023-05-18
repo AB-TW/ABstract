@@ -91,10 +91,10 @@ public class FeaturesImpl extends AbstractFeatures {
      * that match the given filter.
      *
      * @see Features#subCollection(Features.FilterParams,
-     * int, int)
+     * long, long)
      */
     @Override
-    public Flux<Feature> subCollection(FilterParams params, int from, int to) {
+    public Flux<Feature> subCollection(FilterParams params, long from, long to) {
         return this.getAll(params).skip(from).take(to - from);
     }
 

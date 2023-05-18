@@ -108,7 +108,7 @@ class AbstractFeaturesTest {
         }
 
         @Override
-        public Flux<Feature> subCollection(FilterParams params, int from, int to) {
+        public Flux<Feature> subCollection(FilterParams params, long from, long to) {
             return null;
         }
 
@@ -155,7 +155,7 @@ class AbstractFeaturesTest {
         }
 
         @Override
-        public Flux<Feature> subCollection(FilterParams params, int from, int to) {
+        public Flux<Feature> subCollection(FilterParams params, long from, long to) {
             return null;
         }
 

@@ -1,17 +1,18 @@
 package cn.dpc.ab.api.feature.dto;
 
 import cn.dpc.ab.domain.feature.Feature;
+import cn.dpc.ab.domain.feature.Feature.FeatureTemplate;
 import lombok.*;
 
 /**
- * FeatureFlagRequest represents a feature flag in the API.
+ * FeatureRequest represents a feature in the API.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FeatureFlagRequest {
+public class FeatureRequest {
     private String featureKey;
 
     private String name;
@@ -20,7 +21,7 @@ public class FeatureFlagRequest {
 
     private boolean enabled;
 
-    private Feature.FeatureTemplate template;
+    private FeatureTemplate template;
 
 
     /**
