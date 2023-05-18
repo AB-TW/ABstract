@@ -1,0 +1,26 @@
+package cn.dpc.ab.api.feature.dto;
+
+import cn.dpc.ab.api.dto.PageRequest;
+import cn.dpc.ab.domain.feature.Features.FilterParams;
+import lombok.Data;
+
+/**
+ * FeaturePageRequest represents a page of feature flags in the API.
+ */
+@Data
+public class FeaturePageRequest extends PageRequest {
+    private String key;
+    private Boolean enabled;
+
+    /**
+     * Creates a FilterParams from a FeaturePageRequest.
+     *
+     * @return the FilterParams
+     */
+    public FilterParams filterParams() {
+        return FilterParams.builder()
+                .key(key)
+                .enabled(enabled)
+                .build();
+    }
+}

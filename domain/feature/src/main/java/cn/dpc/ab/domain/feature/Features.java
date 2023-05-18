@@ -40,7 +40,7 @@ public interface Features {
      * @param to     the end index of the sub-collection
      * @return a Flux that emits a sub-collection of feature flags
      */
-    Flux<Feature> subCollection(FilterParams params, int from, int to);
+    Flux<Feature> subCollection(FilterParams params, long from, long to);
 
     /**
      * Get the size of a sub-collection of feature flags.

@@ -7,14 +7,14 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * FeatureFlagResponse represents a feature flag in the API.
+ * FeatureResponse represents a feature in the API.
  */
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FeatureFlagResponse {
+public class FeatureResponse {
     private String featureKey;
 
     private String name;
@@ -37,8 +37,8 @@ public class FeatureFlagResponse {
      * @param feature the FeatureFlag to convert
      * @return the FeatureFlagResponse
      */
-    public static FeatureFlagResponse from(Feature feature) {
-        return FeatureFlagResponse.builder()
+    public static FeatureResponse from(Feature feature) {
+        return FeatureResponse.builder()
                 .featureKey(feature.getId().featureKey())
                 .name(feature.getDescription().name())
                 .description(feature.getDescription().description())
