@@ -1,6 +1,6 @@
 package cn.dpc.ab.api.feature.dto;
 
-import cn.dpc.ab.domain.feature.FeatureFlag;
+import cn.dpc.ab.domain.feature.Feature;
 import lombok.*;
 
 /**
@@ -20,7 +20,7 @@ public class FeatureFlagRequest {
 
     private boolean enabled;
 
-    private FeatureFlag.FeatureTemplate template;
+    private Feature.FeatureTemplate template;
 
 
     /**
@@ -28,10 +28,10 @@ public class FeatureFlagRequest {
      *
      * @return the FeatureFlag
      */
-    public FeatureFlag toFeatureFlag() {
-        return new FeatureFlag(
-                new FeatureFlag.FeatureFlagId(featureKey),
-                FeatureFlag.FeatureFlagDescription.builder()
+    public Feature toFeatureFlag() {
+        return new Feature(
+                new Feature.FeatureId(featureKey),
+                Feature.FeatureDescription.builder()
                         .name(name)
                         .description(description)
                         .enabled(enabled)

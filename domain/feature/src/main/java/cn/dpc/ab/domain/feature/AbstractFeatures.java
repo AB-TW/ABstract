@@ -6,15 +6,15 @@ import reactor.core.publisher.Mono;
 /**
  * AbstractFeatureFlags provides a skeleton implementation of the FeatureFlags interface.
  */
-public abstract class AbstractFeatureFlags implements FeatureFlags {
+public abstract class AbstractFeatures implements Features {
 
     /**
      * Enable a feature flag.
      *
-     * @param featureFlag the feature flag to enable
+     * @param feature the feature flag to enable
      * @return a Mono that completes when the feature flag has been enabled
      */
-    protected abstract Mono<Void> doEnable(FeatureFlag featureFlag);
+    protected abstract Mono<Void> doEnable(Feature feature);
 
 
     /**
@@ -23,20 +23,20 @@ public abstract class AbstractFeatureFlags implements FeatureFlags {
      * @param id the id of the feature flag to enable
      * @return a Mono that completes when the feature flag has been enabled
      */
-    public Mono<Void> enable(FeatureFlag.FeatureFlagId id) {
+    public Mono<Void> enable(Feature.FeatureId id) {
         return this.get(id)
                 .switchIfEmpty(Mono.error(new RecordNotFoundException(id.toString())))
-                .flatMap(featureFlag -> doEnable(featureFlag));
+                .flatMap(this::doEnable);
     }
 
     /**
      * Update a feature flag.
      *
-     * @param featureFlag the feature flag to update
+     * @param feature the feature flag to update
      * @param description the new description of the feature flag
      * @return a Mono that completes when the feature flag has been updated
      */
-    protected abstract Mono<Void> doUpdate(FeatureFlag featureFlag, FeatureFlag.FeatureFlagDescription description);
+    protected abstract Mono<Void> doUpdate(Feature feature, Feature.FeatureDescription description);
 
     /**
      * Update a feature flag.
@@ -45,19 +45,19 @@ public abstract class AbstractFeatureFlags implements FeatureFlags {
      * @param description the new description of the feature flag
      * @return a Mono that completes when the feature flag has been updated
      */
-    public Mono<Void> update(FeatureFlag.FeatureFlagId id, FeatureFlag.FeatureFlagDescription description) {
+    public Mono<Void> update(Feature.FeatureId id, Feature.FeatureDescription description) {
         return this.get(id)
                 .switchIfEmpty(Mono.error(new RecordNotFoundException(id.toString())))
-                .flatMap(featureFlag -> doUpdate(featureFlag, description));
+                .flatMap(feature -> doUpdate(feature, description));
     }
 
     /**
      * Disable a feature flag.
      *
-     * @param featureFlag the feature flag to disable
+     * @param feature the feature flag to disable
      * @return a Mono that completes when the feature flag has been disabled
      */
-    protected abstract Mono<Void> doDisable(FeatureFlag featureFlag);
+    protected abstract Mono<Void> doDisable(Feature feature);
 
 
     /**
@@ -66,9 +66,9 @@ public abstract class AbstractFeatureFlags implements FeatureFlags {
      * @param id the id of the feature flag to disable
      * @return a Mono that completes when the feature flag has been disabled
      */
-    public Mono<Void> disable(FeatureFlag.FeatureFlagId id) {
+    public Mono<Void> disable(Feature.FeatureId id) {
         return this.get(id)
                 .switchIfEmpty(Mono.error(new RecordNotFoundException(id.toString())))
-                .flatMap(featureFlag -> doDisable(featureFlag));
+                .flatMap(this::doDisable);
     }
 }

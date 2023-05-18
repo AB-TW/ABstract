@@ -1,10 +1,10 @@
 package cn.dpc.ab.persistent.feature;
 
 import cn.dpc.ab.domain.exception.RecordNotFoundException;
-import cn.dpc.ab.domain.feature.FeatureFlag;
-import cn.dpc.ab.domain.feature.FeatureFlags;
-import cn.dpc.ab.domain.feature.FeatureFlags.FilterParams;
-import cn.dpc.ab.persistent.feature.db.FeatureFlagDb;
+import cn.dpc.ab.domain.feature.Feature;
+import cn.dpc.ab.domain.feature.Features;
+import cn.dpc.ab.domain.feature.Features.FilterParams;
+import cn.dpc.ab.persistent.feature.db.FeatureDb;
 import cn.dpc.ab.persistent.feature.db.FeatureFlagDbRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,25 +23,25 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class FeatureFlagsImplTest {
+class FeaturesImplTest {
     @Mock
     FeatureFlagDbRepository repository;
 
-    FeatureFlags featureFlags;
+    Features features;
 
     @BeforeEach
     void setUp() {
-        featureFlags = new FeatureFlagsImpl(repository);
+        features = new FeaturesImpl(repository);
     }
 
     @Test
     void should_add_success() {
-        when(repository.save(any(FeatureFlagDb.class))).thenAnswer(invocation -> {
-            FeatureFlagDb featureFlagDb = invocation.getArgument(0);
-            return Mono.just(featureFlagDb);
+        when(repository.save(any(FeatureDb.class))).thenAnswer(invocation -> {
+            FeatureDb featureDb = invocation.getArgument(0);
+            return Mono.just(featureDb);
         });
 
-        featureFlags.add(createFeatureFlag("featureKey1"))
+        features.add(createFeatureFlag("featureKey1"))
                 .as(StepVerifier::create)
                 .expectNextMatches(config -> config.getId().featureKey().equals("featureKey1")
                         && config.getDescription().updatedAt() != null
@@ -52,11 +52,11 @@ class FeatureFlagsImplTest {
 
     @Test
     void should_add_return_error_when_repository_save_error() {
-        FeatureFlag featureFlag = createFeatureFlag("featureKey1");
+        Feature feature = createFeatureFlag("featureKey1");
 
-        when(repository.save(any(FeatureFlagDb.class))).thenReturn(Mono.error(new DuplicateKeyException("save error")));
+        when(repository.save(any(FeatureDb.class))).thenReturn(Mono.error(new DuplicateKeyException("save error")));
 
-        featureFlags.add(featureFlag)
+        features.add(feature)
                 .as(StepVerifier::create)
                 .expectError()
                 .verify();
@@ -65,33 +65,33 @@ class FeatureFlagsImplTest {
     @Test
     void should_update_success() {
         String featureKey = "featureKey1";
-        FeatureFlag featureFlag = createFeatureFlag(featureKey);
-        FeatureFlagDb db = FeatureFlagDb.from(featureFlag);
-        FeatureFlag updatedFeatureFlag = createFeatureFlag(featureKey).update(FeatureFlag.FeatureFlagDescription.builder()
+        Feature feature = createFeatureFlag(featureKey);
+        FeatureDb db = FeatureDb.from(feature);
+        Feature updatedFeature = createFeatureFlag(featureKey).update(Feature.FeatureDescription.builder()
                         .description("description1")
                         .name("name1")
                         .enabled(true)
                 .build());
 
         when(repository.findById(anyString())).thenReturn(Mono.just(db));
-        when(repository.save(any(FeatureFlagDb.class))).thenAnswer(invocation -> {
-            FeatureFlagDb featureFlagDb = invocation.getArgument(0);
-            return Mono.just(featureFlagDb);
+        when(repository.save(any(FeatureDb.class))).thenAnswer(invocation -> {
+            FeatureDb featureDb = invocation.getArgument(0);
+            return Mono.just(featureDb);
         });
 
-        featureFlags.update(updatedFeatureFlag.getId(), updatedFeatureFlag.getDescription())
+        features.update(updatedFeature.getId(), updatedFeature.getDescription())
                 .as(StepVerifier::create)
                 .verifyComplete();
     }
 
     @Test
-    void should_update_throw_error_when_featureFlag_not_found() {
+    void should_update_throw_error_when_feature_not_found() {
         String featureKey = "not_exist";
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
-        FeatureFlag updateFeatureFlag = createFeatureFlag(featureKey);
+        Feature updateFeature = createFeatureFlag(featureKey);
 
-        featureFlags.update(updateFeatureFlag.getId(), updateFeatureFlag.getDescription())
+        features.update(updateFeature.getId(), updateFeature.getDescription())
                 .as(StepVerifier::create)
                 .expectError(RecordNotFoundException.class)
                 .verify();
@@ -100,26 +100,26 @@ class FeatureFlagsImplTest {
     @Test
     void should_enable_success() {
         String featureKey = "featureKey1";
-        FeatureFlag featureFlag = createFeatureFlag(featureKey);
-        FeatureFlagDb db = FeatureFlagDb.from(featureFlag);
+        Feature feature = createFeatureFlag(featureKey);
+        FeatureDb db = FeatureDb.from(feature);
 
         when(repository.findById(anyString())).thenReturn(Mono.just(db));
-        when(repository.save(any(FeatureFlagDb.class))).thenAnswer(invocation -> {
-            FeatureFlagDb featureFlagDb = invocation.getArgument(0);
-            return Mono.just(featureFlagDb);
+        when(repository.save(any(FeatureDb.class))).thenAnswer(invocation -> {
+            FeatureDb featureDb = invocation.getArgument(0);
+            return Mono.just(featureDb);
         });
 
-        featureFlags.enable(new FeatureFlag.FeatureFlagId(featureKey))
+        features.enable(new Feature.FeatureId(featureKey))
                 .as(StepVerifier::create)
                 .verifyComplete();
     }
 
     @Test
-    void should_enable_return_error_when_featureFlag_not_exist() {
+    void should_enable_return_error_when_feature_not_exist() {
         String featureKey = "not_exist";
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
-        featureFlags.enable(new FeatureFlag.FeatureFlagId(featureKey))
+        features.enable(new Feature.FeatureId(featureKey))
                 .as(StepVerifier::create)
                 .expectError(RecordNotFoundException.class)
                 .verify();
@@ -128,26 +128,26 @@ class FeatureFlagsImplTest {
     @Test
     void should_disable_success() {
         String featureKey = "featureKey1";
-        FeatureFlag featureFlag = createFeatureFlag(featureKey);
-        FeatureFlagDb db = FeatureFlagDb.from(featureFlag);
+        Feature feature = createFeatureFlag(featureKey);
+        FeatureDb db = FeatureDb.from(feature);
 
         when(repository.findById(anyString())).thenReturn(Mono.just(db));
-        when(repository.save(any(FeatureFlagDb.class))).thenAnswer(invocation -> {
-            FeatureFlagDb featureFlagDb = invocation.getArgument(0);
-            return Mono.just(featureFlagDb);
+        when(repository.save(any(FeatureDb.class))).thenAnswer(invocation -> {
+            FeatureDb featureDb = invocation.getArgument(0);
+            return Mono.just(featureDb);
         });
 
-        featureFlags.disable(new FeatureFlag.FeatureFlagId(featureKey))
+        features.disable(new Feature.FeatureId(featureKey))
                 .as(StepVerifier::create)
                 .verifyComplete();
     }
 
     @Test
-    void should_disable_return_error_when_featureFlag_not_exist() {
+    void should_disable_return_error_when_feature_not_exist() {
         String featureKey = "not_exist";
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
-        featureFlags.disable(new FeatureFlag.FeatureFlagId(featureKey))
+        features.disable(new Feature.FeatureId(featureKey))
                 .as(StepVerifier::create)
                 .expectError(RecordNotFoundException.class)
                 .verify();
@@ -159,7 +159,7 @@ class FeatureFlagsImplTest {
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
 
-        featureFlags.getAll(FilterParams.builder().key("3").build())
+        features.getAll(FilterParams.builder().key("3").build())
                 .as(StepVerifier::create)
                 .expectNextCount(1)
                 .verifyComplete();
@@ -169,7 +169,7 @@ class FeatureFlagsImplTest {
     void should_get_all_return_empty_when_no_record() {
         when(repository.findAll()).thenReturn(Flux.empty());
 
-        featureFlags.getAll(FilterParams.builder().key("3").build())
+        features.getAll(FilterParams.builder().key("3").build())
                 .as(StepVerifier::create)
                 .expectNextCount(0)
                 .verifyComplete();
@@ -180,7 +180,7 @@ class FeatureFlagsImplTest {
         String featureKey = "featureKey1";
         when(repository.findById(anyString())).thenReturn(Mono.just(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)));
 
-        featureFlags.get(new FeatureFlag.FeatureFlagId(featureKey))
+        features.get(new Feature.FeatureId(featureKey))
                 .as(StepVerifier::create)
                 .expectNextMatches(config -> config.getId().featureKey().equals(featureKey))
                 .verifyComplete();
@@ -191,7 +191,7 @@ class FeatureFlagsImplTest {
         String featureKey = "not_exist";
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
-        featureFlags.get(new FeatureFlag.FeatureFlagId(featureKey))
+        features.get(new Feature.FeatureId(featureKey))
                 .as(StepVerifier::create)
                 .expectNextCount(0)
                 .verifyComplete();
@@ -201,7 +201,7 @@ class FeatureFlagsImplTest {
     void should_subCollection_return_empty_when_no_record() {
         when(repository.findAll()).thenReturn(Flux.empty());
 
-        featureFlags.subCollection(FilterParams.builder().build(), 0, 10)
+        features.subCollection(FilterParams.builder().build(), 0, 10)
                 .as(StepVerifier::create)
                 .expectNextCount(0)
                 .verifyComplete();
@@ -213,7 +213,7 @@ class FeatureFlagsImplTest {
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
 
-        featureFlags.subCollection(FilterParams.builder().build(), 0, 2)
+        features.subCollection(FilterParams.builder().build(), 0, 2)
                 .as(StepVerifier::create)
                 .expectNextCount(2)
                 .verifyComplete();
@@ -225,7 +225,7 @@ class FeatureFlagsImplTest {
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
 
-        featureFlags.subCollection(FilterParams.builder().key("2").build(), 0, 2)
+        features.subCollection(FilterParams.builder().key("2").build(), 0, 2)
                 .as(StepVerifier::create)
                 .expectNextCount(1)
                 .verifyComplete();
@@ -235,7 +235,7 @@ class FeatureFlagsImplTest {
     void should_size_return_0_when_no_record() {
         when(repository.findAll()).thenReturn(Flux.empty());
 
-        featureFlags.size(FilterParams.builder().build())
+        features.size(FilterParams.builder().build())
                 .as(StepVerifier::create)
                 .expectNext(0L)
                 .verifyComplete();
@@ -247,7 +247,7 @@ class FeatureFlagsImplTest {
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
 
-        featureFlags.size(FilterParams.builder().build())
+        features.size(FilterParams.builder().build())
                 .as(StepVerifier::create)
                 .expectNext(3L)
                 .verifyComplete();
@@ -259,7 +259,7 @@ class FeatureFlagsImplTest {
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
 
-        featureFlags.size(FilterParams.builder().key("3").build())
+        features.size(FilterParams.builder().key("3").build())
                 .as(StepVerifier::create)
                 .expectNext(1L)
                 .verifyComplete();
@@ -272,7 +272,7 @@ class FeatureFlagsImplTest {
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 createFeatureFlagDb("featureKey3", true)));
 
-        featureFlags.enabled(FilterParams.builder().build())
+        features.enabled(FilterParams.builder().build())
                 .as(StepVerifier::create)
                 .expectNextCount(2)
                 .verifyComplete();
@@ -282,7 +282,7 @@ class FeatureFlagsImplTest {
     void should_enabled_return_empty_when_no_record() {
         when(repository.findAll()).thenReturn(Flux.empty());
 
-        featureFlags.enabled(FilterParams.builder().build())
+        features.enabled(FilterParams.builder().build())
                 .as(StepVerifier::create)
                 .expectNextCount(0)
                 .verifyComplete();
@@ -294,7 +294,7 @@ class FeatureFlagsImplTest {
                 FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
                 createFeatureFlagDb("featureKey3", true)));
 
-        featureFlags.enabled(FilterParams.builder().key("3").build())
+        features.enabled(FilterParams.builder().key("3").build())
                 .as(StepVerifier::create)
                 .expectNextMatches(config -> config.getId().featureKey().equals("featureKey3"))
                 .verifyComplete();

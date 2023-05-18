@@ -1,7 +1,7 @@
 package cn.dpc.ab.persistent.feature;
 
-import cn.dpc.ab.domain.feature.FeatureFlag;
-import cn.dpc.ab.persistent.feature.db.FeatureFlagDb;
+import cn.dpc.ab.domain.feature.Feature;
+import cn.dpc.ab.persistent.feature.db.FeatureDb;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +16,7 @@ public class FeatureFlagTestUtil {
      * @param featureKey the feature key
      * @return the feature flag db
      */
-    public static FeatureFlagDb createFeatureFlagDb(String featureKey) {
+    public static FeatureDb createFeatureFlagDb(String featureKey) {
         return createFeatureFlagDb(featureKey, false);
     }
 
@@ -27,11 +27,11 @@ public class FeatureFlagTestUtil {
      * @param enabled    the enabled
      * @return the feature flag db
      */
-    public static FeatureFlagDb createFeatureFlagDb(String featureKey, boolean enabled) {
-        FeatureFlagDb featureFlagDb = new FeatureFlagDb();
-        featureFlagDb.setFeatureKey(featureKey);
-        featureFlagDb.setId(FeatureFlagDb.idFromFeatureKey(featureKey));
-        featureFlagDb.setDescription(FeatureFlag.FeatureFlagDescription.builder()
+    public static FeatureDb createFeatureFlagDb(String featureKey, boolean enabled) {
+        FeatureDb featureDb = new FeatureDb();
+        featureDb.setFeatureKey(featureKey);
+        featureDb.setId(FeatureDb.idFromFeatureKey(featureKey));
+        featureDb.setDescription(Feature.FeatureDescription.builder()
                 .description("description")
                 .name("name")
                 .enabled(enabled)
@@ -39,7 +39,7 @@ public class FeatureFlagTestUtil {
                 .updatedAt(LocalDateTime.now())
                 .template(null)
                 .build());
-        return featureFlagDb;
+        return featureDb;
     }
 
     /**
@@ -48,9 +48,9 @@ public class FeatureFlagTestUtil {
      * @param featureKey the feature key
      * @return the feature flag
      */
-    public static FeatureFlag createFeatureFlag(String featureKey) {
-        return new FeatureFlag(new FeatureFlag.FeatureFlagId(featureKey),
-                FeatureFlag.FeatureFlagDescription.builder()
+    public static Feature createFeatureFlag(String featureKey) {
+        return new Feature(new Feature.FeatureId(featureKey),
+                Feature.FeatureDescription.builder()
                         .description("description")
                         .name("name")
                         .enabled(false)

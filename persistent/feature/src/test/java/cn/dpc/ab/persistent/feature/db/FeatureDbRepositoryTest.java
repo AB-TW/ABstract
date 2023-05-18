@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import reactor.test.StepVerifier;
 
 
-class FeatureFlagDbRepositoryTest extends RepositoryTestBase {
+class FeatureDbRepositoryTest extends RepositoryTestBase {
     @Autowired
     FeatureFlagDbRepository repository;
 
@@ -46,9 +46,10 @@ class FeatureFlagDbRepositoryTest extends RepositoryTestBase {
     @Test
     void should_update_same_featureKey_fail() {
         var featureKey = "featureKey1";
-        FeatureFlagDb db = repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)).block();
+        FeatureDb db = repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)).block();
 
-        FeatureFlagDb db1 = FeatureFlagDb.from(db.to().enable());
+        assert db != null;
+        FeatureDb db1 = FeatureDb.from(db.to().enable());
         db1.setVersion(db.getVersion());
 
         repository.save(db1)
@@ -62,7 +63,7 @@ class FeatureFlagDbRepositoryTest extends RepositoryTestBase {
         var featureKey = "featureKey1";
         repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)).block();
 
-        repository.findById(FeatureFlagDb.idFromFeatureKey(featureKey))
+        repository.findById(FeatureDb.idFromFeatureKey(featureKey))
                 .as(StepVerifier::create)
                 .expectNextMatches(config -> config.getFeatureKey().equals(featureKey))
                 .verifyComplete();
