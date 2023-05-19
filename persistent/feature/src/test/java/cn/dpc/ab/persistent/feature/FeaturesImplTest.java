@@ -5,7 +5,7 @@ import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Features;
 import cn.dpc.ab.domain.feature.Features.FilterParams;
 import cn.dpc.ab.persistent.feature.db.FeatureDb;
-import cn.dpc.ab.persistent.feature.db.FeatureFlagDbRepository;
+import cn.dpc.ab.persistent.feature.db.FeatureDbRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +16,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static cn.dpc.ab.persistent.feature.FeatureFlagTestUtil.createFeatureFlag;
-import static cn.dpc.ab.persistent.feature.FeatureFlagTestUtil.createFeatureFlagDb;
+import static cn.dpc.ab.persistent.feature.FeatureTestUtil.createFeature;
+import static cn.dpc.ab.persistent.feature.FeatureTestUtil.createFeatureDb;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class FeaturesImplTest {
     @Mock
-    FeatureFlagDbRepository repository;
+    FeatureDbRepository repository;
 
     Features features;
 
@@ -41,7 +41,7 @@ class FeaturesImplTest {
             return Mono.just(featureDb);
         });
 
-        features.add(createFeatureFlag("featureKey1"))
+        features.add(createFeature("featureKey1"))
                 .as(StepVerifier::create)
                 .expectNextMatches(config -> config.getId().featureKey().equals("featureKey1")
                         && config.getDescription().updatedAt() != null
@@ -52,7 +52,7 @@ class FeaturesImplTest {
 
     @Test
     void should_add_return_error_when_repository_save_error() {
-        Feature feature = createFeatureFlag("featureKey1");
+        Feature feature = createFeature("featureKey1");
 
         when(repository.save(any(FeatureDb.class))).thenReturn(Mono.error(new DuplicateKeyException("save error")));
 
@@ -65,9 +65,9 @@ class FeaturesImplTest {
     @Test
     void should_update_success() {
         String featureKey = "featureKey1";
-        Feature feature = createFeatureFlag(featureKey);
+        Feature feature = createFeature(featureKey);
         FeatureDb db = FeatureDb.from(feature);
-        Feature updatedFeature = createFeatureFlag(featureKey).update(Feature.FeatureDescription.builder()
+        Feature updatedFeature = createFeature(featureKey).update(Feature.Description.builder()
                         .description("description1")
                         .name("name1")
                         .enabled(true)
@@ -89,7 +89,7 @@ class FeaturesImplTest {
         String featureKey = "not_exist";
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
-        Feature updateFeature = createFeatureFlag(featureKey);
+        Feature updateFeature = createFeature(featureKey);
 
         features.update(updateFeature.getId(), updateFeature.getDescription())
                 .as(StepVerifier::create)
@@ -100,7 +100,7 @@ class FeaturesImplTest {
     @Test
     void should_enable_success() {
         String featureKey = "featureKey1";
-        Feature feature = createFeatureFlag(featureKey);
+        Feature feature = createFeature(featureKey);
         FeatureDb db = FeatureDb.from(feature);
 
         when(repository.findById(anyString())).thenReturn(Mono.just(db));
@@ -128,7 +128,7 @@ class FeaturesImplTest {
     @Test
     void should_disable_success() {
         String featureKey = "featureKey1";
-        Feature feature = createFeatureFlag(featureKey);
+        Feature feature = createFeature(featureKey);
         FeatureDb db = FeatureDb.from(feature);
 
         when(repository.findById(anyString())).thenReturn(Mono.just(db));
@@ -155,9 +155,9 @@ class FeaturesImplTest {
 
     @Test
     void should_get_all_success() {
-        when(repository.findAll()).thenReturn(Flux.just(FeatureFlagTestUtil.createFeatureFlagDb("featureKey1"),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
+        when(repository.findAll()).thenReturn(Flux.just(FeatureTestUtil.createFeatureDb("featureKey1"),
+                FeatureTestUtil.createFeatureDb("featureKey2"),
+                FeatureTestUtil.createFeatureDb("featureKey3")));
 
         features.getAll(FilterParams.builder().key("3").build())
                 .as(StepVerifier::create)
@@ -178,7 +178,7 @@ class FeaturesImplTest {
     @Test
     void should_get_success() {
         String featureKey = "featureKey1";
-        when(repository.findById(anyString())).thenReturn(Mono.just(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)));
+        when(repository.findById(anyString())).thenReturn(Mono.just(FeatureTestUtil.createFeatureDb(featureKey)));
 
         features.get(new Feature.FeatureId(featureKey))
                 .as(StepVerifier::create)
@@ -209,9 +209,9 @@ class FeaturesImplTest {
 
     @Test
     void should_subCollection_return_success() {
-        when(repository.findAll()).thenReturn(Flux.just(FeatureFlagTestUtil.createFeatureFlagDb("featureKey1"),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
+        when(repository.findAll()).thenReturn(Flux.just(FeatureTestUtil.createFeatureDb("featureKey1"),
+                FeatureTestUtil.createFeatureDb("featureKey2"),
+                FeatureTestUtil.createFeatureDb("featureKey3")));
 
         features.subCollection(FilterParams.builder().build(), 0, 2)
                 .as(StepVerifier::create)
@@ -221,9 +221,9 @@ class FeaturesImplTest {
 
     @Test
     void should_subCollection_return_success_when_filter_by_key() {
-        when(repository.findAll()).thenReturn(Flux.just(FeatureFlagTestUtil.createFeatureFlagDb("featureKey1"),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
+        when(repository.findAll()).thenReturn(Flux.just(FeatureTestUtil.createFeatureDb("featureKey1"),
+                FeatureTestUtil.createFeatureDb("featureKey2"),
+                FeatureTestUtil.createFeatureDb("featureKey3")));
 
         features.subCollection(FilterParams.builder().key("2").build(), 0, 2)
                 .as(StepVerifier::create)
@@ -243,9 +243,9 @@ class FeaturesImplTest {
 
     @Test
     void should_size_return_size_number() {
-        when(repository.findAll()).thenReturn(Flux.just(FeatureFlagTestUtil.createFeatureFlagDb("featureKey1"),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
+        when(repository.findAll()).thenReturn(Flux.just(FeatureTestUtil.createFeatureDb("featureKey1"),
+                FeatureTestUtil.createFeatureDb("featureKey2"),
+                FeatureTestUtil.createFeatureDb("featureKey3")));
 
         features.size(FilterParams.builder().build())
                 .as(StepVerifier::create)
@@ -255,9 +255,9 @@ class FeaturesImplTest {
 
     @Test
     void should_size_return_size_number_with_filter_params() {
-        when(repository.findAll()).thenReturn(Flux.just(FeatureFlagTestUtil.createFeatureFlagDb("featureKey1"),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey3")));
+        when(repository.findAll()).thenReturn(Flux.just(FeatureTestUtil.createFeatureDb("featureKey1"),
+                FeatureTestUtil.createFeatureDb("featureKey2"),
+                FeatureTestUtil.createFeatureDb("featureKey3")));
 
         features.size(FilterParams.builder().key("3").build())
                 .as(StepVerifier::create)
@@ -268,9 +268,9 @@ class FeaturesImplTest {
 
     @Test
     void should_enabled_success() {
-        when(repository.findAll()).thenReturn(Flux.just(createFeatureFlagDb("featureKey1", true),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
-                createFeatureFlagDb("featureKey3", true)));
+        when(repository.findAll()).thenReturn(Flux.just(createFeatureDb("featureKey1", true),
+                FeatureTestUtil.createFeatureDb("featureKey2"),
+                createFeatureDb("featureKey3", true)));
 
         features.enabled(FilterParams.builder().build())
                 .as(StepVerifier::create)
@@ -290,9 +290,9 @@ class FeaturesImplTest {
 
     @Test
     void should_enabled_return_with_filter() {
-        when(repository.findAll()).thenReturn(Flux.just(createFeatureFlagDb("featureKey1", true),
-                FeatureFlagTestUtil.createFeatureFlagDb("featureKey2"),
-                createFeatureFlagDb("featureKey3", true)));
+        when(repository.findAll()).thenReturn(Flux.just(createFeatureDb("featureKey1", true),
+                FeatureTestUtil.createFeatureDb("featureKey2"),
+                createFeatureDb("featureKey3", true)));
 
         features.enabled(FilterParams.builder().key("3").build())
                 .as(StepVerifier::create)

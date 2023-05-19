@@ -5,7 +5,7 @@ import cn.dpc.ab.domain.feature.Features.FilterParams;
 import lombok.Data;
 
 /**
- * FeaturePageRequest represents a page of feature flags in the API.
+ * FeaturePageRequest represents a page of features in the API.
  */
 @Data
 public class FeaturePageRequest extends PageRequest {

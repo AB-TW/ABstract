@@ -1,7 +1,7 @@
 package cn.dpc.ab.persistent.feature.db;
 
 import cn.dpc.ab.domain.feature.Feature;
-import cn.dpc.ab.domain.feature.Feature.FeatureDescription;
+import cn.dpc.ab.domain.feature.Feature.Description;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
@@ -17,7 +17,7 @@ import java.util.Optional;
 import static org.springframework.data.couchbase.core.mapping.id.GenerationStrategy.USE_ATTRIBUTES;
 
 /**
- * FeatureFlagDb represents a feature flag in the database.
+ * FeatureDb represents a feature in the database.
  */
 @Document
 @Data
@@ -37,7 +37,7 @@ public class FeatureDb {
     private String featureKey;
 
     @Field
-    private FeatureDescription description;
+    private Description description;
 
 
     public static String idFromFeatureKey(String featureKey) {
@@ -45,10 +45,10 @@ public class FeatureDb {
     }
 
     /**
-     * Creates a FeatureFlagDb from a FeatureFlag.
+     * Creates a FeatureDb from a Feature.
      *
-     * @param feature the FeatureFlag
-     * @return the FeatureFlagDb
+     * @param feature the Feature
+     * @return the FeatureDb
      */
     public static FeatureDb from(Feature feature) {
         FeatureDb db = new FeatureDb();
@@ -58,8 +58,8 @@ public class FeatureDb {
         return db;
     }
 
-    private static FeatureDescription from(FeatureDescription description) {
-        return FeatureDescription.builder()
+    private static Description from(Description description) {
+        return Description.builder()
                 .name(description.name())
                 .description(description.description())
                 .enabled(description.enabled())

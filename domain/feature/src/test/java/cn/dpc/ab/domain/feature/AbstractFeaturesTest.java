@@ -12,7 +12,7 @@ class AbstractFeaturesTest {
     void should_update_success() {
         Features features = new MockSuccessFeatures();
         Feature.FeatureId id = new Feature.FeatureId("featureKey");
-        Feature.FeatureDescription description = Feature.FeatureDescription.builder()
+        Feature.Description description = Feature.Description.builder()
                 .name("name")
                 .description("description")
                 .build();
@@ -26,7 +26,7 @@ class AbstractFeaturesTest {
     void should_update_return_error_when_id_not_exist() {
         Features features = new MockNotFoundFeatures();
         Feature.FeatureId id = new Feature.FeatureId("featureKey");
-        Feature.FeatureDescription description = Feature.FeatureDescription.builder()
+        Feature.Description description = Feature.Description.builder()
                 .name("name")
                 .description("description")
                 .build();
@@ -87,7 +87,7 @@ class AbstractFeaturesTest {
         }
 
         @Override
-        public Mono<Void> doUpdate(Feature feature, Feature.FeatureDescription description) {
+        public Mono<Void> doUpdate(Feature feature, Feature.Description description) {
             return Mono.empty();
         }
 
@@ -99,7 +99,7 @@ class AbstractFeaturesTest {
         @Override
         public Mono<Feature> get(Feature.FeatureId id) {
             return Mono.just(new Feature(id,
-                    Feature.FeatureDescription.builder().name("name").description("description").build()));
+                    Feature.Description.builder().name("name").description("description").build()));
         }
 
         @Override
@@ -135,7 +135,7 @@ class AbstractFeaturesTest {
         }
 
         @Override
-        public Mono<Void> doUpdate(Feature feature, Feature.FeatureDescription description) {
+        public Mono<Void> doUpdate(Feature feature, Feature.Description description) {
             return Mono.empty();
         }
 

@@ -32,10 +32,10 @@ public class FeatureResponse {
     private Feature.FeatureTemplate template;
 
     /**
-     * Creates a FeatureFlagResponse from a FeatureFlag.
+     * Creates a FeatureResponse from a Feature.
      *
-     * @param feature the FeatureFlag to convert
-     * @return the FeatureFlagResponse
+     * @param feature the Feature to convert
+     * @return the FeatureResponse
      */
     public static FeatureResponse from(Feature feature) {
         return FeatureResponse.builder()
