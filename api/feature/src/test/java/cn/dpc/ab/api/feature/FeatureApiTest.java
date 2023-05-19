@@ -60,9 +60,9 @@ class FeatureApiTest {
     @Test
     void should_getAll_success_when_has_records() {
         when(features.subCollection(any(Features.FilterParams.class), anyLong(), anyLong()))
-                .thenReturn(Flux.just(createFeatureFlag("featureKey1"),
-                createFeatureFlag("featureKey2"),
-                createFeatureFlag("featureKey3")));
+                .thenReturn(Flux.just(createFeature("featureKey1"),
+                createFeature("featureKey2"),
+                createFeature("featureKey3")));
 
         when(features.size(any())).thenReturn(Mono.justOrEmpty(10L));
 
@@ -85,9 +85,9 @@ class FeatureApiTest {
     @Test
     void should_getAll_page_return_0_when_total_record_not_meet_page() {
         when(features.subCollection(any(Features.FilterParams.class), anyLong(), anyLong()))
-                .thenReturn(Flux.just(createFeatureFlag("featureKey1"),
-                        createFeatureFlag("featureKey2"),
-                        createFeatureFlag("featureKey3")));
+                .thenReturn(Flux.just(createFeature("featureKey1"),
+                        createFeature("featureKey2"),
+                        createFeature("featureKey3")));
 
         when(features.size(any())).thenReturn(Mono.justOrEmpty(10L));
 
@@ -109,11 +109,11 @@ class FeatureApiTest {
 
     @Test
     void should_add_feature_success() {
-        when(features.add(any())).thenReturn(Mono.just(createFeatureFlag("featureKey1")));
+        when(features.add(any())).thenReturn(Mono.just(createFeature("featureKey1")));
 
         webClient.post()
                 .uri("/features")
-                .body(Mono.just(createFeatureFlagRequest("featureKey1")), FeatureRequest.class)
+                .body(Mono.just(createFeatureRequest("featureKey1")), FeatureRequest.class)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -129,7 +129,7 @@ class FeatureApiTest {
 
         webClient.post()
                 .uri("/features")
-                .body(Mono.just(createFeatureFlagRequest("featureKey1")), FeatureRequest.class)
+                .body(Mono.just(createFeatureRequest("featureKey1")), FeatureRequest.class)
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
@@ -137,7 +137,7 @@ class FeatureApiTest {
 
     @Test
     void should_get_feature_success() {
-        when(features.get(any())).thenReturn(Mono.just(createFeatureFlag("featureKey1")));
+        when(features.get(any())).thenReturn(Mono.just(createFeature("featureKey1")));
 
         webClient.get()
                 .uri("/features/{featureKey}", "featureKey1")
@@ -167,7 +167,7 @@ class FeatureApiTest {
 
         webClient.put()
                 .uri("/features/{featureKey}", "featureKey1")
-                .body(Mono.just(createFeatureFlagRequest("featureKey1")), FeatureRequest.class)
+                .body(Mono.just(createFeatureRequest("featureKey1")), FeatureRequest.class)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -179,7 +179,7 @@ class FeatureApiTest {
 
         webClient.put()
                 .uri("/features/{featureKey}", "featureKey1")
-                .body(Mono.just(createFeatureFlagRequest("featureKey1")), FeatureRequest.class)
+                .body(Mono.just(createFeatureRequest("featureKey1")), FeatureRequest.class)
                 .exchange()
                 .expectStatus()
                 .isNotFound();
@@ -230,9 +230,9 @@ class FeatureApiTest {
                 .isNotFound();
     }
 
-    public static Feature createFeatureFlag(String featureKey) {
+    public static Feature createFeature(String featureKey) {
         return new Feature(new Feature.FeatureId(featureKey),
-                Feature.FeatureDescription.builder()
+                Feature.Description.builder()
                         .description("description")
                         .name("name")
                         .enabled(false)
@@ -240,7 +240,7 @@ class FeatureApiTest {
                         .build());
     }
 
-    public static FeatureRequest createFeatureFlagRequest(String featureKey) {
+    public static FeatureRequest createFeatureRequest(String featureKey) {
         return FeatureRequest.builder()
                 .name("name")
                 .featureKey(featureKey)

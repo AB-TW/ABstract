@@ -25,14 +25,14 @@ public class FeatureRequest {
 
 
     /**
-     * Creates a FeatureFlag from a FeatureFlagRequest.
+     * Creates a Feature from a FeatureRequest.
      *
-     * @return the FeatureFlag
+     * @return the Feature
      */
-    public Feature toFeatureFlag() {
+    public Feature toFeature() {
         return new Feature(
                 new Feature.FeatureId(featureKey),
-                Feature.FeatureDescription.builder()
+                Feature.Description.builder()
                         .name(name)
                         .description(description)
                         .enabled(enabled)

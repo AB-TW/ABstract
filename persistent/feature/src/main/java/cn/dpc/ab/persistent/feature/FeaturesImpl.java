@@ -2,25 +2,25 @@ package cn.dpc.ab.persistent.feature;
 
 import cn.dpc.ab.domain.feature.AbstractFeatures;
 import cn.dpc.ab.domain.feature.Feature;
-import cn.dpc.ab.domain.feature.Feature.FeatureDescription;
+import cn.dpc.ab.domain.feature.Feature.Description;
 import cn.dpc.ab.domain.feature.Features;
 import cn.dpc.ab.persistent.feature.db.FeatureDb;
-import cn.dpc.ab.persistent.feature.db.FeatureFlagDbRepository;
+import cn.dpc.ab.persistent.feature.db.FeatureDbRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * FeatureFlagsImpl provides a skeleton implementation of the FeatureFlags interface.
+ * FeaturesImpl provides a skeleton implementation of the Features interface.
  */
 @Component
 @RequiredArgsConstructor
 public class FeaturesImpl extends AbstractFeatures {
-    private final FeatureFlagDbRepository repository;
+    private final FeatureDbRepository repository;
 
     /**
-     * enableToDb enables a feature flag in the database.
+     * enableToDb enables a feature in the database.
      *
      * @see AbstractFeatures#doEnable(Feature)
      */
@@ -30,18 +30,18 @@ public class FeaturesImpl extends AbstractFeatures {
     }
 
     /**
-     * doUpdate updates a feature flag in the database.
+     * doUpdate updates a feature in the database.
      *
      * @see AbstractFeatures#doUpdate(Feature,
-     * FeatureDescription)
+     * Description)
      */
     @Override
-    protected Mono<Void> doUpdate(Feature feature, FeatureDescription description) {
+    protected Mono<Void> doUpdate(Feature feature, Description description) {
         return updateToDb(feature.getId().featureKey(), feature.update(description).getDescription());
     }
 
     /**
-     * doDisable disables a feature flag in the database.
+     * doDisable disables a feature in the database.
      *
      * @see AbstractFeatures#doDisable(Feature)
      */
@@ -51,7 +51,7 @@ public class FeaturesImpl extends AbstractFeatures {
     }
 
     /**
-     * get retrieves a feature flag from the database.
+     * get retrieves a feature from the database.
      *
      * @see Features#get(Feature.FeatureId)
      */
@@ -62,7 +62,7 @@ public class FeaturesImpl extends AbstractFeatures {
     }
 
     /**
-     * getAll retrieves all feature flags from the database.
+     * getAll retrieves all features from the database.
      *
      * @see Features#getAll(Features.FilterParams)
      */
@@ -73,11 +73,11 @@ public class FeaturesImpl extends AbstractFeatures {
     }
 
     /**
-     * getAllByFilter retrieves all feature flags from the database that match the
+     * getAllByFilter retrieves all features from the database that match the
      * given filter.
      *
      * @param params the filter parameters
-     * @return a Flux of FeatureFlagDb
+     * @return a Flux of FeatureDb
      */
     private Flux<FeatureDb> getAllByFilter(FilterParams params) {
         return repository.findAll()
@@ -87,7 +87,7 @@ public class FeaturesImpl extends AbstractFeatures {
     }
 
     /**
-     * subCollection retrieves a sub-collection of feature flags from the database
+     * subCollection retrieves a sub-collection of features from the database
      * that match the given filter.
      *
      * @see Features#subCollection(Features.FilterParams,
@@ -99,7 +99,7 @@ public class FeaturesImpl extends AbstractFeatures {
     }
 
     /**
-     * size retrieves the number of feature flags from the database that match the
+     * size retrieves the number of features from the database that match the
      * given filter.
      *
      * @see Features#size(Features.FilterParams)
@@ -110,7 +110,7 @@ public class FeaturesImpl extends AbstractFeatures {
     }
 
     /**
-     * enabled retrieves all enabled feature flags from the database.
+     * enabled retrieves all enabled features from the database.
      *
      * @see Features#enabled(Features.FilterParams)
      */
@@ -120,7 +120,7 @@ public class FeaturesImpl extends AbstractFeatures {
     }
 
     /**
-     * disabled retrieves all disabled feature flags from the database.
+     * disabled retrieves all disabled features from the database.
      *
      * @see Features#add(Feature)
      */
@@ -130,13 +130,13 @@ public class FeaturesImpl extends AbstractFeatures {
     }
 
     /**
-     * updateToDb updates a feature flag in the database.
+     * updateToDb updates a feature in the database.
      *
      * @param featureKey  the feature key
-     * @param description the feature flag description
+     * @param description the feature description
      * @return a Mono of Void
      */
-    private Mono<Void> updateToDb(String featureKey, FeatureDescription description) {
+    private Mono<Void> updateToDb(String featureKey, Description description) {
         return repository.findById(FeatureDb.idFromFeatureKey(featureKey))
                 .flatMap(db -> {
                     db.setDescription(description);

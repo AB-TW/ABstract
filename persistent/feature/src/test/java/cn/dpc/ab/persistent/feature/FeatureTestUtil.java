@@ -6,32 +6,32 @@ import cn.dpc.ab.persistent.feature.db.FeatureDb;
 import java.time.LocalDateTime;
 
 /**
- * Feature flag test util.
+ * Feature test util.
  */
-public class FeatureFlagTestUtil {
+public class FeatureTestUtil {
 
     /**
-     * Create a feature flag db.
+     * Create a feature db.
      *
      * @param featureKey the feature key
-     * @return the feature flag db
+     * @return the feature db
      */
-    public static FeatureDb createFeatureFlagDb(String featureKey) {
-        return createFeatureFlagDb(featureKey, false);
+    public static FeatureDb createFeatureDb(String featureKey) {
+        return createFeatureDb(featureKey, false);
     }
 
     /**
-     * Create a feature flag db.
+     * Create a feature db.
      *
      * @param featureKey the feature key
      * @param enabled    the enabled
-     * @return the feature flag db
+     * @return the feature db
      */
-    public static FeatureDb createFeatureFlagDb(String featureKey, boolean enabled) {
+    public static FeatureDb createFeatureDb(String featureKey, boolean enabled) {
         FeatureDb featureDb = new FeatureDb();
         featureDb.setFeatureKey(featureKey);
         featureDb.setId(FeatureDb.idFromFeatureKey(featureKey));
-        featureDb.setDescription(Feature.FeatureDescription.builder()
+        featureDb.setDescription(Feature.Description.builder()
                 .description("description")
                 .name("name")
                 .enabled(enabled)
@@ -43,14 +43,14 @@ public class FeatureFlagTestUtil {
     }
 
     /**
-     * Create a feature flag.
+     * Create a feature.
      *
      * @param featureKey the feature key
-     * @return the feature flag
+     * @return the feature
      */
-    public static Feature createFeatureFlag(String featureKey) {
+    public static Feature createFeature(String featureKey) {
         return new Feature(new Feature.FeatureId(featureKey),
-                Feature.FeatureDescription.builder()
+                Feature.Description.builder()
                         .description("description")
                         .name("name")
                         .enabled(false)

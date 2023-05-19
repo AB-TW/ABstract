@@ -1,7 +1,7 @@
 package cn.dpc.ab.persistent.feature.db;
 
 import cn.dpc.ab.persistent.RepositoryTestBase;
-import cn.dpc.ab.persistent.feature.FeatureFlagTestUtil;
+import cn.dpc.ab.persistent.feature.FeatureTestUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import reactor.test.StepVerifier;
 
 class FeatureDbRepositoryTest extends RepositoryTestBase {
     @Autowired
-    FeatureFlagDbRepository repository;
+    FeatureDbRepository repository;
 
     @BeforeEach
     void setUp() {
@@ -24,9 +24,9 @@ class FeatureDbRepositoryTest extends RepositoryTestBase {
     }
 
     @Test
-    void should_save_FeatureFlag_success() {
+    void should_save_Feature_success() {
         var featureKey = "featureKey1";
-        repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey))
+        repository.save(FeatureTestUtil.createFeatureDb(featureKey))
                 .as(StepVerifier::create)
                 .expectNextCount(1)
                 .verifyComplete();
@@ -35,9 +35,9 @@ class FeatureDbRepositoryTest extends RepositoryTestBase {
     @Test
     void should_add_same_featureKey_fail() {
         var featureKey = "featureKey1";
-        repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)).block();
+        repository.save(FeatureTestUtil.createFeatureDb(featureKey)).block();
 
-        repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey))
+        repository.save(FeatureTestUtil.createFeatureDb(featureKey))
                 .as(StepVerifier::create)
                 .expectError()
                 .verify();
@@ -46,7 +46,7 @@ class FeatureDbRepositoryTest extends RepositoryTestBase {
     @Test
     void should_update_same_featureKey_fail() {
         var featureKey = "featureKey1";
-        FeatureDb db = repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)).block();
+        FeatureDb db = repository.save(FeatureTestUtil.createFeatureDb(featureKey)).block();
 
         assert db != null;
         FeatureDb db1 = FeatureDb.from(db.to().enable());
@@ -61,7 +61,7 @@ class FeatureDbRepositoryTest extends RepositoryTestBase {
     @Test
     void should_getById_success() {
         var featureKey = "featureKey1";
-        repository.save(FeatureFlagTestUtil.createFeatureFlagDb(featureKey)).block();
+        repository.save(FeatureTestUtil.createFeatureDb(featureKey)).block();
 
         repository.findById(FeatureDb.idFromFeatureKey(featureKey))
                 .as(StepVerifier::create)
@@ -71,9 +71,9 @@ class FeatureDbRepositoryTest extends RepositoryTestBase {
 
     @Test
     void should_findAll_success() {
-        repository.save(FeatureFlagTestUtil.createFeatureFlagDb("key1")).block();
-        repository.save(FeatureFlagTestUtil.createFeatureFlagDb("key2")).block();
-        repository.save(FeatureFlagTestUtil.createFeatureFlagDb("key3")).block();
+        repository.save(FeatureTestUtil.createFeatureDb("key1")).block();
+        repository.save(FeatureTestUtil.createFeatureDb("key2")).block();
+        repository.save(FeatureTestUtil.createFeatureDb("key3")).block();
 
         repository.findAll()
                 .as(StepVerifier::create)

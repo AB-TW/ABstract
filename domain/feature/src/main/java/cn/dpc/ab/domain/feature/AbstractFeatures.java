@@ -4,24 +4,24 @@ import cn.dpc.ab.domain.exception.RecordNotFoundException;
 import reactor.core.publisher.Mono;
 
 /**
- * AbstractFeatureFlags provides a skeleton implementation of the FeatureFlags interface.
+ * AbstractFeatures provides a skeleton implementation of the Features interface.
  */
 public abstract class AbstractFeatures implements Features {
 
     /**
-     * Enable a feature flag.
+     * Enable a feature.
      *
-     * @param feature the feature flag to enable
-     * @return a Mono that completes when the feature flag has been enabled
+     * @param feature the feature to enable
+     * @return a Mono that completes when the feature has been enabled
      */
     protected abstract Mono<Void> doEnable(Feature feature);
 
 
     /**
-     * Enable a feature flag.
+     * Enable a feature.
      *
-     * @param id the id of the feature flag to enable
-     * @return a Mono that completes when the feature flag has been enabled
+     * @param id the id of the feature to enable
+     * @return a Mono that completes when the feature has been enabled
      */
     public Mono<Void> enable(Feature.FeatureId id) {
         return this.get(id)
@@ -30,41 +30,41 @@ public abstract class AbstractFeatures implements Features {
     }
 
     /**
-     * Update a feature flag.
+     * Update a feature.
      *
-     * @param feature the feature flag to update
-     * @param description the new description of the feature flag
-     * @return a Mono that completes when the feature flag has been updated
+     * @param feature the feature to update
+     * @param description the new description of the feature
+     * @return a Mono that completes when the feature has been updated
      */
-    protected abstract Mono<Void> doUpdate(Feature feature, Feature.FeatureDescription description);
+    protected abstract Mono<Void> doUpdate(Feature feature, Feature.Description description);
 
     /**
-     * Update a feature flag.
+     * Update a feature.
      *
-     * @param id          the id of the feature flag to update
-     * @param description the new description of the feature flag
-     * @return a Mono that completes when the feature flag has been updated
+     * @param id          the id of the feature to update
+     * @param description the new description of the feature
+     * @return a Mono that completes when the feature has been updated
      */
-    public Mono<Void> update(Feature.FeatureId id, Feature.FeatureDescription description) {
+    public Mono<Void> update(Feature.FeatureId id, Feature.Description description) {
         return this.get(id)
                 .switchIfEmpty(Mono.error(new RecordNotFoundException(id.toString())))
                 .flatMap(feature -> doUpdate(feature, description));
     }
 
     /**
-     * Disable a feature flag.
+     * Disable a feature.
      *
-     * @param feature the feature flag to disable
-     * @return a Mono that completes when the feature flag has been disabled
+     * @param feature the feature to disable
+     * @return a Mono that completes when the feature has been disabled
      */
     protected abstract Mono<Void> doDisable(Feature feature);
 
 
     /**
-     * Disable a feature flag.
+     * Disable a feature.
      *
-     * @param id the id of the feature flag to disable
-     * @return a Mono that completes when the feature flag has been disabled
+     * @param id the id of the feature to disable
+     * @return a Mono that completes when the feature has been disabled
      */
     public Mono<Void> disable(Feature.FeatureId id) {
         return this.get(id)

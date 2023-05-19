@@ -36,7 +36,7 @@ public class FeatureApi {
 
     @PostMapping
     Mono<FeatureResponse> add(@RequestBody FeatureRequest request) {
-        return features.add(request.toFeatureFlag())
+        return features.add(request.toFeature())
                 .map(FeatureResponse::from);
     }
 
@@ -49,7 +49,7 @@ public class FeatureApi {
 
     @PutMapping("/{featureKey}")
     Mono<Void> update(@PathVariable String featureKey, @RequestBody FeatureRequest request) {
-        return features.update(Feature.FeatureId.builder().featureKey(featureKey).build(), request.toFeatureFlag().getDescription());
+        return features.update(Feature.FeatureId.builder().featureKey(featureKey).build(), request.toFeature().getDescription());
     }
 
     @PutMapping("/{featureKey}/enable")

@@ -6,10 +6,10 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 
 /**
- * FeatureFlagDBRepository provides a skeleton implementation of the FeatureFlagDBRepository interface.
+ * FeatureDBRepository provides a skeleton implementation of the FeatureDBRepository interface.
  */
 @ScanConsistency(query = QueryScanConsistency.REQUEST_PLUS)
-public interface FeatureFlagDbRepository extends ReactiveCrudRepository<FeatureDb, String> {
+public interface FeatureDbRepository extends ReactiveCrudRepository<FeatureDb, String> {
 
     Flux<FeatureDb> findAll();
 }
