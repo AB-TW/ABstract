@@ -1,5 +1,0 @@
-- Couchbase是一款面向企业应用的NoSQL数据库。它提供了高性能、高可用性和可扩展性，使得它成为了许多企业的首选。Couchbase支持类JSON文档、键值对和图形数据模型，非常适合用于Web应用、移动应用和物联网应用等场景。
-  
-  对于需要高可用性和可扩展性的企业来说，Couchbase提供了一些非常有用的功能，如动态数据分片、自动故障转移和跨数据中心复制。Couchbase还提供了一个灵活的查询引擎，使得查询数据变得非常容易。同时，Couchbase还支持各种各样的客户端库，包括Java、Python、C# 和Node.js等。
-  
-  有关Cou chbase的更多信息，请查看[Couchbase官方网站](https://www.couchbase.com/)。
