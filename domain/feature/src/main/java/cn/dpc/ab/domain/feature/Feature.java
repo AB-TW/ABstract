@@ -122,10 +122,13 @@ public class Feature {
         /**
          * FilterParams represents the filter params of a feature.
          */
+        @Builder
         record FilterParams(String title, FeatureConfig.Status.DynamicStatus status) {
         }
 
         Flux<FeatureConfig> getAll(FilterParams params);
+
+        Flux<FeatureConfig> subCollection(FilterParams params, long from, long to);
 
         Mono<Long> size(FilterParams params);
 

@@ -3,6 +3,7 @@ package cn.dpc.ab.domain.feature;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * FeatureConfig represents a feature config.
@@ -34,8 +35,8 @@ public class FeatureConfig {
     public record Description(String key,
                                            String title,
                                            String description,
-                                           String data,
-                                           String saData,
+                                           Object data,
+                                           Map<String, String> saData,
                                            Status status,
                                            long priority,
                                            LocalDateTime createdAt,
