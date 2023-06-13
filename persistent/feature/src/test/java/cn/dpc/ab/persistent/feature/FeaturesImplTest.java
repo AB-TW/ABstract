@@ -4,6 +4,7 @@ import cn.dpc.ab.domain.exception.RecordNotFoundException;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Features;
 import cn.dpc.ab.domain.feature.Features.FilterParams;
+import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import cn.dpc.ab.persistent.feature.db.FeatureDb;
 import cn.dpc.ab.persistent.feature.db.FeatureDbRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,12 +27,14 @@ import static org.mockito.Mockito.when;
 class FeaturesImplTest {
     @Mock
     FeatureDbRepository repository;
+    @Mock
+    FeatureConfigDbRepository featureConfigDbRepository;
 
     Features features;
 
     @BeforeEach
     void setUp() {
-        features = new FeaturesImpl(repository);
+        features = new FeaturesImpl(repository, featureConfigDbRepository);
     }
 
     @Test

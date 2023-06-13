@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * FeatureConfig test.
@@ -52,7 +53,7 @@ class FeatureConfigTest {
                 .title("title")
                 .description("description")
                 .data("data1")
-                .saData("saData")
+                .saData(Map.of("key", "value"))
                 .status(FeatureConfig.Status.builder()
                         .staticStatus(FeatureConfig.Status.StaticStatus.DRAFT)
                         .startTime(null)
@@ -74,7 +75,7 @@ class FeatureConfigTest {
                         .title("title")
                         .description("description")
                         .data("data")
-                        .saData("saData")
+                        .saData(Map.of("key", "value"))
                         .status(FeatureConfig.Status.builder()
                                 .staticStatus(FeatureConfig.Status.StaticStatus.DRAFT)
                                 .startTime(null)
