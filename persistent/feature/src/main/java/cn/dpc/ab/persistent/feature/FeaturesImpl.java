@@ -62,7 +62,7 @@ public class FeaturesImpl extends AbstractFeatures {
         return repository.findById(FeatureDb.idFromFeatureKey(id.featureKey()))
                 .map(FeatureDb::to)
                 .map(feature -> {
-                    feature.setFeatureConfigs(new FeatureConfigsImpl(featureConfigDbRepository, feature.getId()));
+                    feature.setConfigs(new FeatureConfigsImpl(featureConfigDbRepository, feature.getId()));
                     return feature;
                 });
     }

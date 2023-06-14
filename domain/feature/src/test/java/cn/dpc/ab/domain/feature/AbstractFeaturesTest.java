@@ -1,6 +1,5 @@
 package cn.dpc.ab.domain.feature;
 
-import cn.dpc.ab.domain.exception.RecordNotFoundException;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,7 +32,7 @@ class AbstractFeaturesTest {
 
         features.update(id, description)
                 .as(StepVerifier::create)
-                .expectError(RecordNotFoundException.class)
+                .expectError(IllegalArgumentException.class)
                 .verify();
     }
 
@@ -54,7 +53,7 @@ class AbstractFeaturesTest {
 
         features.enable(id)
                 .as(StepVerifier::create)
-                .expectError(RecordNotFoundException.class)
+                .expectError(IllegalArgumentException.class)
                 .verify();
     }
 
@@ -75,7 +74,7 @@ class AbstractFeaturesTest {
 
         features.disable(id)
                 .as(StepVerifier::create)
-                .expectError(RecordNotFoundException.class)
+                .expectError(IllegalArgumentException.class)
                 .verify();
     }
 

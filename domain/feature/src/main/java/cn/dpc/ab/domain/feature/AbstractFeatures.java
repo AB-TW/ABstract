@@ -1,6 +1,5 @@
 package cn.dpc.ab.domain.feature;
 
-import cn.dpc.ab.domain.exception.RecordNotFoundException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -25,7 +24,7 @@ public abstract class AbstractFeatures implements Features {
      */
     public Mono<Void> enable(Feature.FeatureId id) {
         return this.get(id)
-                .switchIfEmpty(Mono.error(new RecordNotFoundException(id.toString())))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Feature not found: " + id.toString())))
                 .flatMap(this::doEnable);
     }
 
@@ -47,7 +46,7 @@ public abstract class AbstractFeatures implements Features {
      */
     public Mono<Void> update(Feature.FeatureId id, Feature.Description description) {
         return this.get(id)
-                .switchIfEmpty(Mono.error(new RecordNotFoundException(id.toString())))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Feature not found: " + id.toString())))
                 .flatMap(feature -> doUpdate(feature, description));
     }
 
@@ -68,7 +67,7 @@ public abstract class AbstractFeatures implements Features {
      */
     public Mono<Void> disable(Feature.FeatureId id) {
         return this.get(id)
-                .switchIfEmpty(Mono.error(new RecordNotFoundException(id.toString())))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Feature not found: " + id.toString())))
                 .flatMap(this::doDisable);
     }
 }

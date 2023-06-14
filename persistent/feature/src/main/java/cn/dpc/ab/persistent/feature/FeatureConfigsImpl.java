@@ -1,6 +1,5 @@
 package cn.dpc.ab.persistent.feature;
 
-import cn.dpc.ab.domain.exception.RecordNotFoundException;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDb;
@@ -17,7 +16,7 @@ import java.util.Optional;
  * FeatureConfigsImpl implements FeatureConfigs.
  */
 @RequiredArgsConstructor
-public class FeatureConfigsImpl implements Feature.FeatureConfigs {
+public class FeatureConfigsImpl implements Feature.Configs {
     private final FeatureConfigDbRepository repository;
     private final Feature.FeatureId featureId;
 
@@ -25,7 +24,7 @@ public class FeatureConfigsImpl implements Feature.FeatureConfigs {
     public Flux<FeatureConfig> getAll(FilterParams params) {
         return repository.findByFeatureKey(featureId.featureKey())
                 .map(FeatureConfigDb::toFeatureConfig)
-                .filter(featureConfig -> params.title() == null
+                .filter(featureConfig -> (params.title() == null
                         || Optional.ofNullable(featureConfig.getDescription().description())
                         .map(String::toLowerCase)
                         .map(description -> description.contains(params.title()))
@@ -34,6 +33,9 @@ public class FeatureConfigsImpl implements Feature.FeatureConfigs {
                         .map(String::toLowerCase)
                         .map(description -> description.contains(params.title()))
                         .orElse(false))
+                        && Optional.ofNullable(params.status())
+                        .map(status -> featureConfig.getDescription().status().getStatus() == status)
+                        .orElse(true))
                 .sort(new FeatureConfigComparator());
     }
 
@@ -62,7 +64,7 @@ public class FeatureConfigsImpl implements Feature.FeatureConfigs {
     @Override
     public Mono<Void> update(FeatureConfig.FeatureConfigId id, FeatureConfig.Description description) {
         return repository.findById(id.configId())
-                .switchIfEmpty(Mono.error(new RecordNotFoundException(id.configId())))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("FeatureConfig not found.")))
                 .flatMap(featureConfigDB -> {
                     featureConfigDB.updateDescription(featureConfigDB.toFeatureConfig().update(description).getDescription());
                     return repository.save(featureConfigDB);
@@ -85,7 +87,7 @@ public class FeatureConfigsImpl implements Feature.FeatureConfigs {
     @Override
     public Mono<Void> publish(FeatureConfig.FeatureConfigId id) {
         return repository.findById(id.configId())
-                .switchIfEmpty(Mono.error(new RecordNotFoundException(id.configId())))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("FeatureConfig not found.")))
                 .flatMap(featureConfigDB -> {
                     featureConfigDB.updateDescription(featureConfigDB.toFeatureConfig().publish().getDescription());
                     return repository.save(featureConfigDB);
@@ -95,7 +97,7 @@ public class FeatureConfigsImpl implements Feature.FeatureConfigs {
     @Override
     public Mono<Void> disable(FeatureConfig.FeatureConfigId id) {
         return repository.findById(id.configId())
-                .switchIfEmpty(Mono.error(new RecordNotFoundException(id.configId())))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("FeatureConfig not found.")))
                 .flatMap(featureConfigDB -> {
                     featureConfigDB.updateDescription(featureConfigDB.toFeatureConfig().disable().getDescription());
                     return repository.save(featureConfigDB);
