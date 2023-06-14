@@ -20,7 +20,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 public class GlobalErrorHandler {
 
     /**
-     * handle record not found exception.
+     * handle IllegalArgumentException.
      *
      * @param exception IllegalArgumentException
      * @return ExceptionResponse
@@ -28,6 +28,21 @@ public class GlobalErrorHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionResponse handleIllegalArgumentException(IllegalArgumentException exception) {
+
+        String message = exception.getMessage();
+        logException(exception);
+        return new ExceptionResponse(message);
+    }
+
+    /**
+     * handle IllegalStateException.
+     *
+     * @param exception IllegalStateException
+     * @return ExceptionResponse
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ExceptionResponse handleIllegalArgumentException(IllegalStateException exception) {
 
         String message = exception.getMessage();
         logException(exception);
