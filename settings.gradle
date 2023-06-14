@@ -16,4 +16,6 @@ include 'api:core'
 findProject(':api:core')?.name = 'api-core'
 include 'main'
 include 'frontend'
+include 'domain:experiment'
+findProject(':domain:experiment')?.name = 'experiment'
 
