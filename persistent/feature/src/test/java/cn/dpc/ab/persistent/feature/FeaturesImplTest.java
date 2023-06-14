@@ -96,7 +96,7 @@ class FeaturesImplTest {
 
         features.update(updateFeature.getId(), updateFeature.getDescription())
                 .as(StepVerifier::create)
-                .expectError(RecordNotFoundException.class)
+                .expectError(IllegalArgumentException.class)
                 .verify();
     }
 
@@ -124,7 +124,7 @@ class FeaturesImplTest {
 
         features.enable(new Feature.FeatureId(featureKey))
                 .as(StepVerifier::create)
-                .expectError(RecordNotFoundException.class)
+                .expectError(IllegalArgumentException.class)
                 .verify();
     }
 
@@ -152,7 +152,7 @@ class FeaturesImplTest {
 
         features.disable(new Feature.FeatureId(featureKey))
                 .as(StepVerifier::create)
-                .expectError(RecordNotFoundException.class)
+                .expectError(IllegalArgumentException.class)
                 .verify();
     }
 
