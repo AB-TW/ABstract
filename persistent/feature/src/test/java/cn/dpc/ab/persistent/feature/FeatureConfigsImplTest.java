@@ -1,10 +1,9 @@
 package cn.dpc.ab.persistent.feature;
 
-import cn.dpc.ab.domain.exception.RecordNotFoundException;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
-import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDb;
+import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +21,7 @@ class FeatureConfigsImplTest {
     @Mock
     FeatureConfigDbRepository repository;
 
-    Feature.FeatureConfigs featureConfigs;
+    Feature.Configs featureConfigs;
 
     @BeforeEach
     public void setUp() {
@@ -76,14 +75,14 @@ class FeatureConfigsImplTest {
     }
 
     @Test
-    public void should_update_return_not_found_when_record_not_exist() {
+    public void should_update_return_IllegalArgumentException_when_record_not_exist() {
         when(repository.findById(any(String.class)))
                 .thenReturn(Mono.empty());
 
         featureConfigs.update(new FeatureConfig.FeatureConfigId("id"),
                         FeatureConfigTestUtil.createFeatureConfig("featureConfigId", "featureKey").getDescription())
                 .as(StepVerifier::create)
-                .expectError(RecordNotFoundException.class)
+                .expectError(IllegalArgumentException.class)
                 .verify();
     }
 
@@ -163,13 +162,13 @@ class FeatureConfigsImplTest {
     }
 
     @Test
-    public void should_publish_return_not_found_when_record_not_exist() {
+    public void should_publish_return_IllegalArgumentException_when_record_not_exist() {
         when(repository.findById(any(String.class)))
                 .thenReturn(Mono.empty());
 
         featureConfigs.publish(new FeatureConfig.FeatureConfigId("id"))
                 .as(StepVerifier::create)
-                .expectError(RecordNotFoundException.class)
+                .expectError(IllegalArgumentException.class)
                 .verify();
     }
 
@@ -208,13 +207,13 @@ class FeatureConfigsImplTest {
     }
 
     @Test
-    public void should_disable_return_not_found_when_record_not_exist() {
+    public void should_disable_return_IllegalArgumentException_when_record_not_exist() {
         when(repository.findById(any(String.class)))
                 .thenReturn(Mono.empty());
 
         featureConfigs.disable(new FeatureConfig.FeatureConfigId("id"))
                 .as(StepVerifier::create)
-                .expectError(RecordNotFoundException.class)
+                .expectError(IllegalArgumentException.class)
                 .verify();
     }
 
@@ -241,7 +240,7 @@ class FeatureConfigsImplTest {
                 .thenReturn(Flux.just(FeatureConfigTestUtil.createFeatureConfigDb("id1", featureKey),
                         FeatureConfigTestUtil.createFeatureConfigDb("id2", featureKey)));
 
-        featureConfigs.getAll(Feature.FeatureConfigs.FilterParams.builder().build())
+        featureConfigs.getAll(Feature.Configs.FilterParams.builder().build())
                 .as(StepVerifier::create)
                 .expectNextMatches(featureConfig -> featureConfig.getId().configId().equals("id2"))
                 .expectNextMatches(featureConfig -> featureConfig.getId().configId().equals("id1"))
@@ -253,7 +252,7 @@ class FeatureConfigsImplTest {
         when(repository.findByFeatureKey(any(String.class)))
                 .thenReturn(Flux.empty());
 
-        featureConfigs.getAll(Feature.FeatureConfigs.FilterParams.builder().build())
+        featureConfigs.getAll(Feature.Configs.FilterParams.builder().build())
                 .as(StepVerifier::create)
                 .verifyComplete();
     }
@@ -264,7 +263,7 @@ class FeatureConfigsImplTest {
                 .thenReturn(Flux.just(FeatureConfigTestUtil.createFeatureConfigDb("id1", "featureKey"),
                         FeatureConfigTestUtil.createFeatureConfigDb("id2", "featureKey")));
 
-        featureConfigs.subCollection(Feature.FeatureConfigs.FilterParams.builder().build(), 0, 1)
+        featureConfigs.subCollection(Feature.Configs.FilterParams.builder().build(), 0, 1)
                 .as(StepVerifier::create)
                 .expectNextMatches(featureConfig -> featureConfig.getId().configId().equals("id2"))
                 .verifyComplete();
@@ -276,7 +275,7 @@ class FeatureConfigsImplTest {
                 .thenReturn(Flux.just(FeatureConfigTestUtil.createFeatureConfigDb("id1", "featureKey"),
                         FeatureConfigTestUtil.createFeatureConfigDb("id2", "featureKey")));
 
-        featureConfigs.size(Feature.FeatureConfigs.FilterParams.builder().build())
+        featureConfigs.size(Feature.Configs.FilterParams.builder().build())
                 .as(StepVerifier::create)
                 .expectNext(2L)
                 .verifyComplete();

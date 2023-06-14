@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * FeatureConfig represents a feature config.
@@ -25,6 +26,7 @@ public class FeatureConfig {
     /**
      * FeatureConfigId represents the ID of a feature config.
      */
+    @Builder
     public record FeatureConfigId(String configId) {
     }
 
@@ -85,6 +87,15 @@ public class FeatureConfig {
 
         private LocalDateTime endTime;
 
+
+        /**
+         * Get the static status of a feature config.
+         *
+         * @return the static status
+         */
+        public StaticStatus getStaticStatus() {
+            return Optional.ofNullable(staticStatus).orElse(StaticStatus.DRAFT);
+        }
 
         /**
          * Get the dynamic status of a feature config.

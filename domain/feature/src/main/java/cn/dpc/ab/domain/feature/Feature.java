@@ -19,7 +19,7 @@ public class Feature {
     private Description description;
 
     @Setter
-    private FeatureConfigs featureConfigs;
+    private Configs configs;
 
     public Feature(FeatureId id, Description description) {
         this.id = id;
@@ -117,7 +117,7 @@ public class Feature {
     /**
      * FeatureConfigs represents the configs of a feature.
      */
-    public interface FeatureConfigs {
+    public interface Configs {
 
         /**
          * FilterParams represents the filter params of a feature.

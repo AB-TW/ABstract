@@ -71,7 +71,7 @@ public class FeatureConfigDb {
 
             if (data instanceof String) {
                 this.stringData = String.valueOf(data);
-            } else if (data instanceof LinkedHashMap) {
+            } else if (data instanceof Map<?, ?>) {
                 this.objData = data;
             } else if (data instanceof List) {
                 this.arrayData = (List<?>) data;
@@ -102,7 +102,7 @@ public class FeatureConfigDb {
          * @return the Description
          */
         public static Description from(FeatureConfig.Description description) {
-            Description descriptionDb =  Description.builder()
+            Description descriptionDb = Description.builder()
                     .title(description.title())
                     .key(Optional.ofNullable(description.key()).orElse(UUID.randomUUID().toString()))
                     .updatedAt(Optional.ofNullable(description.updatedAt()).orElse(LocalDateTime.now()))
