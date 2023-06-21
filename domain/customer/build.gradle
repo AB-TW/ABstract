@@ -1,0 +1,9 @@
+plugins {
+    id 'domain'
+}
+
+dependencies {
+    implementation project(':domain:core')
+    implementation project(':domain:experiment')
+    implementation project(':domain:feature')
+}
