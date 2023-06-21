@@ -18,4 +18,6 @@ include 'main'
 include 'frontend'
 include 'domain:experiment'
 findProject(':domain:experiment')?.name = 'experiment'
+include 'persistent:experiment'
+findProject(':persistent:experiment')?.name = 'persistent-experiment'
 
