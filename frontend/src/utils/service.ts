@@ -1,5 +1,4 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios"
-import { useUserStoreHook } from "@/store/modules/user"
 import { ElMessage } from "element-plus"
 import { get, merge } from "lodash-es"
 import { getToken } from "./cache/cookies"
@@ -44,8 +43,6 @@ function createService() {
           error.message = "请求错误"
           break
         case 401:
-          // Token 过期时，直接退出登录并强制刷新页面（会重定向到登录页）
-          useUserStoreHook().logout()
           location.reload()
           break
         case 403:
