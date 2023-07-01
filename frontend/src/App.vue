@@ -1,23 +1,17 @@
-<script setup lang="ts">
+<script lang="ts" setup>
+import { useTheme } from "@/hooks/useTheme"
+import zhCn from "element-plus/lib/locale/lang/zh-cn"
+
+const { initTheme } = useTheme()
+
+/** 初始化主题 */
+initTheme()
+/** 将 Element Plus 的语言设置为中文 */
+const locale = zhCn
 </script>
 
 <template>
-  <div>
-    <router-view></router-view>
-  </div>
+  <ElConfigProvider :locale="locale">
+    <router-view />
+  </ElConfigProvider>
 </template>
-
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>

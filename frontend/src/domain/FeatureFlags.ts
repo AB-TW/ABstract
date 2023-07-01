@@ -1,0 +1,106 @@
+import http from "../utils/http/http"
+
+export interface FeatureFlag {
+  id?: string
+  featureKey: string
+  name: string
+  description?: string
+  status: string
+  dataSource: Array<FeatureFlagTemplate>
+  template: FeatureFlagTemplate
+}
+
+export interface PageResponse<T> {
+  total: number
+  page: number
+  pageSize: number
+  content: T[]
+}
+
+export interface FeatureFlagTemplate {
+  key?: string
+  name?: string
+  description?: string
+  dataType: TemplateDataType
+  defaultValue?: unknown | string | object
+  validator?: any
+  items?: FeatureFlagTemplate[]
+}
+
+export enum TemplateDataType {
+  BOOLEAN = "BOOLEAN",
+  STRING = "STRING",
+  NUMBER = "NUMBER",
+  OBJECT = "OBJECT",
+  ARRAY = "ARRAY"
+}
+
+export const getDefaultValue = (featureFlag: FeatureFlag): any => {
+  return getTemplateDefaultValue(featureFlag.template)
+}
+
+export const getTemplateDefaultValue = (template: FeatureFlagTemplate | undefined): any | any[] => {
+  if (!template) {
+    return null
+  }
+
+  if (template.dataType === TemplateDataType.OBJECT) {
+    const result = {} as any
+    ;(template.items || []).forEach((item: FeatureFlagTemplate) => {
+      result[item.key as string] = getTemplateDefaultValue(item)
+    })
+    return result
+  } else if (template.dataType === TemplateDataType.ARRAY) {
+    const result = [] as any[]
+    if (template.items && template.items.length > 0) {
+      result.push(getTemplateDefaultValue(template.items[0]))
+    }
+    return result
+  } else if (template.dataType === TemplateDataType.BOOLEAN) {
+    return template.defaultValue == "true" || template.defaultValue == true
+  } else if (template.dataType === TemplateDataType.STRING) {
+    return template.defaultValue || ""
+  } else if (template.dataType === TemplateDataType.NUMBER) {
+    return Number(template.defaultValue) || 0
+  }
+
+  return template.defaultValue || ""
+}
+
+export class FeatureFlags {
+  constructor(private readonly baseUrl: string = "") {}
+
+  private getUrl(path: string) {
+    return this.baseUrl + path
+  }
+
+  fetchAll(page: number, pageSize: number, featureKey?: string): Promise<PageResponse<FeatureFlag>> {
+    return http
+      .get(this.getUrl(`/features`), { page, pageSize, key: featureKey })
+      .then((res: any) => res?.data as PageResponse<FeatureFlag>)
+  }
+
+  fetch(featureKey: string): Promise<FeatureFlag> {
+    return http.get(this.getUrl(`/features/${featureKey}`), {}).then((res: any) => res?.data as FeatureFlag)
+  }
+
+  create(featureFlag: FeatureFlag): Promise<FeatureFlag> {
+    return http.post(this.getUrl(`/features`), featureFlag).then((res: any) => res?.data as FeatureFlag)
+  }
+
+  update(featureFlag: FeatureFlag): Promise<void> {
+    return http.put(this.getUrl(`/features/${featureFlag.featureKey}`), featureFlag).then()
+  }
+
+  delete(featureKey: string): Promise<void> {
+    return http.del(this.getUrl(`/features/${featureKey}`)).then()
+  }
+
+  publish(featureKey: string): Promise<void> {
+    return http.put(this.getUrl(`/features/${featureKey}/publish`), null).then()
+  }
+
+  disable(featureKey: string, type): Promise<void> {
+    return http.put(this.getUrl(`/features/${featureKey}/` + type), null).then()
+  }
+}
