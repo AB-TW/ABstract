@@ -57,7 +57,6 @@
             <el-button v-else type="success" size="small" @click="disable(scope.row.featureKey, 'enable')"
               >启用
             </el-button>
-            <el-button type="danger" size="small" @click="deleteData(scope.row.featureKey)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
