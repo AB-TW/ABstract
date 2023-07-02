@@ -1,6 +1,7 @@
 <template>
   <div class="custom-tree-container">
     <el-tree
+      v-if="!debugMode"
       :data="dataSource"
       node-key="id"
       default-expand-all
@@ -73,6 +74,9 @@
         </div>
       </template>
     </el-tree>
+    <div v-else>
+      this is a UI Test
+    </div>
   </div>
 </template>
 
@@ -94,10 +98,14 @@ const props = defineProps({
   isViewModel: {
     type: Boolean,
     required: true
+  } ,
+  debugMode: {
+    type: Boolean,
+    required: false
   }
 })
 const formValidatorRules = [] as any
-const getNameRules = (content) => [
+const getNameRules = (content:string) => [
   {
     validator: () => {
       if (!content) {
@@ -112,7 +120,7 @@ const getNameRules = (content) => [
     trigger: "blur"
   }
 ]
-const getKeyRules = (content) => {
+const getKeyRules = (content:any) => {
   return [
     {
       validator: () => {
@@ -140,13 +148,13 @@ const emit = defineEmits(["change"])
 const updateData = () => {
   emit("change", dataSource.value)
 }
-const showDelBtn = (node) => {
+const showDelBtn = (node :any) => {
   return node.level > 1 || (node.level == 1 && node.parent.childNodes.length > 1)
 }
-const shouldShowSubItems = (data) => {
+const shouldShowSubItems = (data :any) => {
   return [TemplateDataType.OBJECT, TemplateDataType.ARRAY].includes(data.dataType)
 }
-const handleDataTypeChange = (node, data) => {
+const handleDataTypeChange = (node:any, data:any) => {
   if (shouldShowSubItems(data)) {
     if (!data.children || data.children.length == 0) {
       addChildNode(node, data)
@@ -176,7 +184,7 @@ interface Tree {
 
 let id = 1000
 
-const addChildNode = (node, data: Tree) => {
+const addChildNode = (node: any, data: Tree) => {
   if (node.level >= 5) {
     ElNotification({
       title: "提示",
@@ -229,7 +237,7 @@ const remove = (node: Node, data: Tree) => {
   dataSource.value = [...dataSource.value]
 }
 
-const removeChildren = (node, data) => {
+const removeChildren = (node:any, data:any) => {
   data.children = []
   dataSource.value = [...dataSource.value]
 }

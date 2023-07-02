@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios"
 import { ElMessage } from "element-plus"
 
-const instance: AxiosInstance = axios.create({ timeout: 5000, baseURL: "http://localhost:8080" })
+const instance: AxiosInstance = axios.create({ timeout: 5000, baseURL: import.meta.env.VITE_BASE_API })
 
 export const ERROR_MESSAGE = {
   "400": "参数错误，请检查输入错误",
