@@ -27,13 +27,14 @@
           <el-form-item label="初值" prop="defaultValue" label-width="auto">
             <el-input v-model="data.defaultValue" />
           </el-form-item>
-          <el-form-item label="校验" prop="validator" label-width="auto">
+          <el-form-item label="校验" prop="validator" label-width="auto" >
             <el-form
               :model="data.validator"
               :rules="formValidatorRules"
               ref="formValidator"
               label-width="140px"
               :disabled="isViewModel"
+              class="validator-container"
             >
               <el-form-item label="必选" prop="required" label-width="auto">
                 <el-switch v-model="data.validator['required']" />
@@ -249,6 +250,14 @@ const removeChildren = (node, data) => {
 
   .el-form-item__error {
     z-index: 100 !important;
+  }
+
+  .validator-container {
+    width: 100% !important;
+    .el-form-item__label {
+      justify-content: flex-start !important;
+      min-width: 80px !important;
+    }
   }
 }
 </style>
