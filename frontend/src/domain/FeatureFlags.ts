@@ -100,7 +100,7 @@ export class FeatureFlags {
     return http.put(this.getUrl(`/features/${featureKey}/publish`), null).then()
   }
 
-  disable(featureKey: string, type): Promise<void> {
+  disable(featureKey: string, type: string): Promise<void> {
     return http.put(this.getUrl(`/features/${featureKey}/` + type), null).then()
   }
 }

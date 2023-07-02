@@ -93,7 +93,7 @@ const searchForm = reactive({
 })
 
 const tableData = ref([] as FeatureFlag[])
-const goToWatch = (key, type) => {
+const goToWatch = (key:string, type: string) => {
   router.push({
     path: "/feature/edit",
     query: {
