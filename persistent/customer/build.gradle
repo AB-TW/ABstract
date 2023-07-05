@@ -1,0 +1,14 @@
+plugins {
+    id 'persistent'
+}
+
+dependencies {
+    implementation project(':domain:core')
+    implementation project(':domain:feature')
+    implementation project(':domain:experiment')
+    implementation project(':domain:customer')
+    implementation project(':persistent:persistent-core')
+    implementation project(':persistent:persistent-feature')
+    implementation project(':persistent:persistent-experiment')
+    testImplementation  project(':persistent:persistent-core').sourceSets.test.output
+}
