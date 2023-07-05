@@ -22,4 +22,6 @@ include 'persistent:experiment'
 findProject(':persistent:experiment')?.name = 'persistent-experiment'
 include 'domain:customer'
 findProject(':domain:customer')?.name = 'customer'
+include 'persistent:customer'
+findProject(':persistent:customer')?.name = 'persistent-customer'
 
