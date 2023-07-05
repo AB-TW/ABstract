@@ -7,11 +7,11 @@ const { initTheme } = useTheme()
 /** 初始化主题 */
 initTheme()
 /** 将 Element Plus 的语言设置为中文 */
-const locale = zhCn
+const localeZh  = zhCn
 </script>
 
 <template>
-  <ElConfigProvider :locale="locale">
+  <ElConfigProvider :locale="localeZh">
     <router-view />
   </ElConfigProvider>
 </template>

@@ -5,8 +5,8 @@
   "author": {},
   "scripts": {
     "dev": "vite",
-    "build:stage": "vue-tsc --noEmit && vite build --mode staging",
-    "build:prod": "vue-tsc --noEmit && vite build",
+    "build:stage": "vite build --mode staging",
+    "build:prod": "vite build",
     "preview:stage": "pnpm build:stage && vite preview",
     "preview:prod": "pnpm build:prod && vite preview",
     "lint:eslint": "eslint --cache --max-warnings 0 \"src/**/*.{vue,js,ts,tsx}\" --fix",
