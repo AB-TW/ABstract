@@ -8,7 +8,7 @@ node {
   version = "16.19.1"
 }
 
-task npmBuild(type: NpmTask, dependsOn: npmInstall) {
+task npmBuildStag(type: NpmTask, dependsOn: npmInstall) {
 
   inputs.files(fileTree('config'))
 
@@ -28,7 +28,30 @@ task npmBuild(type: NpmTask, dependsOn: npmInstall) {
 
   group = 'npm'
 
-  args = ['run', 'build']
+  args = ['run', 'build:stage']
+}
+
+task npmBuildProd(type: NpmTask, dependsOn: npmInstall) {
+
+  inputs.files(fileTree('config'))
+
+  inputs.files(fileTree('src'))
+
+  inputs.files(fileTree('static'))
+
+  inputs.files(fileTree('build'))
+
+  inputs.file('package.json')
+
+  inputs.file('package-lock.json')
+
+  inputs.file('index.html')
+
+  outputs.files(fileTree('dist'))
+
+  group = 'npm'
+
+  args = ['run', 'build:prod']
 }
 
 task npmDev(type: NpmTask, dependsOn: npmInstall) {

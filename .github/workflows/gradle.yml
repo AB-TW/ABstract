@@ -24,6 +24,6 @@ jobs:
         - name: Build with Gradle
           run: ./gradlew build
         - name: Build frontend with Gradle
-          run: ./gradlew npmBuild
+          run: ./gradlew npmBuildProd
         - name: Build Docker image
           run: docker build -t a_bstract/abstract:latest .
