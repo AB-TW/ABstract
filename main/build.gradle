@@ -5,4 +5,5 @@ plugins {
 
 dependencies {
     implementation project(':api:api-feature')
+    implementation project(':api:api-customer')
 }
