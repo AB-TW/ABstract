@@ -31,7 +31,7 @@ task npmBuildStag(type: NpmTask, dependsOn: npmInstall) {
   args = ['run', 'build:stage']
 }
 
-task npmBuildProd(type: NpmTask, dependsOn: npmInstall) {
+task npmBuild(type: NpmTask, dependsOn: npmInstall) {
 
   inputs.files(fileTree('config'))
 
@@ -51,7 +51,7 @@ task npmBuildProd(type: NpmTask, dependsOn: npmInstall) {
 
   group = 'npm'
 
-  args = ['run', 'build:prod']
+  args = ['run', 'build']
 }
 
 task npmDev(type: NpmTask, dependsOn: npmInstall) {

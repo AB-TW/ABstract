@@ -23,7 +23,7 @@ jobs:
           run: chmod +x gradlew
         - name: Build with Gradle
           run: ./gradlew build
-#        - name: Build frontend with Gradle
-#          run: ./gradlew npmBuildProd
+        - name: Build frontend with Gradle
+          run: ./gradlew npmBuild
         - name: Build Docker image
           run: docker build -t a_bstract/abstract:latest .
