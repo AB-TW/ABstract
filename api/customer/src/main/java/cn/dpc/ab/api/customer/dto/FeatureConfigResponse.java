@@ -17,6 +17,8 @@ import java.util.Map;
 public class FeatureConfigResponse {
     private String id;
 
+    private String featureKey;
+
     private String key;
 
     private Object data;
@@ -38,6 +40,7 @@ public class FeatureConfigResponse {
     public static FeatureConfigResponse from(FeatureConfig featureConfig) {
         return FeatureConfigResponse.builder()
                 .id(featureConfig.getId().configId())
+                .featureKey(featureConfig.getFeatureKey().featureKey())
                 .key(featureConfig.getDescription().key())
                 .data(featureConfig.getDescription().data())
                 .saData(featureConfig.getDescription().saData())

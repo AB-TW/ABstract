@@ -1,12 +1,10 @@
 package cn.dpc.ab.api.customer;
 
-import cn.dpc.ab.api.customer.dto.FeatureConfigResponse;
 import cn.dpc.ab.api.TestConfiguration;
+import cn.dpc.ab.api.customer.dto.FeatureConfigResponse;
 import cn.dpc.ab.domain.core.CustomerId;
 import cn.dpc.ab.domain.customer.Customer;
 import cn.dpc.ab.domain.customer.Customers;
-import cn.dpc.ab.domain.feature.Feature;
-import cn.dpc.ab.domain.feature.FeatureConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -20,10 +18,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.UUID;
-
+import static cn.dpc.ab.api.customer.CustomerTestUtil.createFeatureConfig;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -107,24 +102,5 @@ class CustomerApiTest {
                 .expectStatus().isOk()
                 .expectBodyList(FeatureConfigResponse.class)
                 .hasSize(2);
-    }
-
-    public static FeatureConfig createFeatureConfig(String id, String featureKey) {
-        return FeatureConfig.builder()
-                .id(FeatureConfig.FeatureConfigId.builder().configId(null == id ? UUID.randomUUID().toString() : id).build())
-                .featureKey(Feature.FeatureId.builder().featureKey(featureKey).build())
-                .description(FeatureConfig.Description.builder()
-                        .createdAt(LocalDateTime.now())
-                        .updatedAt(LocalDateTime.now())
-                        .description("description")
-                        .title("title")
-                        .data(Map.of("key", "value"))
-                        .saData(Map.of("key", "value"))
-                        .priority(0)
-                        .status(FeatureConfig.Status.builder()
-                                .staticStatus(FeatureConfig.Status.StaticStatus.DRAFT)
-                                .build())
-                        .build())
-                .build();
     }
 }
