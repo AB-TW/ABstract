@@ -1,5 +1,6 @@
 package cn.dpc.ab.domain.experiment;
 
+import cn.dpc.ab.domain.core.FilterCondition;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -53,7 +54,8 @@ public class Experiment {
                               Status status,
                               List<Bucket> buckets,
                               LocalDateTime createdAt,
-                              LocalDateTime updatedAt) {
+                              LocalDateTime updatedAt,
+                              FilterCondition filterCondition) {
 
     }
 
@@ -161,6 +163,7 @@ public class Experiment {
                 .name(description.name)
                 .samplePercentage(description.samplePercentage)
                 .status(description.status)
+                .filterCondition(description.filterCondition)
                 .build();
         return this;
     }

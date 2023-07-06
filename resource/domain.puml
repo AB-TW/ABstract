@@ -147,20 +147,6 @@ package "metrics" {
 
 }
 
-package MemberCriteria {
-    entity Segment #pink {
-        id: SegmentId
-        name: String
-        description: SegmentDescription
-    }
-
-    interface Segments #Orange {
-        getSegments(): List<Segment>
-    }
-
-    Segments "1" -- "0..N" Segment
-}
-
 package "Customer" {
     entity Customer #Green {
         id: CustomerId
@@ -173,9 +159,7 @@ package "Customer" {
     interface CustomerFeatureConfigs #Orange {
                 getFeatureConfigs(featureKey: String, customer: Customer): List<FeatureConfig>
             }
-    interface CustomerSegments #Orange {
-        getSegments(customer: Customer): List<Segment>
-    }
+
 
     interface CustomerAssignments #Orange {
                 getAssignments(experimentId: ExperimentId, customer: Customer): Assignment
@@ -185,16 +169,10 @@ package "Customer" {
     Customer -- CustomerAssignments
     CustomerFeatureConfigs "1" -- "0..N" FeatureConfig
     CustomerAssignments "1" -- "0..N" Assignment
-    CustomerAssignments -- CustomerSegments
-    CustomerFeatureConfigs -- CustomerSegments
     CustomerFeatureConfigs "1" -- "1" CustomerAssignments
-    CustomerSegments "1" -- "0..N" Segment
-
 }
 
 Experiment "1" -- "0..N" MetricMeta
 Experiment "1" -- "0..N" Metric
-Experiment "1" -- "0..N" Segment
-FeatureConfig "1" -- "0..N" Segment
 "metrics" .. "Tracking"
 @enduml

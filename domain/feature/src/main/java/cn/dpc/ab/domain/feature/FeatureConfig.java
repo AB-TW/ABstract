@@ -1,5 +1,6 @@
 package cn.dpc.ab.domain.feature;
 
+import cn.dpc.ab.domain.core.FilterCondition;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -35,14 +36,15 @@ public class FeatureConfig {
      */
     @Builder
     public record Description(String key,
-                                           String title,
-                                           String description,
-                                           Object data,
-                                           Map<String, String> saData,
-                                           Status status,
-                                           long priority,
-                                           LocalDateTime createdAt,
-                                           LocalDateTime updatedAt) {
+                              String title,
+                              String description,
+                              Object data,
+                              Map<String, String> saData,
+                              Status status,
+                              long priority,
+                              LocalDateTime createdAt,
+                              LocalDateTime updatedAt,
+                              FilterCondition filterCondition) {
     }
 
     /**
@@ -145,6 +147,7 @@ public class FeatureConfig {
                 .createdAt(this.description.createdAt())
                 .priority(this.description.priority)
                 .updatedAt(LocalDateTime.now())
+                .filterCondition(newDescription.filterCondition())
                 .build();
         return this;
     }
@@ -155,17 +158,7 @@ public class FeatureConfig {
      * @return the feature config
      */
     public FeatureConfig publish() {
-        this.description = Description.builder()
-                .title(this.description.title())
-                .description(this.description.description())
-                .data(this.description.data())
-                .saData(this.description.saData())
-                .status(this.description.status.updateStatus(Status.StaticStatus.PUBLISHED))
-                .createdAt(this.description.createdAt())
-                .priority(this.description.priority)
-                .updatedAt(LocalDateTime.now())
-                .build();
-        return this;
+        return updateStatus(Status.StaticStatus.PUBLISHED);
     }
 
 
@@ -175,17 +168,7 @@ public class FeatureConfig {
      * @return the feature config
      */
     public FeatureConfig disable() {
-        this.description = Description.builder()
-                .title(this.description.title())
-                .description(this.description.description())
-                .data(this.description.data())
-                .saData(this.description.saData())
-                .status(this.description.status.updateStatus(Status.StaticStatus.DISABLED))
-                .createdAt(this.description.createdAt())
-                .priority(this.description.priority)
-                .updatedAt(LocalDateTime.now())
-                .build();
-        return this;
+        return updateStatus(Status.StaticStatus.DISABLED);
     }
 
     /**
@@ -194,14 +177,19 @@ public class FeatureConfig {
      * @return the feature config
      */
     public FeatureConfig delete() {
+        return updateStatus(Status.StaticStatus.DELETED);
+    }
+
+    private FeatureConfig updateStatus(Status.StaticStatus status) {
         this.description = Description.builder()
                 .title(this.description.title())
                 .description(this.description.description())
                 .data(this.description.data())
                 .saData(this.description.saData())
-                .status(this.description.status.updateStatus(Status.StaticStatus.DELETED))
+                .status(this.description.status.updateStatus(status))
                 .createdAt(this.description.createdAt())
                 .priority(this.description.priority)
+                .filterCondition(this.description.filterCondition())
                 .updatedAt(LocalDateTime.now())
                 .build();
         return this;

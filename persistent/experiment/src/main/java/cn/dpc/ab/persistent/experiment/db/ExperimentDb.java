@@ -1,5 +1,6 @@
 package cn.dpc.ab.persistent.experiment.db;
 
+import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.experiment.Experiment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,6 +51,8 @@ public class ExperimentDb {
 
     private LocalDateTime updatedAt;
 
+    private FilterCondition filterCondition;
+
     /**
      * toExperiment converts ExperimentDb to Experiment.
      *
@@ -66,7 +69,8 @@ public class ExperimentDb {
                         this.status,
                         this.buckets.stream().map(BucketDb::toBucket).collect(Collectors.toList()),
                         this.createdAt,
-                        this.updatedAt
+                        this.updatedAt,
+                        this.filterCondition
                 )
         );
     }

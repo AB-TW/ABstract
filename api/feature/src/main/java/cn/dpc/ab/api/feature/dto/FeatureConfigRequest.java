@@ -1,5 +1,6 @@
 package cn.dpc.ab.api.feature.dto;
 
+import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
 import lombok.*;
@@ -34,6 +35,8 @@ public class FeatureConfigRequest {
 
     private LocalDateTime endTime;
 
+    private FilterCondition filterCondition;
+
     private long priority;
 
     /**
@@ -56,6 +59,7 @@ public class FeatureConfigRequest {
                                 .endTime(endTime)
                                 .build())
                         .priority(priority)
+                        .filterCondition(filterCondition)
                         .build())
                 .build();
     }
