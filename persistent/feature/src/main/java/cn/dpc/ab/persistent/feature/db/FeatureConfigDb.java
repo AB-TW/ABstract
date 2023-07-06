@@ -1,5 +1,6 @@
 package cn.dpc.ab.persistent.feature.db;
 
+import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
 import lombok.AllArgsConstructor;
@@ -59,6 +60,8 @@ public class FeatureConfigDb {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
+        private FilterCondition filterCondition;
+
         /**
          * setData sets the data field.
          *
@@ -111,6 +114,7 @@ public class FeatureConfigDb {
                     .priority(description.priority())
                     .status(description.status())
                     .description(description.description())
+                    .filterCondition(description.filterCondition())
                     .build();
 
             descriptionDb.setData(description.data());
@@ -134,6 +138,7 @@ public class FeatureConfigDb {
                     .status(description.status)
                     .description(description.description)
                     .data(description.getData())
+                    .filterCondition(description.filterCondition)
                     .build();
         }
     }

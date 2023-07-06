@@ -1,5 +1,6 @@
 package cn.dpc.ab.domain.customer;
 
+import cn.dpc.ab.domain.core.CustomerId;
 import reactor.core.publisher.Mono;
 
 /**
@@ -10,5 +11,5 @@ public interface Customers {
     /**
      * getById returns the customer by id.
      */
-    Mono<Customer> getById(Customer.CustomerId customerId);
+    Mono<Customer> getById(CustomerId customerId);
 }
