@@ -162,7 +162,7 @@ package "Customer" {
 
 
     interface CustomerAssignments #Orange {
-                getAssignments(experimentId: ExperimentId, customer: Customer): Assignment
+                getAssignments(featureKey: String, customer: Customer): Assignment
             }
 
     Customer -- CustomerFeatureConfigs
