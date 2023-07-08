@@ -2,7 +2,6 @@ package cn.dpc.ab.domain.customer;
 
 import cn.dpc.ab.domain.core.CustomerId;
 import cn.dpc.ab.domain.experiment.Assignment;
-import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
 import lombok.Getter;
@@ -36,6 +35,6 @@ public class Customer {
      * Assignments represents the assignments of a customer.
      */
     public interface Assignments {
-        Mono<Assignment> getByExperimentId(Experiment.ExperimentId experimentId);
+        Mono<Assignment> getByFeatureKey(Feature.FeatureId featureKey);
     }
 }
