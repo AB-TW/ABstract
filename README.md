@@ -37,13 +37,13 @@ Web框架：Spring WebFlux、Spring RSocket
 ### 构建
 
 ```shell
-./gradlew build
+./gradlew build --no-parallel
 ```
 
 ### 运行测试
 
 ```shell
-./gradlew test
+./gradlew test --no-parallel
 ```
 
 ### 本地运行
