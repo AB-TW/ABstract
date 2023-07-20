@@ -1,6 +1,6 @@
 plugins {
     id 'api'
-    id 'org.springframework.boot' version '3.0.7'
+    id 'org.springframework.boot'
 }
 
 dependencies {
