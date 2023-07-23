@@ -136,12 +136,12 @@ const submitForm = async () => {
   const tempResult = translateDataToTemplateItems(copyJsonObj)
   replaceChildrenWithItems(tempResult.template)
   console.log(JSON.stringify(tempResult))
+
   form.value.validate(async (valid: boolean) => {
-    debugger
     if (valid) {
       try {
         if (formType.value.toLowerCase() == "add") {
-          await featureFlags.create(tempResult)
+          await featureFlags.create(featureFlag.value, tempResult)
         } else {
           await featureFlags.update(tempResult)
         }
