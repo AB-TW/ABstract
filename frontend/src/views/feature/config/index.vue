@@ -24,7 +24,7 @@
         @click="
           () =>
             router.push({
-              path: '/feature-config/edit',
+              path: '/feature/config/edit',
               query: {
                 type: 'add',
                 featureKey: type,
@@ -66,7 +66,7 @@
               @click="
                 () =>
                   router.push({
-                    path: '/feature-config/edit',
+                    path: '/feature/config/edit',
                     query: {
                       featureKey: type,
                       type: 'edit',
@@ -101,9 +101,9 @@ import { onBeforeMount, onMounted, reactive, ref } from "vue"
 import { useRouter } from "vue-router"
 import { useRoute } from "vue-router"
 
-import { FeatureConfig, FeatureConfigs } from "../../domain/FeatureConfigs"
+import { FeatureConfig, FeatureConfigs } from "../../../domain/FeatureConfigs"
 import { ElMessage } from "element-plus"
-import { FeatureFlags } from "../../domain/FeatureFlags"
+import { FeatureFlags } from "../../../domain/FeatureFlags"
 
 const route = useRoute()
 const featureFlag = ref()
@@ -144,7 +144,7 @@ const deleteData = (id: string) => {
 
 const searchData = () => {
   featureConfigs
-    .fetchAll(type.value, searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, searchForm.key)
+    .fetchAll(searchForm.key, searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, type.value)
     .then((res) => {
       tableData.value = res.content
       total.value = res.total
