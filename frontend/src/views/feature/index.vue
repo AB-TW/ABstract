@@ -30,8 +30,8 @@
               link
               @click="
                 router.push({
-                  path: '/feature/config/edit',
-                  query: { featureKey: scope.row.featureKey }
+                  path: '/feature/config/list',
+                  query: { featureKey: scope.row.featureKey, featureName: scope.row.name }
                 })
               "
             >

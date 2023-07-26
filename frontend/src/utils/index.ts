@@ -1,5 +1,5 @@
 import dayjs from "dayjs"
-
+import _ from "lodash"
 /** 格式化时间 */
 export const formatDateTime = (time: string | number | Date) => {
   return time ? dayjs(new Date(time)).format("YYYY-MM-DD HH:mm:ss") : "N/A"
@@ -30,7 +30,7 @@ export const transTempToTreeDataSource = (temp: any) => {
   const tree = {
     name: temp.name || "",
     dataType: temp.dataType || "",
-    defaultValue: temp.defaultValue,
+    defaultValue: temp.dataType == "BOOLEAN" ? Boolean(temp.defaultValue) : temp.defaultValue,
     key: temp.key || "",
     description: temp.description || "",
     validator: {
@@ -55,4 +55,65 @@ export const StatusMaps = {
   add: "新增",
   view: "查看",
   edit: "编辑"
+}
+
+export function replaceChildrenWithItems(data) {
+  // 如果是一个数组，则递归处理每个元素
+  if (Array.isArray(data)) {
+    data.forEach((item) => replaceChildrenWithItems(item))
+    // 如果是一个对象，则处理其属性
+  } else if (typeof data === "object") {
+    for (const prop in data) {
+      if (prop === "children") {
+        data["items"] = data[prop]
+        delete data[prop]
+        // 递归处理嵌套的子级对象
+        replaceChildrenWithItems(data["items"])
+      } else {
+        // 递归处理对象的属性
+        replaceChildrenWithItems(data[prop])
+      }
+    }
+  }
+  return data
+}
+export const translateDataToTemplateItems = (value) => {
+  value.template = value.dataSource[0]
+  return value
+}
+export function getValue(info) {
+  debugger
+  if (info.dataType == "BOOLEAN") {
+    if (_.hasIn(info, "value")) {
+      return info.value
+    } else {
+      return info.defaultValue
+    }
+  } else {
+    return info.value || info.defaultValue
+  }
+}
+// FeatureConfg data数据处理函数
+export function convertConfigObject(data) {
+  const result = []
+  if (data.dataType == "ARRAY") {
+    data.children.forEach((item) => {
+      if (item.dataType == "OBJECT") {
+        const tempObj = {}
+        item.children.forEach((child) => {
+          if (child.dataType == "ARRAY") {
+            tempObj[child.key] = convertConfigObject(child)
+          } else {
+            tempObj[child.key] = getValue(child)
+          }
+        })
+        result.push(tempObj)
+      } else {
+        result.push(getValue(item))
+      }
+    })
+  } else if (["NUMBER", "STRING", "BOOLEAN"].includes(data.dataType)) {
+    return getValue(data)
+  }
+  return result
 }
