@@ -14,8 +14,8 @@
         <el-form-item label="配置描述" prop="description">
           <el-input v-model="featureConfig.description" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="Config Template" prop="template">
-          <feature-flag-template-item
+        <el-form-item label="配置内容" prop="data">
+          <FeatureTemplateConfig
             :key="featureFlag.dataSource"
             :isViewModel="true"
             :dataSource="featureFlag.dataSource"
@@ -71,9 +71,10 @@ import {
   TemplateDataType
 } from "../../../domain/FeatureFlags"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
-import FeatureFlagTemplateItem from "@/components/FeatureFlagTemplateItemNew.vue"
-import { transTempToTreeDataSource } from "@/utils"
-import { StaticStatus } from "@/constants/common";
+import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
+import { convertConfigObject, transTempToTreeDataSource } from "@/utils"
+import { StaticStatus } from "@/constants/common"
+import _ from "lodash"
 
 const route = useRoute()
 const router = useRouter()
@@ -89,7 +90,6 @@ const featureKey = ref("")
 const id = ref("")
 const saData = ref([] as any[])
 let trackingDataIndex = 0
-const locationCondition = ref({} as any)
 onBeforeMount(async () => {
   title.value = (route.query.type == "edit" ? "编辑" : "新增") + "Feature Config"
   formType.value = route.query.type == "edit" ? "edit" : "add"
@@ -99,12 +99,13 @@ onBeforeMount(async () => {
     const res = await featureFlags.fetch(route.query.featureKey.toString())
     featureFlag.value = res
     featureFlag.value.dataSource = [transTempToTreeDataSource(featureFlag.value.template)] as Array<FeatureFlagTemplate>
+    debugger
   } else {
     featureFlag.value = {
       status: "PUBLISHED",
       template: {
         dataType: TemplateDataType.BOOLEAN,
-        defaultValue: "false",
+        defaultValue: false,
         items: [] as FeatureFlagTemplate[]
       },
       dataSource: [
@@ -124,31 +125,6 @@ onBeforeMount(async () => {
     trackingData: [],
     data: getDefaultValue(featureFlag.value)
   } as FeatureConfig
-
-  if (route.query.id) {
-    const res = await featureConfigs.fetchById(route.query.id.toString())
-    id.value = res.id as string
-    featureConfig.value = res
-    console.log(JSON.stringify(res))
-    if (!featureConfig.value.customerCriteriaCondition) {
-      featureConfig.value.customerCriteriaCondition = {}
-    }
-
-    if (!featureConfig.value.customerCriteriaCondition.whiteListCondition) {
-      featureConfig.value.customerCriteriaCondition.whiteListCondition = {
-        whiteList: []
-      }
-    }
-
-    if (!featureConfig.value.customerCriteriaCondition.locationCondition) {
-      featureConfig.value.customerCriteriaCondition.locationCondition = {
-        adCodes: []
-      }
-    }
-
-    originalFeatureConfig.value = featureConfig.value
-    locationCondition.value.item = featureConfig.value.customerCriteriaCondition.locationCondition.adCodes
-  }
 
   saData.value = featureConfig.value.saData
     ? Object.keys(featureConfig.value.saData).map((key) => {
@@ -192,6 +168,11 @@ const submitForm = async () => {
   form?.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
+        // const copyJsonObj = _.cloneDeep(featureFlag.value)
+        // const tempResult = translateDataToTemplateItems(copyJsonObj)
+        // replaceChildrenWithItems(tempResult.template)
+        // console.log(JSON.stringify(tempResult))
+        featureConfig.value.data = convertConfigObject(featureFlag.value.dataSource[0])
         featureConfig.value.type = featureKey.value
         featureConfig.value.status = StaticStatus.DRAFT
         featureConfig.value.saData = saData.value.reduce((acc, cur) => {

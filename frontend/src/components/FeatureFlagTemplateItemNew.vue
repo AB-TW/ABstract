@@ -11,13 +11,25 @@
     >
       <template #default="{ node, data }">
         <div class="custom-tree-node">
-          <el-form-item label="Key" prop="key" :rules="getKeyRules(data.key)" label-width="auto">
+          <el-form-item
+            label="Key"
+            prop="key"
+            :rules="getKeyRules(data.key)"
+            label-width="auto"
+            v-if="showKey(node, data)"
+          >
             <el-input ref="keyInput" v-model="data.key" @change="updateData" />
           </el-form-item>
-          <el-form-item label="名称" :prop="name" :rules="getNameRules(data.name)" label-width="auto">
+          <el-form-item
+            label="名称"
+            :prop="name"
+            :rules="getNameRules(data.name)"
+            label-width="auto"
+            v-if="showKey(node, data)"
+          >
             <el-input v-model="data.name" @change="updateData" />
           </el-form-item>
-          <el-form-item label="描述" prop="description" label-width="auto">
+          <el-form-item label="描述" prop="description" label-width="auto" v-if="showKey(node, data)">
             <el-input v-model="data.description" @change="updateData" />
           </el-form-item>
           <el-form-item label="类型" prop="dataType" label-width="auto">
@@ -25,10 +37,15 @@
               <el-option v-for="item in Object.keys(TemplateDataType)" :key="item" :label="item" :value="item" />
             </el-select>
           </el-form-item>
-          <el-form-item label="初值" prop="defaultValue" label-width="auto">
+          <el-form-item label="初值" prop="defaultValue" label-width="auto" v-if="showDefaultValue(node, data)">
             <el-input v-model="data.defaultValue" />
           </el-form-item>
-          <el-form-item label="校验" prop="validator" label-width="auto" >
+          <el-form-item
+            label="校验"
+            prop="validator"
+            label-width="auto"
+            v-if="data.dataType != 'ARRAY' && data.dataType != 'OBJECT' && data.dataType != 'BOOLEAN'"
+          >
             <el-form
               :model="data.validator"
               :rules="formValidatorRules"
@@ -40,23 +57,23 @@
               <el-form-item label="必选" prop="required" label-width="auto">
                 <el-switch v-model="data.validator['required']" />
               </el-form-item>
-              <el-form-item label="最大长度" prop="maxLength" label-width="auto">
+              <el-form-item label="最大长度" prop="maxLength" label-width="auto" v-if="data.dataType == 'STRING'">
                 <el-input v-model="data.validator['maxLength']" type="number" />
               </el-form-item>
-              <el-form-item label="最小值" prop="min" label-width="auto">
+              <el-form-item label="最小值" prop="min" label-width="auto" v-if="data.dataType == 'NUMBER'">
                 <el-input v-model="data.validator['min']" type="number" />
               </el-form-item>
-              <el-form-item label="最大值" prop="max" label-width="auto">
+              <el-form-item label="最大值" prop="max" label-width="auto" v-if="data.dataType == 'NUMBER'">
                 <el-input v-model="data.validator['max']" type="number" />
               </el-form-item>
-              <el-form-item label="模式" prop="pattern" label-width="auto">
+              <el-form-item label="模式" prop="pattern" label-width="auto" v-if="data.dataType == 'STRING'">
                 <el-input v-model="data.validator['pattern']" />
               </el-form-item>
             </el-form>
           </el-form-item>
           <div class="operation-container">
             <div class="left">{{ data.children.length > 0 ? "| ----------" : "" }}</div>
-            <div class="right" v-if="data.dataType == 'OBJECT' || data.dataType == 'Array'">
+            <div class="right" v-if="showAddNextBtn(node, data)">
               <el-button @click="addChildNode(node, data)" type="primary" icon="plus">
                 新增节点(层级:{{ node.level }})
               </el-button>
@@ -74,14 +91,12 @@
         </div>
       </template>
     </el-tree>
-    <div v-else>
-      this is a UI Test
-    </div>
+    <div v-else>this is a UI Test</div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h, ref } from "vue"
+import { computed, h, ref } from "vue"
 import type Node from "element-plus/es/components/tree/src/model/node"
 import { TemplateDataType } from "@/domain/FeatureFlags"
 import { ElNotification } from "element-plus"
@@ -98,14 +113,14 @@ const props = defineProps({
   isViewModel: {
     type: Boolean,
     required: true
-  } ,
+  },
   debugMode: {
     type: Boolean,
     required: false
   }
 })
 const formValidatorRules = [] as any
-const getNameRules = (content:string) => [
+const getNameRules = (content: string) => [
   {
     validator: () => {
       if (!content) {
@@ -120,7 +135,7 @@ const getNameRules = (content:string) => [
     trigger: "blur"
   }
 ]
-const getKeyRules = (content:any) => {
+const getKeyRules = (content: any) => {
   return [
     {
       validator: () => {
@@ -148,13 +163,13 @@ const emit = defineEmits(["change"])
 const updateData = () => {
   emit("change", dataSource.value)
 }
-const showDelBtn = (node :any) => {
+const showDelBtn = (node: any) => {
   return node.level > 1 || (node.level == 1 && node.parent.childNodes.length > 1)
 }
-const shouldShowSubItems = (data :any) => {
+const shouldShowSubItems = (data: any) => {
   return [TemplateDataType.OBJECT, TemplateDataType.ARRAY].includes(data.dataType)
 }
-const handleDataTypeChange = (node:any, data:any) => {
+const handleDataTypeChange = (node: any, data: any) => {
   if (shouldShowSubItems(data)) {
     if (!data.children || data.children.length == 0) {
       addChildNode(node, data)
@@ -192,26 +207,13 @@ const addChildNode = (node: any, data: Tree) => {
     })
     return
   }
-  // const newChild = {
-  //   id: id++,
-  //   name: "111",
-  //   description: "123",
-  //   key: "a123",
-  //   children: [],
-  //   validator: {
-  //     min: 0,
-  //     max: 10,
-  //     maxLength: 10,
-  //     required: false,
-  //     pattern: "111"
-  //   }
-  // }
+
   const newChild = {
     id: id++,
     name: "",
     description: "",
     key: "",
-    dataType: "Boolean",
+    dataType: "BOOLEAN",
     defaultValue: false,
     children: [],
     validator: {
@@ -237,9 +239,22 @@ const remove = (node: Node, data: Tree) => {
   dataSource.value = [...dataSource.value]
 }
 
-const removeChildren = (node:any, data:any) => {
+const removeChildren = (node: any, data: any) => {
   data.children = []
   dataSource.value = [...dataSource.value]
+}
+
+const showAddNextBtn = (node, child) => {
+  return child.dataType == "OBJECT"
+}
+
+const showKey = (node, child) => {
+  const parentType = node?.parent?.data.dataType || null
+  console.log(parentType, child.dataType)
+  return (!!parentType && ["ARRAY", "OBJECT"].includes(child.dataType)) || parentType == "OBJECT"
+}
+const showDefaultValue = (parent, child) => {
+  return !["ARRAY", "OBJECT"].includes(child.dataType)
 }
 </script>
 <style lang="scss">

@@ -3,8 +3,8 @@
     <el-card>
       <el-card-header style="padding: 5px">
         <div class="card-header">
-          <span class="title"> FeatureKey: {{ type }}</span>
-          <el-button size="mini" style="float: right" @click="router.push({ path: '/feature-flag' })">返回 </el-button>
+          <span class="title"> 名称: {{ featureName }} ---key : {{type}}</span>
+          <el-button size="mini" style="float: right" @click="router.push({ path: '/feature/list' })">返回 </el-button>
         </div>
       </el-card-header>
       <el-divider />
@@ -110,8 +110,10 @@ const featureFlag = ref()
 const featureFlags = new FeatureFlags()
 
 const type = ref()
+const featureName = ref("")
 onBeforeMount(async () => {
   type.value = route.query.featureKey
+  featureName.value = route.query.featureName
   const flag = await featureFlags.fetch(type.value)
   featureFlag.value = flag
 })

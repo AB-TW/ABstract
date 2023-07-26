@@ -69,7 +69,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "featureConigList",
         meta: {
           title: "Config列表",
-          keepAlive: true
+          hidden: true
         }
       },
       {
@@ -78,7 +78,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "featureConfigEdit",
         meta: {
           title: "Config编辑",
-          keepAlive: true
+          hidden: true
         }
       }
     ]
