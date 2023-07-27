@@ -72,7 +72,7 @@
             </el-form>
           </el-form-item>
           <div class="operation-container">
-            <div class="left">{{ data.children.length > 0 ? "| ----------" : "" }}</div>
+            <div class="left">{{ data.children.length > 0 ? "├─" : "" }}</div>
             <div class="right" v-if="showAddNextBtn(node, data)">
               <el-button @click="addChildNode(node, data)" type="primary" icon="plus">
                 新增节点(层级:{{ node.level }})

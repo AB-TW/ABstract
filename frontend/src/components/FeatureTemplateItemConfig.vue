@@ -13,7 +13,7 @@
         <div class="custom-tree-node">
           <el-form-item :label="name" :prop="name" label-width="auto">
             <CommonConfig
-              :default-value="data.defaultValue"
+              :default-value="getDataValue(data)"
               :max-length="data?.validator?.maxLength || Number.MAX_SAFE_INTEGER"
               :max-value="data?.validator?.max || Number.MAX_SAFE_INTEGER"
               :min-value="data?.validator?.min || 0"
@@ -50,6 +50,7 @@ import type Node from "element-plus/es/components/tree/src/model/node"
 import { ElNotification } from "element-plus"
 import CommonConfig from "@/components/CommonConfig.vue"
 import _ from "lodash"
+import { getValue } from "@/utils"
 const props = defineProps({
   index: {
     type: Number,
@@ -68,7 +69,9 @@ const props = defineProps({
     required: false
   }
 })
-
+const getDataValue = (value) => {
+  return getValue(value)
+}
 const dataSource = ref(props.dataSource)
 const emit = defineEmits(["change"])
 // 这个不起作用，用于查看数据是否正确的发送消息
@@ -101,15 +104,11 @@ const addChildNode = (node: any, data: Tree) => {
 }
 
 const remove = (node: Node, data: Tree) => {
+  debugger
   const parent = node.parent
   const children: Tree[] = parent.data.children || parent.data
-  const index = children.findIndex((d) => d.id === data.id)
+  const index = children.findIndex((d) => d.id === data.$treeNodeId)
   children.splice(index, 1)
-  dataSource.value = [...dataSource.value]
-}
-
-const removeChildren = (node: any, data: any) => {
-  data.children = []
   dataSource.value = [...dataSource.value]
 }
 </script>

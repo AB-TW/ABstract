@@ -3,7 +3,7 @@
     <el-card>
       <el-card-header style="padding: 5px">
         <div class="card-header">
-          <span class="title"> 名称: {{ featureName }} ---key : {{type}}</span>
+          <span class="title"> 名称: {{ featureName }} ---key : {{ featureKey }}</span>
           <el-button size="mini" style="float: right" @click="router.push({ path: '/feature/list' })">返回 </el-button>
         </div>
       </el-card-header>
@@ -27,7 +27,7 @@
               path: '/feature/config/edit',
               query: {
                 type: 'add',
-                featureKey: type,
+                featureKey: featureKey,
                 featureFlag: encodeURI(JSON.stringify(featureFlag))
               }
             })
@@ -40,27 +40,26 @@
       </el-button>
       <el-table :data="tableData" border style="width: 100%; margin-top: 50px">
         <el-table-column label="id" prop="id" width="320" />
-        <el-table-column prop="type" label="Feature Key" width="180" />
+        <el-table-column prop="featureKey" label="Feature Key" width="180" />
         <el-table-column prop="title" label="配置标题" width="180" />
         <el-table-column prop="status" label="状态" width="180" />
         <el-table-column label="操作">
           <template #default="scope">
             <el-button
-              v-if="scope.row?.staticStatus !== 'PUBLISHED'"
+              v-if="scope.row?.status !== 'RUNNING'"
               type="warning"
               size="small"
               @click="publish(scope.row.id)"
               >发布
             </el-button>
             <el-button
-              v-if="scope.row?.staticStatus === 'PUBLISHED'"
+              v-if="scope.row?.status === 'RUNNING'"
               type="warning"
               size="small"
               @click="disable(scope.row.id)"
               >撤销
             </el-button>
             <el-button type="danger" size="small" @click="deleteData(scope.row.id)">删除 </el-button>
-
             <el-button
               size="small"
               @click="
@@ -68,7 +67,7 @@
                   router.push({
                     path: '/feature/config/edit',
                     query: {
-                      featureKey: type,
+                      featureKey: featureKey,
                       type: 'edit',
                       id: scope.row.id,
                       featureFlag: encodeURI(JSON.stringify(featureFlag))
@@ -109,12 +108,12 @@ const route = useRoute()
 const featureFlag = ref()
 const featureFlags = new FeatureFlags()
 
-const type = ref()
+const featureKey = ref()
 const featureName = ref("")
 onBeforeMount(async () => {
-  type.value = route.query.featureKey
-  featureName.value = route.query.featureName
-  const flag = await featureFlags.fetch(type.value)
+  featureKey.value = route.query.featureKey
+  featureName.value = <string>route.query.featureName
+  const flag = await featureFlags.fetch(featureKey.value)
   featureFlag.value = flag
 })
 
@@ -133,7 +132,7 @@ const tableData = ref([] as FeatureConfig[])
 
 const deleteData = (id: string) => {
   featureConfigs
-    .delete(id)
+    .delete(featureKey.value, id)
     .then(() => {
       ElMessage.success("删除成功")
       searchData()
@@ -143,10 +142,9 @@ const deleteData = (id: string) => {
       ElMessage.error("删除失败，请重试")
     })
 }
-
 const searchData = () => {
   featureConfigs
-    .fetchAll(searchForm.key, searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, type.value)
+    .fetchAll(searchForm.key, searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, featureKey.value)
     .then((res) => {
       tableData.value = res.content
       total.value = res.total
@@ -158,9 +156,9 @@ const searchData = () => {
     })
 }
 
-const publish = (featureKey: string) => {
+const publish = (id: string) => {
   featureConfigs
-    .publish(featureKey)
+    .publish(featureKey.value, id)
     .then(() => {
       ElMessage.success("发布成功")
       searchData()
@@ -171,9 +169,9 @@ const publish = (featureKey: string) => {
     })
 }
 
-const disable = (featureKey: string) => {
+const disable = (id: string) => {
   featureConfigs
-    .disable(featureKey)
+    .disable(featureKey.value, id)
     .then(() => {
       ElMessage.success("操作成功")
       searchData()
