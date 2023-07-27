@@ -23,7 +23,7 @@
         </el-form-item>
         <el-form-item label="生效时间" prop="timeRange">
           <el-date-picker
-            v-model="featureFlag.timeRange"
+            v-model="timeRange"
             type="datetimerange"
             range-separator="To"
             @calendar-change="calendarChange"
@@ -89,42 +89,58 @@ const originalFeatureConfig = ref({} as FeatureConfig)
 const featureKey = ref("")
 const id = ref("")
 const saData = ref([] as any[])
+const timeRange = ref([])
 let trackingDataIndex = 0
 onBeforeMount(async () => {
   title.value = (route.query.type == "edit" ? "编辑" : "新增") + "Feature Config"
   formType.value = route.query.type == "edit" ? "edit" : "add"
   featureKey.value = "" + route.query.featureKey
   // featureKey 是点击feature 模块跳转过来的
-  if (route.query.featureKey) {
-    const res = await featureFlags.fetch(route.query.featureKey.toString())
-    featureFlag.value = res
-    featureFlag.value.dataSource = [transTempToTreeDataSource(featureFlag.value.template)] as Array<FeatureFlagTemplate>
-    debugger
-  } else {
-    featureFlag.value = {
-      status: "PUBLISHED",
-      template: {
-        dataType: TemplateDataType.BOOLEAN,
-        defaultValue: false,
-        items: [] as FeatureFlagTemplate[]
-      },
-      dataSource: [
-        transTempToTreeDataSource({
+  if (formType.value == "add") {
+    if (route.query.featureKey) {
+      const res = await featureFlags.fetch(route.query.featureKey.toString())
+      featureFlag.value = res
+      featureFlag.value.dataSource = [
+        transTempToTreeDataSource(featureFlag.value.template)
+      ] as Array<FeatureFlagTemplate>
+    } else {
+      featureFlag.value = {
+        status: "PUBLISHED",
+        template: {
           dataType: TemplateDataType.BOOLEAN,
           defaultValue: false,
           items: [] as FeatureFlagTemplate[]
-        })
-      ]
-    } as FeatureFlag
+        },
+        dataSource: [
+          transTempToTreeDataSource({
+            dataType: TemplateDataType.BOOLEAN,
+            defaultValue: false,
+            items: [] as FeatureFlagTemplate[]
+          })
+        ]
+      } as FeatureFlag
+    }
   }
-  featureConfig.value = {
-    timeRange: {
-      startDate: "",
-      endDate: ""
-    },
-    trackingData: [],
-    data: getDefaultValue(featureFlag.value)
-  } as FeatureConfig
+
+  if (route.query.id) {
+    id.value = route.query.id
+    featureConfig.value = await featureConfigs.fetchById(featureKey.value, route.query.id)
+    timeRange.value[0] = new Date(featureConfig.value.startTime)
+    timeRange.value[1] = new Date(featureConfig.value.endTime)
+    if (featureConfig.value.templateData) {
+      featureFlag.value.dataSource = JSON.parse(featureConfig.value.templateData)
+      console.log("###", featureFlag.value.dataSource)
+    }
+  } else {
+    featureConfig.value = {
+      timeRange: {
+        startDate: "",
+        endDate: ""
+      },
+      trackingData: [],
+      data: getDefaultValue(featureFlag.value)
+    } as FeatureConfig
+  }
 
   saData.value = featureConfig.value.saData
     ? Object.keys(featureConfig.value.saData).map((key) => {
@@ -147,9 +163,10 @@ const form = ref<ElForm>(null)
 const deleteTrackingData = (index: number) => {
   saData.value.splice(index, 1)
 }
+
 const calendarChange = (values) => {
-  featureConfig.value.timeRange.startDate = values[0]
-  featureConfig.value.timeRange.endDate = values[1]
+  featureConfig.value.startTime = values[0]
+  featureConfig.value.endTime = values[1]
 }
 const addTrackingData = () => {
   saData.value.push({
@@ -160,7 +177,6 @@ const addTrackingData = () => {
 }
 
 const submitForm = async () => {
-  debugger
   if (!featureKey.value) {
     ElMessage.error("featureKey 不能为空！")
     return
@@ -168,21 +184,21 @@ const submitForm = async () => {
   form?.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        // const copyJsonObj = _.cloneDeep(featureFlag.value)
-        // const tempResult = translateDataToTemplateItems(copyJsonObj)
-        // replaceChildrenWithItems(tempResult.template)
-        // console.log(JSON.stringify(tempResult))
+        featureConfig.value.templateData = JSON.stringify(featureFlag.value.dataSource)
         featureConfig.value.data = convertConfigObject(featureFlag.value.dataSource[0])
-        featureConfig.value.type = featureKey.value
+        featureConfig.value.featureKey = featureKey.value
         featureConfig.value.status = StaticStatus.DRAFT
         featureConfig.value.saData = saData.value.reduce((acc, cur) => {
           acc[cur.key] = cur.value
           return acc
         }, {} as any)
         if (formType.value.toLowerCase() == "add") {
-          await featureConfigs.create(featureKey.value, featureConfig.value)
+          const response = await featureConfigs.create(featureKey.value, featureConfig.value)
+          console.log("response = ", response)
+          // const ret = await featureFlags.updateConfig(featureKey.value, response.id, response)
+          // console.log(ret)
         } else {
-          await featureConfigs.update(id.value, featureConfig.value)
+          await featureConfigs.update(featureKey.value, id.value, featureConfig.value)
         }
         ElMessage.success("操作成功！")
         setTimeout(() => {

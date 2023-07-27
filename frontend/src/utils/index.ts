@@ -82,7 +82,6 @@ export const translateDataToTemplateItems = (value) => {
   return value
 }
 export function getValue(info) {
-  debugger
   if (info.dataType == "BOOLEAN") {
     if (_.hasIn(info, "value")) {
       return info.value

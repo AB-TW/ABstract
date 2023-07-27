@@ -2,7 +2,7 @@ import { PageResponse } from "./FeatureFlags"
 import http from "../utils/http/http"
 
 export class FeatureConfigs {
-  constructor(private readonly baseUrl: string = "") {}
+  constructor(private readonly baseUrl: string = "/features") {}
 
   private getUrl(path: string) {
     return this.baseUrl + path
@@ -10,38 +10,38 @@ export class FeatureConfigs {
 
   fetchAll(title: string, page: number, pageSize: number, featureKey?: string): Promise<PageResponse<FeatureConfig>> {
     return http
-      .get(this.getUrl(`/features/${featureKey}/configs`), {
+      .get(this.getUrl(`/${featureKey}/configs`), {
         title,
         page,
         pageSize,
-        featureKey,
-        status: StaticStatus.DRAFT
+        featureKey
+        // status: StaticStatus.DRAFT
       })
       .then((res: any) => res?.data as PageResponse<FeatureConfig>)
   }
 
-  fetchById(id: string): Promise<FeatureConfig> {
-    return http.get(this.getUrl(`/configurations/${id}`), {}).then((res: any) => res?.data as FeatureConfig)
+  fetchById(featureKey: string, id: string): Promise<FeatureConfig> {
+    return http.get(this.getUrl(`/${featureKey}/configs/${id}`), {}).then((res: any) => res?.data as FeatureConfig)
   }
 
   create(featureKey: string, config: FeatureConfig): Promise<FeatureConfig> {
-    return http.post(this.getUrl(`/features/${featureKey}/configs`), config).then((res: any) => res?.data as FeatureConfig)
+    return http.post(this.getUrl(`/${featureKey}/configs`), config).then((res: any) => res?.data as FeatureConfig)
   }
 
-  update(id: string, config: FeatureConfig): Promise<FeatureConfig> {
-    return http.put(this.getUrl(`/configurations/${id}`), config).then()
+  update(featureKey: string, id: string, config: FeatureConfig): Promise<FeatureConfig> {
+    return http.put(this.getUrl(`/${featureKey}/configs/${id}`), config).then()
   }
 
-  delete(id: string): Promise<void> {
-    return http.del(this.getUrl(`/configurations/${id}`), {}).then()
+  delete(featureKey: string, id: string): Promise<void> {
+    return http.del(this.getUrl(`/${featureKey}/configs/${id}`), {}).then()
   }
 
-  publish(id: string): Promise<void> {
-    return http.put(this.getUrl(`/configurations/${id}/publish`), {}).then()
+  publish(featureKey: string, id: string): Promise<void> {
+    return http.put(this.getUrl(`/${featureKey}/configs/${id}/publish`), {}).then()
   }
 
-  disable(id: string): Promise<void> {
-    return http.put(this.getUrl(`/configurations/${id}/disable`), {}).then()
+  disable(featureKey: string, id: string): Promise<void> {
+    return http.put(this.getUrl(`/${featureKey}/configs/${id}/disable`), {}).then()
   }
 }
 
@@ -51,13 +51,16 @@ export interface FeatureConfig {
   title?: string
   description?: string
   key?: string
+  featureKey?: string
   data: any
   saData?: any
   staticStatus?: StaticStatus
   status?: string
-  timeRange?: TimeRange
+  startTime?: string
+  endTime?: string
   displayRule?: DisplayRule
   priority?: number
+  templateData?: any
   customerCriteriaCondition?: CustomerCriteriaCondition
 }
 
