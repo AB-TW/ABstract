@@ -53,6 +53,7 @@ public class FeatureConfigDb {
         private String description;
         private String stringData;
         private Object objData;
+        private String templateData;
         private List<?> arrayData;
         private Map<String, String> saData;
         private FeatureConfig.Status status;
@@ -111,6 +112,7 @@ public class FeatureConfigDb {
                     .updatedAt(Optional.ofNullable(description.updatedAt()).orElse(LocalDateTime.now()))
                     .createdAt(Optional.ofNullable(description.createdAt()).orElse(LocalDateTime.now()))
                     .saData(description.saData())
+                    .templateData(description.templateData())
                     .priority(description.priority())
                     .status(description.status())
                     .description(description.description())
@@ -134,6 +136,7 @@ public class FeatureConfigDb {
                     .updatedAt(description.updatedAt)
                     .createdAt(description.createdAt)
                     .saData(description.saData)
+                    .templateData(description.templateData)
                     .priority(description.priority)
                     .status(description.status)
                     .description(description.description)

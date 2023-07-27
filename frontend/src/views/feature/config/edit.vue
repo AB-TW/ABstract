@@ -71,6 +71,7 @@ import {
   TemplateDataType
 } from "../../../domain/FeatureFlags"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
+// import FeatureTemplateConfig from "@/components/FeatureFlagTemplateItemNew.vue"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
 import { convertConfigObject, transTempToTreeDataSource } from "@/utils"
 import { StaticStatus } from "@/constants/common"
@@ -185,7 +186,13 @@ const submitForm = async () => {
     if (valid) {
       try {
         featureConfig.value.templateData = JSON.stringify(featureFlag.value.dataSource)
-        featureConfig.value.data = convertConfigObject(featureFlag.value.dataSource[0])
+        const tempRet = convertConfigObject(featureFlag.value.dataSource[0])
+        if (_.isObject(tempRet)) {
+          featureConfig.value.data = JSON.stringify(tempRet)
+        } else {
+          featureConfig.value.data = tempRet
+        }
+        debugger
         featureConfig.value.featureKey = featureKey.value
         featureConfig.value.status = StaticStatus.DRAFT
         featureConfig.value.saData = saData.value.reduce((acc, cur) => {
