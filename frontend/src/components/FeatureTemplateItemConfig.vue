@@ -26,16 +26,16 @@
         <div class="operation-container">
           <div class="right">
             <el-button @click="addChildNode(node, data)" type="primary" icon="plus" v-if="showAddNextBtn(node, data)">
-              新增
+              新增 {{ node.dataType }}--{{ node.children }}-{{ data.dataType }}
             </el-button>
             <el-button
               style="margin-left: 8px"
               @click="remove(node, data)"
               type="danger"
               icon="delete"
-              v-if="showDelBtn(node)"
+              v-if="showDelBtn(node, data)"
             >
-              删除
+              删除{{ data.id }}
             </el-button>
           </div>
         </div>
@@ -69,18 +69,30 @@ const props = defineProps({
     required: false
   }
 })
+const count = ref(1)
 const getDataValue = (value) => {
   return getValue(value)
 }
 const dataSource = ref(props.dataSource)
 const emit = defineEmits(["change"])
+
 // 这个不起作用，用于查看数据是否正确的发送消息
-const showDelBtn = (node: any) => {
-  return node.level > 1 || (node.level == 1 && node.parent.childNodes.length > 1)
+const showDelBtn = (node: any, data) => {
+  const parentType = node?.parent?.data.dataType || null
+  if (parentType != "OBJECT" && ["NUMBER", "BOOLEAN", "STRING"].includes(data.dataType)) {
+    return true
+  } else if (
+    parentType &&
+    data.dataType == "ARRAY" &&
+    data.children.every((item) => ["NUMBER", "BOOLEAN", "STRING"].includes(item.dataType))
+  ) {
+    return true
+  }
+  return false
 }
 const showAddNextBtn = (node, child) => {
-  const parentType = node?.parent?.data.dataType || null
-  return !parentType && ["ARRAY", "OBJECT"].includes(child.dataType)
+  // const parentType = node?.parent?.data.dataType || null
+  return ["ARRAY"].includes(child.dataType)
 }
 interface Tree {
   id: number
@@ -90,7 +102,7 @@ interface Tree {
 const id = 1000
 
 const addChildNode = (node: any, data: Tree) => {
-  debugger
+  count.value++
   if (node.level >= 5) {
     ElNotification({
       title: "提示",
@@ -99,15 +111,15 @@ const addChildNode = (node: any, data: Tree) => {
     return
   }
   const tempCloneObj = _.cloneDeep(node.data.children[0])
+  tempCloneObj.id = count.value
   data.children.push(tempCloneObj)
   dataSource.value = [...dataSource.value]
 }
 
 const remove = (node: Node, data: Tree) => {
-  debugger
   const parent = node.parent
   const children: Tree[] = parent.data.children || parent.data
-  const index = children.findIndex((d) => d.id === data.$treeNodeId)
+  const index = children.findIndex((d) => d.id === data.id)
   children.splice(index, 1)
   dataSource.value = [...dataSource.value]
 }

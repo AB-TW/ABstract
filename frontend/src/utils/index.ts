@@ -25,7 +25,7 @@ export const setCssVariableValue = (cssVariableName: string, cssVariableValue: s
     console.error(error)
   }
 }
-
+let localId = 0
 export const transTempToTreeDataSource = (temp: any) => {
   const tree = {
     name: temp.name || "",
@@ -40,6 +40,7 @@ export const transTempToTreeDataSource = (temp: any) => {
       required: temp?.validator?.required || false,
       pattern: temp?.validator?.pattern || ""
     },
+    id: localId++,
     children: []
   }
 
@@ -94,25 +95,19 @@ export function getValue(info) {
 }
 // FeatureConfg data数据处理函数
 export function convertConfigObject(data) {
-  const result = []
-  if (data.dataType == "ARRAY") {
-    data.children.forEach((item) => {
-      if (item.dataType == "OBJECT") {
-        const tempObj = {}
-        item.children.forEach((child) => {
-          if (child.dataType == "ARRAY") {
-            tempObj[child.key] = convertConfigObject(child)
-          } else {
-            tempObj[child.key] = getValue(child)
-          }
-        })
-        result.push(tempObj)
-      } else {
-        result.push(getValue(item))
-      }
-    })
-  } else if (["NUMBER", "STRING", "BOOLEAN"].includes(data.dataType)) {
+  if (data.dataType === "OBJECT") {
+    const obj = {}
+    for (const child of data.children) {
+      obj[child.key] = convertConfigObject(child)
+    }
+    return obj
+  } else if (data.dataType === "ARRAY") {
+    const arr = []
+    for (const child of data.children) {
+      arr.push(convertConfigObject(child))
+    }
+    return arr
+  } else {
     return getValue(data)
   }
-  return result
 }
