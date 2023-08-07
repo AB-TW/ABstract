@@ -1,5 +1,6 @@
 import dayjs from "dayjs"
 import _ from "lodash"
+import lodash from "lodash"
 /** 格式化时间 */
 export const formatDateTime = (time: string | number | Date) => {
   return time ? dayjs(new Date(time)).format("YYYY-MM-DD HH:mm:ss") : "N/A"
@@ -110,4 +111,63 @@ export function convertConfigObject(data) {
   } else {
     return getValue(data)
   }
+}
+
+function getModelByKey(key, items, defaultValue = null) {
+  if (!!items && items.length > 0) {
+    return lodash.find(items, (item) => {
+      return item.key == key
+    })
+  } else {
+    return defaultValue || {}
+  }
+}
+
+//数据转换为template对象
+export function mapDataToTemplate(name, obj, model) {
+  if (lodash.isObject(obj) && !lodash.isArray(obj)) {
+    return {
+      name,
+      dataType: "OBJECT",
+      ...lodash.omit(model, ["items"]),
+      children: Object.entries(obj).map(([key, value]) => {
+        return mapDataToTemplate(key, value, getModelByKey(key, model?.items || []))
+      })
+    }
+  }
+  if (typeof obj === "string") {
+    return {
+      name,
+      dataType: "STRING",
+      ...model,
+      value: obj
+    }
+  }
+  if (typeof obj === "number") {
+    return {
+      name,
+      dataType: "NUMBER",
+      ...model,
+      value: obj
+    }
+  } else if (typeof obj === "boolean") {
+    return {
+      name,
+      dataType: "BOOLEAN",
+      ...model,
+      value: obj
+    }
+  } else if (lodash.isArray(obj)) {
+    let extentObj = {}
+    if (model.dataType == "ARRAY") {
+      extentObj = lodash.omit(model, ["items"])
+    }
+    return {
+      name,
+      ...extentObj,
+      dataType: "ARRAY",
+      children: obj.map((it, index) => mapDataToTemplate("", it, model.items[index] || model.items[0]))
+    }
+  }
+  throw new Error(name + obj)
 }
