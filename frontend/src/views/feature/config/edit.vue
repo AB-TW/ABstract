@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref } from "vue"
+import { computed, onBeforeMount, ref, nextTick } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage } from "element-plus"
 import { FeatureConfig, FeatureConfigs } from "../../../domain/FeatureConfigs"
@@ -73,7 +73,7 @@ import {
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
 // import FeatureTemplateConfig from "@/components/FeatureFlagTemplateItemNew.vue"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
-import { convertConfigObject, transTempToTreeDataSource } from "@/utils"
+import { convertConfigObject, mapDataToTemplate, transTempToTreeDataSource } from "@/utils"
 import { StaticStatus } from "@/constants/common"
 import _ from "lodash"
 
@@ -97,30 +97,28 @@ onBeforeMount(async () => {
   formType.value = route.query.type == "edit" ? "edit" : "add"
   featureKey.value = "" + route.query.featureKey
   // featureKey 是点击feature 模块跳转过来的
+  if (route.query.featureKey) {
+    const res = await featureFlags.fetch(route.query.featureKey.toString())
+    featureFlag.value = res
+    featureFlag.value.dataSource = [transTempToTreeDataSource(featureFlag.value.template)] as Array<FeatureFlagTemplate>
+    debugger
+  }
   if (formType.value == "add") {
-    if (route.query.featureKey) {
-      const res = await featureFlags.fetch(route.query.featureKey.toString())
-      featureFlag.value = res
-      featureFlag.value.dataSource = [
-        transTempToTreeDataSource(featureFlag.value.template)
-      ] as Array<FeatureFlagTemplate>
-    } else {
-      featureFlag.value = {
-        status: "PUBLISHED",
-        template: {
+    featureFlag.value = {
+      status: "PUBLISHED",
+      template: {
+        dataType: TemplateDataType.BOOLEAN,
+        defaultValue: false,
+        items: [] as FeatureFlagTemplate[]
+      },
+      dataSource: [
+        transTempToTreeDataSource({
           dataType: TemplateDataType.BOOLEAN,
           defaultValue: false,
           items: [] as FeatureFlagTemplate[]
-        },
-        dataSource: [
-          transTempToTreeDataSource({
-            dataType: TemplateDataType.BOOLEAN,
-            defaultValue: false,
-            items: [] as FeatureFlagTemplate[]
-          })
-        ]
-      } as FeatureFlag
-    }
+        })
+      ]
+    } as FeatureFlag
   }
 
   if (route.query.id) {
@@ -128,9 +126,10 @@ onBeforeMount(async () => {
     featureConfig.value = await featureConfigs.fetchById(featureKey.value, route.query.id)
     timeRange.value[0] = new Date(featureConfig.value.startTime)
     timeRange.value[1] = new Date(featureConfig.value.endTime)
-    if (featureConfig.value.templateData) {
-      featureFlag.value.dataSource = JSON.parse(featureConfig.value.templateData)
-      console.log("###", featureFlag.value.dataSource)
+    if (featureConfig.value.data) {
+      const templateInfo = mapDataToTemplate("", JSON.parse(featureConfig.value.data), featureFlag.value.template)
+      featureFlag.value.dataSource = [templateInfo]
+      console.log("#########", featureFlag.value.dataSource)
     }
   } else {
     featureConfig.value = {
@@ -153,12 +152,17 @@ onBeforeMount(async () => {
       })
     : []
 })
-
+// 防止只有一个Boolean 值为false 或者NUMBER，并且数字为 0
+const isSimpleBooleanOrNumber = () => {
+  return ["NUMBER", "BOOLEAN"].includes(_.get(featureFlag.value, "template.dataType", null))
+}
+nextTick(() => {
+  form.value.clearValidate()
+})
 const formRules = {
   title: [{ required: true, message: "Please enter title", trigger: "submit" }],
-  data: [{ required: true, message: "Please enter data", trigger: "submit" }]
+  data: [{ required: isSimpleBooleanOrNumber(), message: "Please enter data", trigger: "submit" }]
 }
-
 const form = ref<ElForm>(null)
 
 const deleteTrackingData = (index: number) => {
@@ -185,20 +189,21 @@ const submitForm = async () => {
   form?.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        featureConfig.value.templateData = JSON.stringify(featureFlag.value.dataSource)
+        // featureConfig.value.templateData = JSON.stringify(featureFlag.value.dataSource)
         const tempRet = convertConfigObject(featureFlag.value.dataSource[0])
+        debugger
         if (_.isObject(tempRet)) {
           featureConfig.value.data = JSON.stringify(tempRet)
         } else {
           featureConfig.value.data = tempRet
         }
-        debugger
         featureConfig.value.featureKey = featureKey.value
         featureConfig.value.status = StaticStatus.DRAFT
         featureConfig.value.saData = saData.value.reduce((acc, cur) => {
           acc[cur.key] = cur.value
           return acc
         }, {} as any)
+        debugger
         if (formType.value.toLowerCase() == "add") {
           const response = await featureConfigs.create(featureKey.value, featureConfig.value)
           console.log("response = ", response)
