@@ -28,11 +28,11 @@ const props = defineProps({
     required: false
   },
   defaultValue: {
-    type: Object,
+    type: [String , Number , Boolean],
     required: true
   },
   maxLength: {
-    type: String,
+    type: Number,
     required: false
   },
   maxValue: {

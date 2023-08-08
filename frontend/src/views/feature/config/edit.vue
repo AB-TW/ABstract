@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span class="title">{{ title }}</span>
-          <el-button size="mini" style="float: right" @click="router.go(-1)">返回</el-button>
+          <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
         </div>
       </template>
       <el-form :model="featureConfig" :rules="formRules" ref="form" label-width="140px">
@@ -18,7 +18,7 @@
           <FeatureTemplateConfig
             :key="featureFlag.dataSource"
             :isViewModel="true"
-            :dataSource="featureFlag.dataSource"
+            :dataSource="featureFlag?.dataSource || []"
           />
         </el-form-item>
         <el-form-item label="生效时间" prop="timeRange">
@@ -114,7 +114,14 @@ onBeforeMount(async () => {
     }
 
     if (!_.isNil(featureConfig.value.data)) {
-      const templateInfo = mapDataToTemplate("", featureConfig.value.data, featureFlag.value.template)
+      let templateInfo;
+      // 如果返回的数据是一个对象：
+      debugger
+      if (_.get(featureFlag.value,"template.dataType",null) == "OBJECT") {
+        templateInfo = mapDataToTemplate("", JSON.parse(featureConfig.value.data), featureFlag.value.template)
+      } else {
+        templateInfo = mapDataToTemplate("", featureConfig.value.data, featureFlag.value.template)
+      }
       featureFlag.value.dataSource = [templateInfo]
       debugger
       console.log("#########", featureFlag.value.dataSource)

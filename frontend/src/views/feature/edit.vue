@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span class="title">{{ title }}</span>
-          <el-button size="mini" style="float: right" @click="router.go(-1)">返回</el-button>
+          <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
         </div>
       </template>
       <el-form :model="featureFlag" :rules="formRules" ref="form" label-width="140px" :disabled="isViewModel">

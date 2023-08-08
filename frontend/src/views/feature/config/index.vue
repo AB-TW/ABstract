@@ -4,7 +4,7 @@
       <el-card-header style="padding: 5px">
         <div class="card-header">
           <span class="title"> 名称: {{ featureName }} ---key : {{ featureKey }}</span>
-          <el-button size="mini" style="float: right" @click="router.push({ path: '/feature/list' })">返回 </el-button>
+          <el-button size="small" style="float: right" @click="router.push({ path: '/feature/list' })">返回 </el-button>
         </div>
       </el-card-header>
       <el-divider />

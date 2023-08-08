@@ -7,11 +7,11 @@
       default-expand-all
       :expand-on-click-node="false"
       :highlight-current="true"
-      indent="50"
+      :indent="50"
     >
       <template #default="{ node, data }">
         <div class="custom-tree-node">
-          <el-form-item :label="name" :prop="name" label-width="auto">
+          <el-form-item  label-width="auto">
             <CommonConfig
               :default-value="getDataValue(data)"
               :max-length="data?.validator?.maxLength || Number.MAX_SAFE_INTEGER"
@@ -26,7 +26,7 @@
         <div class="operation-container">
           <div class="right">
             <el-button @click="addChildNode(node, data)" type="primary" icon="plus" v-if="showAddNextBtn(node, data)">
-              新增 {{ node.dataType }}--{{ node.children }}-{{ data.dataType }}
+              新增
             </el-button>
             <el-button
               style="margin-left: 8px"
@@ -35,7 +35,7 @@
               icon="delete"
               v-if="showDelBtn(node, data)"
             >
-              删除{{ data.id }}
+              删除
             </el-button>
           </div>
         </div>
@@ -54,7 +54,7 @@ import { getValue } from "@/utils"
 const props = defineProps({
   index: {
     type: Number,
-    required: true
+    required: false
   },
   dataSource: {
     type: Array,
