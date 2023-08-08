@@ -114,7 +114,7 @@ onBeforeMount(async () => {
     }
 
     if (!_.isNil(featureConfig.value.data)) {
-      const templateInfo = mapDataToTemplate("", JSON.parse(featureConfig.value.data), featureFlag.value.template)
+      const templateInfo = mapDataToTemplate("", featureConfig.value.data, featureFlag.value.template)
       featureFlag.value.dataSource = [templateInfo]
       debugger
       console.log("#########", featureFlag.value.dataSource)

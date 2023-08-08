@@ -48,7 +48,13 @@ const emit = defineEmits(["update:modelValue"])
 // 绑定控件的值
 const value = ref(props.defaultValue)
 const onInput = (e) => {
-  emit("update:modelValue", e)
+  let tempValue = e;
+  if (props.dataType == 'NUMBER') {
+    tempValue = Number(e);
+  } else if(props.dataType == 'BOOLEAN'){
+    tempValue = Boolean(e)
+  }
+  emit("update:modelValue", tempValue)
 }
 watch(
   () => props.defaultValue,
