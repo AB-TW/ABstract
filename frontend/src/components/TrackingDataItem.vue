@@ -1,17 +1,17 @@
 <template>
   <div class="track-container">
     <el-row :gutter="20">
-      <el-col span="2">
+      <el-col :span="10">
         <el-form-item label="Key" prop="key">
           <el-input v-model="item.key" autocomplete="off" />
         </el-form-item>
       </el-col>
-      <el-col span="2">
+      <el-col :span="10">
         <el-form-item label="Value" prop="key">
           <el-input v-model="item.value" autocomplete="off" />
         </el-form-item>
       </el-col>
-      <el-col span="4">
+      <el-col :span="4">
         <el-form-item>
           <el-button type="warning" @click="deleteItem()"
             ><el-icon> <Delete /> </el-icon
