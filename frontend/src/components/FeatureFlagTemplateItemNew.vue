@@ -7,7 +7,7 @@
       default-expand-all
       :expand-on-click-node="false"
       :highlight-current="true"
-      indent="50"
+      :indent="50"
     >
       <template #default="{ node, data }">
         <div class="custom-tree-node">
