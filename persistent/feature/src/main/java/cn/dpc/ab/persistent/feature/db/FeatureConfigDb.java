@@ -51,10 +51,7 @@ public class FeatureConfigDb {
         private String key;
         private String title;
         private String description;
-        private String stringData;
         private Object objData;
-        private String templateData;
-        private List<?> arrayData;
         private Map<String, String> saData;
         private FeatureConfig.Status status;
         private long priority;
@@ -72,14 +69,7 @@ public class FeatureConfigDb {
             if (null == data) {
                 return;
             }
-
-            if (data instanceof String) {
-                this.stringData = String.valueOf(data);
-            } else if (data instanceof Map<?, ?>) {
-                this.objData = data;
-            } else if (data instanceof List) {
-                this.arrayData = (List<?>) data;
-            }
+            this.objData = data;
         }
 
         /**
@@ -91,12 +81,7 @@ public class FeatureConfigDb {
             if (null != this.objData) {
                 return objData;
             }
-
-            if (null != this.arrayData) {
-                return arrayData;
-            }
-
-            return this.stringData;
+            return null;
         }
 
         /**
@@ -112,7 +97,6 @@ public class FeatureConfigDb {
                     .updatedAt(Optional.ofNullable(description.updatedAt()).orElse(LocalDateTime.now()))
                     .createdAt(Optional.ofNullable(description.createdAt()).orElse(LocalDateTime.now()))
                     .saData(description.saData())
-                    .templateData(description.templateData())
                     .priority(description.priority())
                     .status(description.status())
                     .description(description.description())
@@ -136,7 +120,6 @@ public class FeatureConfigDb {
                     .updatedAt(description.updatedAt)
                     .createdAt(description.createdAt)
                     .saData(description.saData)
-                    .templateData(description.templateData)
                     .priority(description.priority)
                     .status(description.status)
                     .description(description.description)

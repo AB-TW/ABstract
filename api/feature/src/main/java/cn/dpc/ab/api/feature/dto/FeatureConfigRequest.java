@@ -27,8 +27,6 @@ public class FeatureConfigRequest {
 
     private Object data;
 
-    private String templateData;
-
     private Map<String, String> saData;
 
     private FeatureConfig.Status.StaticStatus status;
@@ -54,7 +52,6 @@ public class FeatureConfigRequest {
                         .description(description)
                         .key(key)
                         .data(data)
-                        .templateData(templateData)
                         .saData(saData)
                         .status(FeatureConfig.Status.builder()
                                 .staticStatus(status)
