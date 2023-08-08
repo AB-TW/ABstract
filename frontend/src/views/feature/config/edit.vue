@@ -101,34 +101,22 @@ onBeforeMount(async () => {
     const res = await featureFlags.fetch(route.query.featureKey.toString())
     featureFlag.value = res
     featureFlag.value.dataSource = [transTempToTreeDataSource(featureFlag.value.template)] as Array<FeatureFlagTemplate>
-    debugger
-  }
-  if (formType.value == "add") {
-    featureFlag.value = {
-      status: "PUBLISHED",
-      template: {
-        dataType: TemplateDataType.BOOLEAN,
-        defaultValue: false,
-        items: [] as FeatureFlagTemplate[]
-      },
-      dataSource: [
-        transTempToTreeDataSource({
-          dataType: TemplateDataType.BOOLEAN,
-          defaultValue: false,
-          items: [] as FeatureFlagTemplate[]
-        })
-      ]
-    } as FeatureFlag
   }
 
   if (route.query.id) {
     id.value = route.query.id
     featureConfig.value = await featureConfigs.fetchById(featureKey.value, route.query.id)
-    timeRange.value[0] = new Date(featureConfig.value.startTime)
-    timeRange.value[1] = new Date(featureConfig.value.endTime)
-    if (featureConfig.value.data) {
+    if(_.isNil(featureConfig.value.startTime)) {
+      timeRange.value = [];
+    } else {
+      timeRange.value[0] = new Date(featureConfig.value.startTime)
+      timeRange.value[1] = new Date(featureConfig.value.endTime)
+    }
+
+    if (!_.isNil(featureConfig.value.data)) {
       const templateInfo = mapDataToTemplate("", JSON.parse(featureConfig.value.data), featureFlag.value.template)
       featureFlag.value.dataSource = [templateInfo]
+      debugger
       console.log("#########", featureFlag.value.dataSource)
     }
   } else {
@@ -141,6 +129,7 @@ onBeforeMount(async () => {
       data: getDefaultValue(featureFlag.value)
     } as FeatureConfig
   }
+
 
   saData.value = featureConfig.value.saData
     ? Object.keys(featureConfig.value.saData).map((key) => {
@@ -157,7 +146,9 @@ const isSimpleBooleanOrNumber = () => {
   return ["NUMBER", "BOOLEAN"].includes(_.get(featureFlag.value, "template.dataType", null))
 }
 nextTick(() => {
-  form.value.clearValidate()
+  if(!!form.value) {
+    form.value.clearValidate()
+  }
 })
 const formRules = {
   title: [{ required: true, message: "Please enter title", trigger: "submit" }],
@@ -191,12 +182,12 @@ const submitForm = async () => {
       try {
         // featureConfig.value.templateData = JSON.stringify(featureFlag.value.dataSource)
         const tempRet = convertConfigObject(featureFlag.value.dataSource[0])
-        debugger
-        if (_.isObject(tempRet)) {
-          featureConfig.value.data = JSON.stringify(tempRet)
-        } else {
+        // debugger
+        // if (_.isObject(tempRet)) {
+        //   featureConfig.value.data = JSON.stringify(tempRet)
+        // } else {
           featureConfig.value.data = tempRet
-        }
+        // }
         featureConfig.value.featureKey = featureKey.value
         featureConfig.value.status = StaticStatus.DRAFT
         featureConfig.value.saData = saData.value.reduce((acc, cur) => {
