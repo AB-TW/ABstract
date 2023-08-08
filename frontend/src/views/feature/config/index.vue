@@ -3,7 +3,7 @@
     <el-card>
       <el-card-header style="padding: 5px">
         <div class="card-header">
-          <span class="title"> 名称: {{ featureName }} ---key : {{ featureKey }}</span>
+          <span class="title"> 名称: {{ featureName }}</span>
           <el-button size="small" style="float: right" @click="router.push({ path: '/feature/list' })">返回 </el-button>
         </div>
       </el-card-header>
@@ -28,6 +28,7 @@
               query: {
                 type: 'add',
                 featureKey: featureKey,
+                featureName,
                 featureFlag: encodeURI(JSON.stringify(featureFlag))
               }
             })

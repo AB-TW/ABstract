@@ -60,7 +60,8 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "添加Feature",
         meta: {
           title: "添加Feature",
-          keepAlive: true
+          keepAlive: true,
+          hidden: true
         }
       },
       {
