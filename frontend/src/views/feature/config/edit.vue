@@ -93,7 +93,7 @@ const saData = ref([] as any[])
 const timeRange = ref([])
 let trackingDataIndex = 0
 onBeforeMount(async () => {
-  title.value = (route.query.type == "edit" ? "编辑" : "新增") + "Feature Config"
+  title.value = (route.query.type == "edit" ? "编辑" : "新增") + (route.query.featureName || "Feature Config")
   formType.value = route.query.type == "edit" ? "edit" : "add"
   featureKey.value = "" + route.query.featureKey
   // featureKey 是点击feature 模块跳转过来的
