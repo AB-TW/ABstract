@@ -72,6 +72,18 @@ export function replaceChildrenWithItems(data) {
         // 递归处理嵌套的子级对象
         replaceChildrenWithItems(data["items"])
       } else {
+        if(prop == "dataType") {
+          switch (data[prop]) {
+            case 'NUMBER':
+              data['defaultValue'] = Number(data['defaultValue'])
+              break;
+            case 'BOOLEAN':
+              data['defaultValue'] = Boolean(data['defaultValue'])
+              break;
+            default:
+              break;
+          }
+        }
         // 递归处理对象的属性
         replaceChildrenWithItems(data[prop])
       }
@@ -88,9 +100,11 @@ export function getValue(info) {
     if (_.hasIn(info, "value")) {
       return info.value
     } else {
-      return info.defaultValue
+      return Boolean(info.defaultValue)
     }
-  } else {
+  } else if(info.dataType== 'NUMBER') {
+    return Number(info.value || info.defaultValue)
+  }  else {
     return info.value || info.defaultValue
   }
 }

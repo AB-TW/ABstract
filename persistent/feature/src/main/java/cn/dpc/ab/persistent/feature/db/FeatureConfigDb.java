@@ -52,6 +52,7 @@ public class FeatureConfigDb {
         private String title;
         private String description;
         private Object objData;
+        private List<?> arrayData;
         private Map<String, String> saData;
         private FeatureConfig.Status status;
         private long priority;
@@ -69,7 +70,11 @@ public class FeatureConfigDb {
             if (null == data) {
                 return;
             }
-            this.objData = data;
+            if (data instanceof List) {
+                this.arrayData = (List<?>) data;
+            } else {
+                this.objData = data;
+            }
         }
 
         /**
@@ -78,6 +83,10 @@ public class FeatureConfigDb {
          * @return the data
          */
         public Object getData() {
+            if (null != this.arrayData) {
+                return arrayData;
+            }
+
             if (null != this.objData) {
                 return objData;
             }
