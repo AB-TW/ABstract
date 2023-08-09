@@ -3,8 +3,7 @@ package cn.dpc.ab.persistent.feature.db;
 import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import cn.dpc.ab.persistent.couchbase.ObjectAdapter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -53,9 +52,7 @@ public class FeatureConfigDb {
         private String key;
         private String title;
         private String description;
-        private Object objData;
-        private String stringData;
-        private List<?> arrayData;
+        private ObjectAdapter dataAdapter;
         private Map<String, String> saData;
         private FeatureConfig.Status status;
         private long priority;
@@ -70,23 +67,9 @@ public class FeatureConfigDb {
          * @param data the data
          */
         public void setData(Object data) {
-            if (null == data) {
-                return;
-            }
-            if (data instanceof String) {
-                this.stringData = String.valueOf(data);
-            } else if (data instanceof LinkedHashMap) {
-                try {
-                    this.stringData = new ObjectMapper().writeValueAsString(data);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            } else if (data instanceof List) {
-                this.arrayData = (List<?>) data;
-            } else {
-                this.objData = data;
-            }
+            this.dataAdapter = new ObjectAdapter(data);
         }
+
 
         /**
          * getData gets the data field.
@@ -94,13 +77,7 @@ public class FeatureConfigDb {
          * @return the data
          */
         public Object getData() {
-            if (null != this.arrayData) {
-                return arrayData;
-            }
-            if (null != this.objData) {
-                return objData;
-            }
-            return this.stringData;
+            return Optional.ofNullable(dataAdapter).map(ObjectAdapter::toObject).orElse(null);
         }
 
         /**
