@@ -6,3 +6,6 @@ build
 /lib/
 /.idea/
 /docs/
+
+# Ignore .DS_Store
+.DS_Store
