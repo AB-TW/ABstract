@@ -1,4 +1,5 @@
 import http from "../utils/http/http"
+import { FeatureConfig } from "@/domain/FeatureConfigs"
 
 export interface FeatureFlag {
   id?: string
@@ -102,5 +103,9 @@ export class FeatureFlags {
 
   disable(featureKey: string, type: string): Promise<void> {
     return http.put(this.getUrl(`/features/${featureKey}/` + type), null).then()
+  }
+
+  updateConfig(featureKey: string, configId: string, featureConfig: FeatureConfig): Promise<void> {
+    return http.put(this.getUrl(`/features/${featureKey}/configs/${configId}`), featureConfig).then()
   }
 }

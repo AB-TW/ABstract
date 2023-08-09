@@ -60,7 +60,26 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "添加Feature",
         meta: {
           title: "添加Feature",
-          keepAlive: true
+          keepAlive: true,
+          hidden: true
+        }
+      },
+      {
+        path: "/feature/config/list",
+        component: () => import("@/views/feature/config/index.vue"),
+        name: "featureConigList",
+        meta: {
+          title: "Config列表",
+          hidden: true
+        }
+      },
+      {
+        path: "/feature/config/edit",
+        component: () => import("@/views/feature/config/edit.vue"),
+        name: "featureConfigEdit",
+        meta: {
+          title: "Config编辑",
+          hidden: true
         }
       }
     ]
