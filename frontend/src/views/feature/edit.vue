@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span class="title">{{ title }}</span>
-          <el-button size="mini" style="float: right" @click="router.go(-1)">返回</el-button>
+          <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
         </div>
       </template>
       <el-form :model="featureFlag" :rules="formRules" ref="form" label-width="140px" :disabled="isViewModel">
@@ -44,7 +44,7 @@ import { ElForm, ElFormItem, ElInput, ElButton, ElMessage } from "element-plus"
 import { FeatureFlag, FeatureFlags, FeatureFlagTemplate, TemplateDataType } from "@/domain/FeatureFlags"
 import FeatureFlagTemplateItem from "../../components/FeatureFlagTemplateItemNew.vue"
 import _ from "lodash"
-import { StatusMaps, transTempToTreeDataSource } from "@/utils"
+import { replaceChildrenWithItems, StatusMaps, translateDataToTemplateItems, transTempToTreeDataSource } from "@/utils"
 
 const route = useRoute()
 const router = useRouter()
@@ -68,7 +68,7 @@ onBeforeMount(async () => {
     status: "PUBLISHED",
     template: {
       dataType: TemplateDataType.BOOLEAN,
-      defaultValue: "false",
+      defaultValue: false,
       items: [] as FeatureFlagTemplate[]
     },
     dataSource: [
@@ -105,42 +105,18 @@ const form = ref<ElForm>(null)
 const getDataSource = () => {
   console.log("featureFlag.value.dataSource =", JSON.stringify(featureFlag.value.dataSource))
 }
-const translateDataToTemplateItems = (value) => {
-  value.template = value.dataSource[0]
-  return value
-}
-
-function replaceChildrenWithItems(data) {
-  // 如果是一个数组，则递归处理每个元素
-  if (Array.isArray(data)) {
-    data.forEach((item) => replaceChildrenWithItems(item))
-    // 如果是一个对象，则处理其属性
-  } else if (typeof data === "object") {
-    for (const prop in data) {
-      if (prop === "children") {
-        data["items"] = data[prop]
-        delete data[prop]
-        // 递归处理嵌套的子级对象
-        replaceChildrenWithItems(data["items"])
-      } else {
-        // 递归处理对象的属性
-        replaceChildrenWithItems(data[prop])
-      }
-    }
-  }
-  return data
-}
 
 const submitForm = async () => {
   const copyJsonObj = _.cloneDeep(featureFlag.value)
   const tempResult = translateDataToTemplateItems(copyJsonObj)
   replaceChildrenWithItems(tempResult.template)
   console.log(JSON.stringify(tempResult))
+
   form.value.validate(async (valid: boolean) => {
-    debugger
     if (valid) {
       try {
         if (formType.value.toLowerCase() == "add") {
+          debugger
           await featureFlags.create(tempResult)
         } else {
           await featureFlags.update(tempResult)

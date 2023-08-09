@@ -3,6 +3,8 @@ package cn.dpc.ab.persistent.feature.db;
 import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -51,8 +53,8 @@ public class FeatureConfigDb {
         private String key;
         private String title;
         private String description;
-        private String stringData;
         private Object objData;
+        private String stringData;
         private List<?> arrayData;
         private Map<String, String> saData;
         private FeatureConfig.Status status;
@@ -71,13 +73,18 @@ public class FeatureConfigDb {
             if (null == data) {
                 return;
             }
-
             if (data instanceof String) {
                 this.stringData = String.valueOf(data);
-            } else if (data instanceof Map<?, ?>) {
-                this.objData = data;
+            } else if (data instanceof LinkedHashMap) {
+                try {
+                    this.stringData = new ObjectMapper().writeValueAsString(data);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
             } else if (data instanceof List) {
                 this.arrayData = (List<?>) data;
+            } else {
+                this.objData = data;
             }
         }
 
@@ -87,14 +94,12 @@ public class FeatureConfigDb {
          * @return the data
          */
         public Object getData() {
-            if (null != this.objData) {
-                return objData;
-            }
-
             if (null != this.arrayData) {
                 return arrayData;
             }
-
+            if (null != this.objData) {
+                return objData;
+            }
             return this.stringData;
         }
 
