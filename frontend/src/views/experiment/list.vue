@@ -14,21 +14,20 @@
     </el-button>
 
     <el-table :data="experiments" border style="width: 100%; margin-top: 30px">
-      <el-table-column align="center" prop="id" label="实验ID" />
       <el-table-column align="center" prop="name" label="实验名称" />
-      <el-table-column align="center" prop="description" label="实验描述" />
       <el-table-column align="center" prop="status" label="实验状态">
         <template #default="scope">
           {{ EXPERIMENT_STATUS_MAPPING[scope.row?.status] }}
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="createdUsername" label="创建人" />
       <el-table-column align="center" prop="createdAt" label="创建时间" />
       <el-table-column align="center" label="操作">
         <template #default="scope">
           <div style="display: flex; justify-content: center">
             <el-button type="success" text>查看</el-button>
-            <el-button type="primary" text>编辑</el-button>
+            <el-button type="primary" text v-if="scope.row?.status === ExperimentStatus.DRAFT">编辑</el-button>
+            <el-button type="primary" text v-if="scope.row?.status === ExperimentStatus.DRAFT">发布</el-button>
+            <el-button type="primary" text v-if="scope.row?.status === ExperimentStatus.RUNNING">暂停</el-button>
             <el-button type="danger" text :disabled="scope.row?.status === ExperimentStatus.DRAFT">删除</el-button>
           </div>
         </template>
@@ -75,6 +74,28 @@ const experiments = reactive<Experiment[]>([
     samplePercentage: 100,
     buckets: [],
     status: ExperimentStatus.PUBLISHED,
+    createdUsername: "Zhouzhou Wang(PSP)",
+    createdAt: "2023-07-23 17:26:00"
+  },
+  {
+    id: "afe2566a-5998-492b-9eea-8a5a1e5ee4ee",
+    name: "菜单UI推荐",
+    description: "此实验测试了这些两种UI对于用户下单的提升率",
+    featureKey: "feature-key",
+    samplePercentage: 100,
+    buckets: [],
+    status: ExperimentStatus.DRAFT,
+    createdUsername: "Zhouzhou Wang(PSP)",
+    createdAt: "2023-07-23 17:26:00"
+  },
+  {
+    id: "afe2566a-5998-492b-9eea-8a5a1e5ee4ee",
+    name: "运行中实验",
+    description: "运行哦",
+    featureKey: "feature-key",
+    samplePercentage: 100,
+    buckets: [],
+    status: ExperimentStatus.RUNNING,
     createdUsername: "Zhouzhou Wang(PSP)",
     createdAt: "2023-07-23 17:26:00"
   }
