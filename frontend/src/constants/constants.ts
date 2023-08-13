@@ -1,4 +1,4 @@
-import { ExperimentStatus } from "@/api/experiment/types/experiment"
+import { ExperimentStatus } from "@/model/ExperimentStatus"
 
 export const EXPERIMENT_STATUS_MAPPING = {
   [ExperimentStatus.DRAFT]: "待发布",
