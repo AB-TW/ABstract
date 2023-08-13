@@ -2,7 +2,7 @@
   <el-card>
     <div class="header">
       <span>实验搜索：</span>
-      <el-input class="search-input" v-model="pageSearchParams.keyword" placeholder="请输入实验名称或ID"></el-input>
+      <el-input class="search-input" v-model="pageSearchParams.keyword" placeholder="请输入实验名称或ID" />
       <div class="operation-btn-group">
         <el-button @click="() => (pageSearchParams.keyword = '')">重置</el-button>
         <el-button type="primary">查询</el-button>
@@ -50,9 +50,10 @@
 <script setup lang="ts">
 import router from "@/router"
 import { reactive, ref } from "vue"
-import { Experiment, ExperimentStatus } from "@/api/experiment/types/experiment"
+import { Experiment } from "@/api/experiment/types/experiment"
 import { EXPERIMENT_STATUS_MAPPING } from "@/constants/constants"
 import _ from "lodash"
+import { ExperimentStatus } from "@/model/ExperimentStatus"
 
 const totalExperiment = ref<number>(0)
 const pageSearchParams = reactive<{
