@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import reactor.test.StepVerifier;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * FeatureConfigDbRepositoryTest provides a skeleton implementation of the FeatureConfigDbRepositoryTest interface.
@@ -37,6 +38,54 @@ public class FeatureConfigDbRepositoryTest extends RepositoryTestBase {
                 .as(StepVerifier::create)
                 .expectNextMatches(config -> config.getId().equals(id) && config.getFeatureKey().equals(featureKey)
                         && config.getDescription().getData() instanceof List<?>)
+                .verifyComplete();
+    }
+
+    @Test
+    public void should_save_feature_config_success_when_data_is_Map() {
+        String id = "id";
+        String featureKey = "feature1";
+
+        repository.save(FeatureConfigTestUtil.createFeatureConfigDb(id, featureKey, Map.of("key1", Map.of("key2", "value2"))))
+                .as(StepVerifier::create)
+                .expectNextMatches(config -> config.getId().equals(id) && config.getFeatureKey().equals(featureKey)
+                        && config.getDescription().getData() instanceof Map<?, ?>)
+                .verifyComplete();
+    }
+
+    @Test
+    public void should_save_feature_config_success_when_data_is_bool() {
+        String id = "id";
+        String featureKey = "feature1";
+
+        repository.save(FeatureConfigTestUtil.createFeatureConfigDb(id, featureKey, false))
+                .as(StepVerifier::create)
+                .expectNextMatches(config -> config.getId().equals(id) && config.getFeatureKey().equals(featureKey)
+                        && config.getDescription().getData() instanceof Boolean)
+                .verifyComplete();
+    }
+
+    @Test
+    public void should_save_feature_config_success_when_data_is_string() {
+        String id = "id";
+        String featureKey = "feature1";
+
+        repository.save(FeatureConfigTestUtil.createFeatureConfigDb(id, featureKey, "data"))
+                .as(StepVerifier::create)
+                .expectNextMatches(config -> config.getId().equals(id) && config.getFeatureKey().equals(featureKey)
+                        && config.getDescription().getData() instanceof String)
+                .verifyComplete();
+    }
+
+    @Test
+    public void should_save_feature_config_success_when_data_is_Integer() {
+        String id = "id";
+        String featureKey = "feature1";
+
+        repository.save(FeatureConfigTestUtil.createFeatureConfigDb(id, featureKey, 123))
+                .as(StepVerifier::create)
+                .expectNextMatches(config -> config.getId().equals(id) && config.getFeatureKey().equals(featureKey)
+                        && config.getDescription().getData() instanceof Number)
                 .verifyComplete();
     }
 
