@@ -151,6 +151,8 @@ public class FeatureConfig {
                 .updatedAt(LocalDateTime.now())
                 .filterCondition(newDescription.filterCondition())
                 .build();
+        this.description.status.setStartTime(newDescription.status().getStartTime());
+        this.description.status.setEndTime(newDescription.status().getEndTime());
         return this;
     }
 
