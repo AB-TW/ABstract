@@ -1,8 +1,8 @@
-import { PageResponse } from "./FeatureFlags"
+import { PageResponse } from "./Features"
 import http from "../utils/http/http"
 
 export class FeatureConfigs {
-  constructor(private readonly baseUrl: string = "/features") {}
+  constructor(private readonly baseUrl: string = "/api/features") {}
 
   private getUrl(path: string) {
     return this.baseUrl + path

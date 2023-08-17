@@ -41,8 +41,12 @@
         </el-table-column>
         <el-table-column prop="name" label="名称" width="200" />
         <el-table-column prop="description" label="描述" width="300" />
-        <el-table-column prop="enabled" label="使能" width="240" />
-        <el-table-column prop="status" label="状态" width="240" />
+        <el-table-column label="是否启用" width="240" >
+          <template #default="scope">
+            <el-tag v-if="scope.row?.enabled == true" type="success">启用</el-tag>
+            <el-tag v-else type="danger">禁用</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="操作">
           <template #default="scope">
             <el-button size="small" @click="goToWatch(scope.row.featureKey, 'view')">查看</el-button>
@@ -51,10 +55,10 @@
               v-if="scope.row?.enabled == true"
               type="info"
               size="small"
-              @click="disable(scope.row.featureKey, 'disable')"
+              @click="disable(scope.row.featureKey)"
               >禁用
             </el-button>
-            <el-button v-else type="success" size="small" @click="disable(scope.row.featureKey, 'enable')"
+            <el-button v-else type="success" size="small" @click="enable(scope.row.featureKey)"
               >启用
             </el-button>
           </template>
@@ -78,12 +82,12 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue"
 import { useRouter } from "vue-router"
-import { FeatureFlag, FeatureFlags } from "../../domain/FeatureFlags"
+import { Feature, Features } from "../../domain/Features"
 import { ElMessage } from "element-plus"
 
 const router = useRouter()
 
-const featureFlags = new FeatureFlags()
+const features = new Features()
 const total = ref(0)
 
 const searchForm = reactive({
@@ -92,7 +96,7 @@ const searchForm = reactive({
   featureKey: ""
 })
 
-const tableData = ref([] as FeatureFlag[])
+const tableData = ref([] as Feature[])
 const goToWatch = (key:string, type: string) => {
   router.push({
     path: "/feature/edit",
@@ -103,21 +107,8 @@ const goToWatch = (key:string, type: string) => {
   })
 }
 
-const deleteData = (id: string) => {
-  featureFlags
-    .delete(id)
-    .then(() => {
-      ElMessage.success("删除成功")
-      searchData()
-    })
-    .catch((err) => {
-      console.log(err)
-      ElMessage.error("删除失败，请重试")
-    })
-}
-
 const searchData = () => {
-  featureFlags
+  features
     .fetchAll(searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, searchForm.featureKey)
     .then((res) => {
       tableData.value = res.content
@@ -130,9 +121,9 @@ const searchData = () => {
     })
 }
 
-const disable = (featureKey: string, type: string) => {
-  featureFlags
-    .disable(featureKey, type)
+const disable = (featureKey: string) => {
+  features
+    .disable(featureKey)
     .then(() => {
       ElMessage.success("操作成功")
       searchData()
@@ -141,6 +132,19 @@ const disable = (featureKey: string, type: string) => {
       console.log(err)
       ElMessage.error("操作失败，请重试")
     })
+}
+
+const enable = (featureKey: string) => {
+  features
+      .enable(featureKey)
+      .then(() => {
+        ElMessage.success("操作成功")
+        searchData()
+      })
+      .catch((err) => {
+        console.log(err)
+        ElMessage.error("操作失败，请重试")
+      })
 }
 
 const handleSizeChange = () => {

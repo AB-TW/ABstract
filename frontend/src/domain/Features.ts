@@ -1,14 +1,14 @@
 import http from "../utils/http/http"
 import { FeatureConfig } from "@/domain/FeatureConfigs"
 
-export interface FeatureFlag {
+export interface Feature {
   id?: string
   featureKey: string
   name: string
   description?: string
   status: string
-  dataSource: Array<FeatureFlagTemplate>
-  template: FeatureFlagTemplate
+  dataSource: Array<FeatureTemplate>
+  template: FeatureTemplate
 }
 
 export interface PageResponse<T> {
@@ -18,14 +18,14 @@ export interface PageResponse<T> {
   content: T[]
 }
 
-export interface FeatureFlagTemplate {
+export interface FeatureTemplate {
   key?: string
   name?: string
   description?: string
   dataType: TemplateDataType
   defaultValue?: unknown | string | object
   validator?: any
-  items?: FeatureFlagTemplate[]
+  items?: FeatureTemplate[]
 }
 
 export enum TemplateDataType {
@@ -36,18 +36,18 @@ export enum TemplateDataType {
   ARRAY = "ARRAY"
 }
 
-export const getDefaultValue = (featureFlag: FeatureFlag): any => {
-  return getTemplateDefaultValue(featureFlag.template)
+export const getDefaultValue = (feature: Feature): any => {
+  return getTemplateDefaultValue(feature.template)
 }
 
-export const getTemplateDefaultValue = (template: FeatureFlagTemplate | undefined): any | any[] => {
+export const getTemplateDefaultValue = (template: FeatureTemplate | undefined): any | any[] => {
   if (!template) {
     return null
   }
 
   if (template.dataType === TemplateDataType.OBJECT) {
     const result = {} as any
-    ;(template.items || []).forEach((item: FeatureFlagTemplate) => {
+    ;(template.items || []).forEach((item: FeatureTemplate) => {
       result[item.key as string] = getTemplateDefaultValue(item)
     })
     return result
@@ -68,33 +68,29 @@ export const getTemplateDefaultValue = (template: FeatureFlagTemplate | undefine
   return template.defaultValue || ""
 }
 
-export class FeatureFlags {
-  constructor(private readonly baseUrl: string = "") {}
+export class Features {
+  constructor(private readonly baseUrl: string = "/api") {}
 
   private getUrl(path: string) {
     return this.baseUrl + path
   }
 
-  fetchAll(page: number, pageSize: number, featureKey?: string): Promise<PageResponse<FeatureFlag>> {
+  fetchAll(page: number, pageSize: number, featureKey?: string): Promise<PageResponse<Feature>> {
     return http
       .get(this.getUrl(`/features`), { page, pageSize, key: featureKey })
-      .then((res: any) => res?.data as PageResponse<FeatureFlag>)
+      .then((res: any) => res?.data as PageResponse<Feature>)
   }
 
-  fetch(featureKey: string): Promise<FeatureFlag> {
-    return http.get(this.getUrl(`/features/${featureKey}`), {}).then((res: any) => res?.data as FeatureFlag)
+  fetch(featureKey: string): Promise<Feature> {
+    return http.get(this.getUrl(`/features/${featureKey}`), {}).then((res: any) => res?.data as Feature)
   }
 
-  create(featureFlag: FeatureFlag): Promise<FeatureFlag> {
-    return http.post(this.getUrl(`/features`), featureFlag).then((res: any) => res?.data as FeatureFlag)
+  create(feature: Feature): Promise<Feature> {
+    return http.post(this.getUrl(`/features`), feature).then((res: any) => res?.data as Feature)
   }
 
-  update(featureFlag: FeatureFlag): Promise<void> {
-    return http.put(this.getUrl(`/features/${featureFlag.featureKey}`), featureFlag).then()
-  }
-
-  delete(featureKey: string): Promise<void> {
-    return http.del(this.getUrl(`/features/${featureKey}`)).then()
+  update(feature: Feature): Promise<void> {
+    return http.put(this.getUrl(`/features/${feature.featureKey}`), feature).then()
   }
 
   publish(featureKey: string): Promise<void> {
@@ -102,7 +98,11 @@ export class FeatureFlags {
   }
 
   disable(featureKey: string, type: string): Promise<void> {
-    return http.put(this.getUrl(`/features/${featureKey}/` + type), null).then()
+    return http.put(this.getUrl(`/features/${featureKey}/disable`), null).then()
+  }
+
+  enable(featureKey: string, type: string): Promise<void> {
+    return http.put(this.getUrl(`/features/${featureKey}/enable`), null).then()
   }
 
   updateConfig(featureKey: string, configId: string, featureConfig: FeatureConfig): Promise<void> {

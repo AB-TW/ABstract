@@ -8,17 +8,17 @@
         </div>
       </template>
       <el-form :model="featureConfig" :rules="formRules" ref="form" label-width="140px">
-        <el-form-item label="配置标题" prop="title">
-          <el-input v-model="featureConfig.title" autocomplete="off" />
+        <el-form-item label="标题" prop="title">
+          <el-input v-model="featureConfig.title" autocomplete="off" :disabled="formType == 'view'" />
         </el-form-item>
-        <el-form-item label="配置描述" prop="description">
-          <el-input v-model="featureConfig.description" autocomplete="off" />
+        <el-form-item label="描述" prop="description">
+          <el-input v-model="featureConfig.description" autocomplete="off" :disabled="formType == 'view'" />
         </el-form-item>
         <el-form-item label="配置内容" prop="data">
           <FeatureTemplateConfig
-            :key="featureFlag.dataSource"
+            :key="feature.dataSource"
             :isViewModel="true"
-            :dataSource="featureFlag?.dataSource || []"
+            :dataSource="feature?.dataSource || []"
           />
         </el-form-item>
         <el-form-item label="生效时间" prop="timeRange">
@@ -29,6 +29,7 @@
             @calendar-change="calendarChange"
             start-placeholder="Start date"
             end-placeholder="End date"
+            :disabled="formType == 'view'"
           />
         </el-form-item>
         <el-form-item label="埋点数据" prop="trackingData">
@@ -38,10 +39,11 @@
               :key="item.index"
               :item="item"
               :index="index"
+              :disable="formType == 'view'"
               @deleteItem="deleteTrackingData(index)"
             />
             <div>
-              <el-button type="primary" @click="addTrackingData">
+              <el-button type="primary" @click="addTrackingData" v-if="formType !== 'view'">
                 <el-icon>
                   <Plus />
                 </el-icon>
@@ -49,7 +51,7 @@
             </div>
           </div>
         </el-form-item>
-        <el-form-item>
+        <el-form-item v-if="formType !== 'view'">
           <el-button type="default" @click="resetForm()">重置</el-button>
           <el-button type="primary" @click="submitForm()">提交</el-button>
         </el-form-item>
@@ -64,14 +66,14 @@ import { useRoute, useRouter } from "vue-router"
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage } from "element-plus"
 import { FeatureConfig, FeatureConfigs } from "../../../domain/FeatureConfigs"
 import {
-  FeatureFlag,
-  FeatureFlags,
-  FeatureFlagTemplate,
+  Feature,
+  Features,
+  FeatureTemplate,
   getDefaultValue,
   TemplateDataType
-} from "../../../domain/FeatureFlags"
+} from "../../../domain/Features"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
-// import FeatureTemplateConfig from "@/components/FeatureFlagTemplateItemNew.vue"
+// import FeatureTemplateConfig from "@/components/FeatureTemplateItemNew.vue"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
 import { convertConfigObject, mapDataToTemplate, transTempToTreeDataSource } from "@/utils"
 import { StaticStatus } from "@/constants/common"
@@ -81,8 +83,8 @@ const route = useRoute()
 const router = useRouter()
 const featureConfigs = new FeatureConfigs()
 const featureConfig = ref({} as FeatureConfig)
-const featureFlag = ref({} as FeatureFlag)
-const featureFlags = new FeatureFlags()
+const feature = ref({} as Feature)
+const features = new Features()
 
 const title = ref("Feature Config")
 const formType = ref("add")
@@ -94,13 +96,13 @@ const timeRange = ref([])
 let trackingDataIndex = 0
 onBeforeMount(async () => {
   title.value = (route.query.type == "edit" ? "编辑" : "新增") + (route.query.featureName || "Feature Config")
-  formType.value = route.query.type == "edit" ? "edit" : "add"
+  formType.value = route.query.type == "edit" ? "edit" : route.query.type == "view" ? "view" : "add"
   featureKey.value = "" + route.query.featureKey
   // featureKey 是点击feature 模块跳转过来的
   if (route.query.featureKey) {
-    const res = await featureFlags.fetch(route.query.featureKey.toString())
-    featureFlag.value = res
-    featureFlag.value.dataSource = [transTempToTreeDataSource(featureFlag.value.template)] as Array<FeatureFlagTemplate>
+    const res = await features.fetch(route.query.featureKey.toString())
+    feature.value = res
+    feature.value.dataSource = [transTempToTreeDataSource(feature.value.template)] as Array<FeatureTemplate>
   }
 
   if (route.query.id) {
@@ -117,14 +119,12 @@ onBeforeMount(async () => {
       let templateInfo;
       // 如果返回的数据是一个对象：
       debugger
-      if (_.get(featureFlag.value,"template.dataType",null) == "OBJECT") {
-        templateInfo = mapDataToTemplate("", JSON.parse(featureConfig.value.data), featureFlag.value.template)
-      } else {
-        templateInfo = mapDataToTemplate("", featureConfig.value.data, featureFlag.value.template)
-      }
-      featureFlag.value.dataSource = [templateInfo]
+
+      templateInfo = mapDataToTemplate("", featureConfig.value.data, feature.value.template)
+
+      feature.value.dataSource = [templateInfo]
       debugger
-      console.log("#########", featureFlag.value.dataSource)
+      console.log("#########", feature.value.dataSource)
     }
   } else {
     featureConfig.value = {
@@ -133,7 +133,7 @@ onBeforeMount(async () => {
         endDate: ""
       },
       trackingData: [],
-      data: getDefaultValue(featureFlag.value)
+      data: getDefaultValue(feature.value)
     } as FeatureConfig
   }
 
@@ -150,7 +150,7 @@ onBeforeMount(async () => {
 })
 // 防止只有一个Boolean 值为false 或者NUMBER，并且数字为 0
 const isSimpleBooleanOrNumber = () => {
-  return ["NUMBER", "BOOLEAN"].includes(_.get(featureFlag.value, "template.dataType", null))
+  return ["NUMBER", "BOOLEAN"].includes(_.get(feature.value, "template.dataType", null))
 }
 nextTick(() => {
   if(!!form.value) {
@@ -187,8 +187,8 @@ const submitForm = async () => {
   form?.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        // featureConfig.value.templateData = JSON.stringify(featureFlag.value.dataSource)
-        const tempRet = convertConfigObject(featureFlag.value.dataSource[0])
+        // featureConfig.value.templateData = JSON.stringify(feature.value.dataSource)
+        const tempRet = convertConfigObject(feature.value.dataSource[0])
         // debugger
         // if (_.isObject(tempRet)) {
         //   featureConfig.value.data = JSON.stringify(tempRet)
@@ -205,7 +205,7 @@ const submitForm = async () => {
         if (formType.value.toLowerCase() == "add") {
           const response = await featureConfigs.create(featureKey.value, featureConfig.value)
           console.log("response = ", response)
-          // const ret = await featureFlags.updateConfig(featureKey.value, response.id, response)
+          // const ret = await features.updateConfig(featureKey.value, response.id, response)
           // console.log(ret)
         } else {
           await featureConfigs.update(featureKey.value, id.value, featureConfig.value)

@@ -1,6 +1,6 @@
 <template>
   <div class="common-container">
-    <div class="label">{{ description || "设置值" }} :</div>
+    <div class="label">{{ name  || "" }}</div>
     <div>
       <div v-if="dataType == 'STRING'">
         <el-input v-model="value" type="string" :maxlength="maxLength" @change="onInput" />
@@ -26,6 +26,10 @@ const props = defineProps({
   description: {
     type: String,
     required: false
+  },
+  name: {
+    type: String,
+    required: true
   },
   defaultValue: {
     type: [String , Number , Boolean],
