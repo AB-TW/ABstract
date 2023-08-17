@@ -3,7 +3,7 @@
     <el-card>
       <el-card-header style="padding: 5px">
         <div class="card-header">
-          <span class="title"> 名称: {{ featureName }}</span>
+          <span class="title"> Feature: {{ featureName }}</span>
           <el-button size="small" style="float: right" @click="router.push({ path: '/feature/list' })">返回 </el-button>
         </div>
       </el-card-header>
@@ -11,7 +11,7 @@
       <el-input
         v-model="searchForm.key"
         clearable
-        placeholder="请输入configKey或名称"
+        placeholder="请输入关键字"
         class="input-with-select"
         @clear="searchData"
       >
@@ -29,7 +29,7 @@
                 type: 'add',
                 featureKey: featureKey,
                 featureName,
-                featureFlag: encodeURI(JSON.stringify(featureFlag))
+                feature: encodeURI(JSON.stringify(feature))
               }
             })
         "
@@ -40,10 +40,23 @@
         新增
       </el-button>
       <el-table :data="tableData" border style="width: 100%; margin-top: 50px">
-        <el-table-column label="id" prop="id" width="320" />
-        <el-table-column prop="featureKey" label="Feature Key" width="180" />
-        <el-table-column prop="title" label="配置标题" width="180" />
-        <el-table-column prop="status" label="状态" width="180" />
+<!--        <el-table-column label="id" prop="id" width="320" />-->
+<!--        <el-table-column prop="featureKey" label="Feature Key" width="180" />-->
+        <el-table-column prop="title" label="标题" width="230" />
+        <el-table-column prop="startTime" label="生效时间" width="200" />
+        <el-table-column prop="endTime" label="失效时间" width="200" />
+        <el-table-column label="状态" width="200">
+          <template #default="scope">
+            <el-tag v-if="scope.row?.status == 'DRAFT'" type="">草稿</el-tag>
+            <el-tag v-else-if="scope.row?.status == 'NOT_BEGIN'" type="warning">已发布(未生效)</el-tag>
+            <el-tag v-else-if="scope.row?.status == 'RUNNING'" type="success">生效中</el-tag>
+            <el-tag v-else-if="scope.row?.status == 'EXPIRED'" type="info">已过期</el-tag>
+            <el-tag v-else-if="scope.row?.status == 'DISABLED'" type="danger">已撤销</el-tag>
+            <el-tag v-else type="danger">已删除</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createdAt" label="创建时间" width="200" />
+        <el-table-column prop="updatedAt" label="更新时间" width="200" />
         <el-table-column label="操作">
           <template #default="scope">
             <el-button
@@ -62,6 +75,7 @@
             </el-button>
             <el-button type="danger" size="small" @click="deleteData(scope.row.id)">删除 </el-button>
             <el-button
+              v-if="scope.row?.status !== 'RUNNING'"
               size="small"
               @click="
                 () =>
@@ -71,12 +85,30 @@
                       featureKey: featureKey,
                       type: 'edit',
                       id: scope.row.id,
-                      featureFlag: encodeURI(JSON.stringify(featureFlag))
+                      feature: encodeURI(JSON.stringify(feature))
                     }
                   })
               "
             >
               编辑
+            </el-button>
+            <el-button
+                v-if="scope.row?.status === 'RUNNING'"
+                size="small"
+                @click="
+                () =>
+                  router.push({
+                    path: '/feature/config/edit',
+                    query: {
+                      featureKey: featureKey,
+                      type: 'view',
+                      id: scope.row.id,
+                      feature: encodeURI(JSON.stringify(feature))
+                    }
+                  })
+              "
+            >
+              查看
             </el-button>
           </template>
         </el-table-column>
@@ -103,19 +135,19 @@ import { useRoute } from "vue-router"
 
 import { FeatureConfig, FeatureConfigs } from "../../../domain/FeatureConfigs"
 import { ElMessage } from "element-plus"
-import { FeatureFlags } from "../../../domain/FeatureFlags"
+import { Features } from "../../../domain/Features"
 
 const route = useRoute()
-const featureFlag = ref()
-const featureFlags = new FeatureFlags()
+const feature = ref()
+const features = new Features()
 
 const featureKey = ref()
 const featureName = ref("")
 onBeforeMount(async () => {
   featureKey.value = route.query.featureKey
   featureName.value = <string>route.query.featureName
-  const flag = await featureFlags.fetch(featureKey.value)
-  featureFlag.value = flag
+  const flag = await features.fetch(featureKey.value)
+  feature.value = flag
 })
 
 const router = useRouter()
@@ -204,5 +236,7 @@ onMounted(() => {
 
 span.title {
   float: left;
+  font-size: 14px;
+  font-weight:bold;
 }
 </style>

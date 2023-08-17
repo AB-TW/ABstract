@@ -7,6 +7,7 @@ import vueJsx from "@vitejs/plugin-vue-jsx"
 import { createSvgIconsPlugin } from "vite-plugin-svg-icons"
 import svgLoader from "vite-svg-loader"
 import UnoCSS from "unocss/vite"
+import * as process from "process";
 
 /** 配置项文档：https://cn.vitejs.dev/config */
 export default (configEnv: ConfigEnv): UserConfigExport => {
@@ -36,12 +37,12 @@ export default (configEnv: ConfigEnv): UserConfigExport => {
       strictPort: false,
       /** 接口代理 */
       proxy: {
-        "/api/v1": {
-          target: "https://mock.mengxuegu.com/mock/63218b5fb4c53348ed2bc212/api/v1",
-          ws: true,
+        "/api": {
+          target: `http://localhost:8080`,
+          ws: false,
           /** 是否允许跨域 */
-          changeOrigin: true,
-          rewrite: (path) => path.replace("/api/v1", "")
+          changeOrigin: false,
+          rewrite: (path) => path.replace("/api", "")
         }
       }
     },
