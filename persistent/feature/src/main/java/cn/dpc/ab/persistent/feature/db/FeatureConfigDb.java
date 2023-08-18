@@ -3,6 +3,7 @@ package cn.dpc.ab.persistent.feature.db;
 import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
+import cn.dpc.ab.persistent.couchbase.ObjectAdapter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -51,9 +52,7 @@ public class FeatureConfigDb {
         private String key;
         private String title;
         private String description;
-        private String stringData;
-        private Object objData;
-        private List<?> arrayData;
+        private ObjectAdapter dataAdapter;
         private Map<String, String> saData;
         private FeatureConfig.Status status;
         private long priority;
@@ -68,18 +67,9 @@ public class FeatureConfigDb {
          * @param data the data
          */
         public void setData(Object data) {
-            if (null == data) {
-                return;
-            }
-
-            if (data instanceof String) {
-                this.stringData = String.valueOf(data);
-            } else if (data instanceof Map<?, ?>) {
-                this.objData = data;
-            } else if (data instanceof List) {
-                this.arrayData = (List<?>) data;
-            }
+            this.dataAdapter = new ObjectAdapter(data);
         }
+
 
         /**
          * getData gets the data field.
@@ -87,15 +77,7 @@ public class FeatureConfigDb {
          * @return the data
          */
         public Object getData() {
-            if (null != this.objData) {
-                return objData;
-            }
-
-            if (null != this.arrayData) {
-                return arrayData;
-            }
-
-            return this.stringData;
+            return Optional.ofNullable(dataAdapter).map(ObjectAdapter::toObject).orElse(null);
         }
 
         /**
