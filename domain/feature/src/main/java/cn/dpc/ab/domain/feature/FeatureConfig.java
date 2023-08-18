@@ -39,6 +39,7 @@ public class FeatureConfig {
                               String title,
                               String description,
                               Object data,
+                              String templateData,
                               Map<String, String> saData,
                               Status status,
                               long priority,
@@ -142,6 +143,7 @@ public class FeatureConfig {
                 .title(newDescription.title())
                 .description(newDescription.description())
                 .data(newDescription.data())
+                .templateData(newDescription.templateData())
                 .saData(newDescription.saData())
                 .status(this.description.status)
                 .createdAt(this.description.createdAt())
@@ -185,6 +187,7 @@ public class FeatureConfig {
                 .title(this.description.title())
                 .description(this.description.description())
                 .data(this.description.data())
+                .templateData(this.description.templateData())
                 .saData(this.description.saData())
                 .status(this.description.status.updateStatus(status))
                 .createdAt(this.description.createdAt())

@@ -1,5 +1,6 @@
 import dayjs from "dayjs"
-
+import _ from "lodash"
+import lodash from "lodash"
 /** 格式化时间 */
 export const formatDateTime = (time: string | number | Date) => {
   return time ? dayjs(new Date(time)).format("YYYY-MM-DD HH:mm:ss") : "N/A"
@@ -25,12 +26,12 @@ export const setCssVariableValue = (cssVariableName: string, cssVariableValue: s
     console.error(error)
   }
 }
-
+let localId = 0
 export const transTempToTreeDataSource = (temp: any) => {
   const tree = {
     name: temp.name || "",
     dataType: temp.dataType || "",
-    defaultValue: temp.defaultValue,
+    defaultValue: temp.dataType == "BOOLEAN" ? Boolean(temp.defaultValue) : temp.defaultValue,
     key: temp.key || "",
     description: temp.description || "",
     validator: {
@@ -40,6 +41,7 @@ export const transTempToTreeDataSource = (temp: any) => {
       required: temp?.validator?.required || false,
       pattern: temp?.validator?.pattern || ""
     },
+    id: localId++,
     children: []
   }
 
@@ -55,4 +57,131 @@ export const StatusMaps = {
   add: "新增",
   view: "查看",
   edit: "编辑"
+}
+
+export function replaceChildrenWithItems(data) {
+  // 如果是一个数组，则递归处理每个元素
+  if (Array.isArray(data)) {
+    data.forEach((item) => replaceChildrenWithItems(item))
+    // 如果是一个对象，则处理其属性
+  } else if (typeof data === "object") {
+    for (const prop in data) {
+      if (prop === "children") {
+        data["items"] = data[prop]
+        delete data[prop]
+        // 递归处理嵌套的子级对象
+        replaceChildrenWithItems(data["items"])
+      } else {
+        if(prop == "dataType") {
+          switch (data[prop]) {
+            case 'NUMBER':
+              data['defaultValue'] = Number(data['defaultValue'])
+              break;
+            case 'BOOLEAN':
+              data['defaultValue'] = Boolean(data['defaultValue'])
+              break;
+            default:
+              break;
+          }
+        }
+        // 递归处理对象的属性
+        replaceChildrenWithItems(data[prop])
+      }
+    }
+  }
+  return data
+}
+export const translateDataToTemplateItems = (value) => {
+  value.template = value.dataSource[0]
+  return value
+}
+export function getValue(info) {
+  if (info.dataType == "BOOLEAN") {
+    if (_.hasIn(info, "value")) {
+      return info.value
+    } else {
+      return Boolean(info.defaultValue)
+    }
+  } else if(info.dataType== 'NUMBER') {
+    return Number(info.value || info.defaultValue)
+  }  else {
+    return info.value || info.defaultValue
+  }
+}
+// FeatureConfg data数据处理函数
+export function convertConfigObject(data) {
+  if (data.dataType === "OBJECT") {
+    const obj = {}
+    for (const child of data.children) {
+      obj[child.key] = convertConfigObject(child)
+    }
+    return obj
+  } else if (data.dataType === "ARRAY") {
+    const arr = []
+    for (const child of data.children) {
+      arr.push(convertConfigObject(child))
+    }
+    return arr
+  } else {
+    return getValue(data)
+  }
+}
+
+function getModelByKey(key, items, defaultValue = null) {
+  if (!!items && items.length > 0) {
+    return lodash.find(items, (item) => {
+      return item.key == key
+    })
+  } else {
+    return defaultValue || {}
+  }
+}
+
+//数据转换为template对象
+export function mapDataToTemplate(name, obj, model) {
+  if (lodash.isObject(obj) && !lodash.isArray(obj)) {
+    return {
+      name,
+      dataType: "OBJECT",
+      ...lodash.omit(model, ["items"]),
+      children: Object.entries(obj).map(([key, value]) => {
+        return mapDataToTemplate(key, value, getModelByKey(key, model?.items || []))
+      })
+    }
+  }
+  if (typeof obj === "string") {
+    return {
+      name,
+      dataType: "STRING",
+      ...model,
+      value: obj
+    }
+  }
+  if (typeof obj === "number") {
+    return {
+      name,
+      dataType: "NUMBER",
+      ...model,
+      value: obj
+    }
+  } else if (typeof obj === "boolean") {
+    return {
+      name,
+      dataType: "BOOLEAN",
+      ...model,
+      value: obj
+    }
+  } else if (lodash.isArray(obj)) {
+    let extentObj = {}
+    if (model.dataType == "ARRAY") {
+      extentObj = lodash.omit(model, ["items"])
+    }
+    return {
+      name,
+      ...extentObj,
+      dataType: "ARRAY",
+      children: obj.map((it, index) => mapDataToTemplate("", it, model.items[index] || model.items[0]))
+    }
+  }
+  throw new Error(name + obj)
 }

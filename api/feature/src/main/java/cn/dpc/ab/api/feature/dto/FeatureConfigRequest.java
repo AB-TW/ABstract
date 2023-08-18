@@ -29,7 +29,8 @@ public class FeatureConfigRequest {
 
     private Map<String, String> saData;
 
-    private FeatureConfig.Status.StaticStatus status;
+    @Builder.Default
+    private FeatureConfig.Status.StaticStatus status = FeatureConfig.Status.StaticStatus.DRAFT;
 
     private LocalDateTime startTime;
 
