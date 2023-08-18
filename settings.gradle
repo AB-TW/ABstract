@@ -26,3 +26,6 @@ include 'persistent:customer'
 findProject(':persistent:customer')?.name = 'persistent-customer'
 include 'api:customer'
 findProject(':api:customer')?.name = 'api-customer'
+include 'api:experiment'
+findProject(':api:experiment')?.name = 'api-experiment'
+
