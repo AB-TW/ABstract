@@ -50,7 +50,8 @@ Web框架：Spring WebFlux、Spring RSocket
 
 ```shell
 # 启动数据库
-docker-compose up -d
+# docker-compose up -d
+# 引入了spring-boot-docker-compose插件，可以直接运行不需要手动启动数据库容器
 
 
 ./gradlew bootrun
