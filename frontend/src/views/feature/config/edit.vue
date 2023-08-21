@@ -159,7 +159,12 @@ const formRules = {
     validator: (rule: any, value: any, callback: Function) => {
       if (!featureConfig.value.startTime) {
         callback();
-      } else {
+      } else  {
+        if(!value) {
+          callback();
+          return;
+        }
+
         if(new Date(value).getTime() > new Date(featureConfig.value.startTime).getTime()) {
           callback();
         } else {
