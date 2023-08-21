@@ -43,8 +43,14 @@
 <!--        <el-table-column label="id" prop="id" width="320" />-->
 <!--        <el-table-column prop="featureKey" label="Feature Key" width="180" />-->
         <el-table-column prop="title" label="标题" width="230" />
-        <el-table-column prop="startTime" label="生效时间" width="200" />
-        <el-table-column prop="endTime" label="失效时间" width="200" />
+        <el-table-column label="有效期" width="350">
+          <template #default="scope">
+            <span v-if="!scope.row?.startTime && !scope.row?.endTime">长期有效</span>
+            <span v-else-if="scope.row?.startTime && !scope.row?.endTime">{{scope.row?.startTime}} ～ 不限</span>
+            <span v-else-if="!scope.row?.startTime && scope.row?.endTime"> 不限 ～ {{scope.row?.endTime}}</span>
+            <span v-else >{{scope.row?.startTime}} ～ {{scope.row?.endTime}}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="状态" width="200">
           <template #default="scope">
             <el-tag v-if="scope.row?.status == 'DRAFT'" type="">草稿</el-tag>
@@ -83,6 +89,7 @@
                     path: '/feature/config/edit',
                     query: {
                       featureKey: featureKey,
+                      featureName,
                       type: 'edit',
                       id: scope.row.id,
                       feature: encodeURI(JSON.stringify(feature))
@@ -101,6 +108,7 @@
                     path: '/feature/config/edit',
                     query: {
                       featureKey: featureKey,
+                      featureName,
                       type: 'view',
                       id: scope.row.id,
                       feature: encodeURI(JSON.stringify(feature))
