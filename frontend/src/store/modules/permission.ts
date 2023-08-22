@@ -10,7 +10,7 @@ const hasPermission = (roles: string[], route: RouteRecordRaw) => {
   return routeRoles ? roles.some((role) => routeRoles.includes(role)) : true
 }
 
-const filterAsyncRoutes = (routes: RouteRecordRaw[], roles: string[]) => {
+const filterAsyncRoutes = (routes: RouteRecordRaw[], roles: string[]): RouteRecordRaw[] => {
   const res: RouteRecordRaw[] = []
   routes.forEach((route) => {
     const tempRoute = { ...route }
@@ -19,6 +19,9 @@ const filterAsyncRoutes = (routes: RouteRecordRaw[], roles: string[]) => {
         tempRoute.children = filterAsyncRoutes(tempRoute.children, roles)
       }
       res.push(tempRoute)
+    }
+    if(route.children.length > 0) {
+      res.push(...filterAsyncRoutes(route.children, roles))
     }
   })
   return res

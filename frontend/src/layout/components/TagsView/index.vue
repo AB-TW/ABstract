@@ -62,7 +62,7 @@ const initTags = () => {
 }
 
 const addTags = () => {
-  if (route.name) {
+  if (route.name && !route.meta?.hidden) {
     tagsViewStore.addVisitedView(route)
     tagsViewStore.addCachedView(route)
   }

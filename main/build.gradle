@@ -4,6 +4,11 @@ plugins {
 }
 
 dependencies {
+    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
     implementation project(':api:api-feature')
     implementation project(':api:api-customer')
+}
+
+bootRun {
+    workingDir = file('..')
 }

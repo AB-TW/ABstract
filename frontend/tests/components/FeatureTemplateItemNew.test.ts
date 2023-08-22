@@ -1,11 +1,11 @@
 import { shallowMount } from "@vue/test-utils"
 import { describe, expect, it } from "vitest"
-import FeatureFlagTemplateItemNew from "@/components/FeatureFlagTemplateItemNew.vue"
+import FeatureTemplateItemNew from "@/components/FeatureTemplateItemNew.vue"
 
-describe("FeatureFlagTemplateItemNew render test", () => {
+describe("FeatureTemplateItemNew render test", () => {
   it("正常渲染", () => {
     // 由于引入第三方控件，导致UI界面可测性不强，这里只是做UI测试说明举例
-    const wrapper = shallowMount(FeatureFlagTemplateItemNew,{
+    const wrapper = shallowMount(FeatureTemplateItemNew,{
       props:{
         debugMode:true
       }

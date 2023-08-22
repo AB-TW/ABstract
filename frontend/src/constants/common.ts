@@ -1,6 +1,6 @@
 export enum StaticStatus {
-  DRAFT,
-  PUBLISHED,
-  DISABLED,
-  DELETED
+  DRAFT = "DRAFT",
+  PUBLISHED = "PUBLISHED",
+  DISABLED = "DISABLED",
+  DELETED = "DELETED"
 }

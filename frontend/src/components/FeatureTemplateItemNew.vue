@@ -98,7 +98,7 @@
 <script lang="ts" setup>
 import { computed, h, ref } from "vue"
 import type Node from "element-plus/es/components/tree/src/model/node"
-import { TemplateDataType } from "@/domain/FeatureFlags"
+import { TemplateDataType } from "@/domain/Features"
 import { ElNotification } from "element-plus"
 
 const props = defineProps({
@@ -251,7 +251,7 @@ const showAddNextBtn = (node, child) => {
 const showKey = (node, child) => {
   const parentType = node?.parent?.data.dataType || null
   console.log(parentType, child.dataType)
-  return (!!parentType && ["ARRAY", "OBJECT"].includes(child.dataType)) || parentType == "OBJECT"
+  return !!parentType && parentType == "OBJECT"
 }
 const showDefaultValue = (parent, child) => {
   return !["ARRAY", "OBJECT"].includes(child.dataType)
