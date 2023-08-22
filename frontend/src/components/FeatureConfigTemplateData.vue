@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue"
-import { TemplateDataType, getTemplateDefaultValue, FeatureFlagTemplate } from "../domain/FeatureFlags"
+import { TemplateDataType, getTemplateDefaultValue, FeatureTemplate } from "../domain/Features"
 
 const props = defineProps({
   templ: {
@@ -87,8 +87,8 @@ const props = defineProps({
   }
 })
 
-const templ = ref(props.templ as FeatureFlagTemplate)
-const parentTemplate = ref(props.parentTemplate as FeatureFlagTemplate)
+const templ = ref(props.templ as FeatureTemplate)
+const parentTemplate = ref(props.parentTemplate as FeatureTemplate)
 const index = ref(props.index)
 const item = ref(props.item)
 

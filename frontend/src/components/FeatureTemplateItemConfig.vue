@@ -18,6 +18,7 @@
               :max-value="data?.validator?.max || Number.MAX_SAFE_INTEGER"
               :min-value="data?.validator?.min || 0"
               :data-type="data.dataType"
+              :name="data.name"
               :description="data.description"
               v-model="data.value"
             />
@@ -79,16 +80,17 @@ const emit = defineEmits(["change"])
 // 这个不起作用，用于查看数据是否正确的发送消息
 const showDelBtn = (node: any, data) => {
   const parentType = node?.parent?.data.dataType || null
-  if (parentType != "OBJECT" && ["NUMBER", "BOOLEAN", "STRING"].includes(data.dataType)) {
-    return true
-  } else if (
-    parentType &&
-    data.dataType == "ARRAY" &&
-    data.children.every((item) => ["NUMBER", "BOOLEAN", "STRING"].includes(item.dataType))
-  ) {
-    return true
-  }
-  return false
+  return parentType && parentType == "ARRAY" && node?.parent?.data.children?.length > 1
+  // if (parentType != "OBJECT" && ["NUMBER", "BOOLEAN", "STRING"].includes(data.dataType)) {
+  //   return true
+  // } else if (
+  //   parentType &&
+  //   data.dataType == "ARRAY" &&
+  //   data.children.every((item) => ["NUMBER", "BOOLEAN", "STRING"].includes(item.dataType))
+  // ) {
+  //   return true
+  // }
+  // return false
 }
 const showAddNextBtn = (node, child) => {
   // const parentType = node?.parent?.data.dataType || null
@@ -112,6 +114,7 @@ const addChildNode = (node: any, data: Tree) => {
   }
   const tempCloneObj = _.cloneDeep(node.data.children[0])
   tempCloneObj.id = count.value
+  tempCloneObj.index = node.data.children.length - 1
   data.children.push(tempCloneObj)
   dataSource.value = [...dataSource.value]
 }

@@ -4,12 +4,10 @@ server:
 spring:
   couchbase:
     env:
-      endpoints:
-        query-service:
-          max-endpoints: 8
-        key-value: 5
-      timeout:
+      timeouts:
         connect: 15s
+      io:
+        max-endpoints: 8
 
 ---
 spring:

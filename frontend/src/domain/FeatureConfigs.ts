@@ -1,21 +1,21 @@
-import { PageResponse } from "./FeatureFlags"
+import { PageResponse } from "./Features"
 import http from "../utils/http/http"
 
 export class FeatureConfigs {
-  constructor(private readonly baseUrl: string = "/features") {}
+  constructor(private readonly baseUrl: string = "/api/features") {}
 
   private getUrl(path: string) {
     return this.baseUrl + path
   }
 
-  fetchAll(title: string, page: number, pageSize: number, featureKey?: string): Promise<PageResponse<FeatureConfig>> {
+  fetchAll(title: string, page: number, pageSize: number, featureKey: string, status?: string): Promise<PageResponse<FeatureConfig>> {
     return http
       .get(this.getUrl(`/${featureKey}/configs`), {
         title,
         page,
         pageSize,
-        featureKey
-        // status: StaticStatus.DRAFT
+        featureKey,
+        status: status == "ALL" ? null : status
       })
       .then((res: any) => res?.data as PageResponse<FeatureConfig>)
   }
