@@ -19,8 +19,18 @@
           <el-button icon="Search" @click="searchData" />
         </template>
       </el-input>
+      <el-radio-group v-model="searchForm.status" @change="searchData"
+                      class="status-check-group">
+        <el-radio-button label="ALL">全部</el-radio-button>
+        <el-radio-button label="DRAFT">草稿</el-radio-button>
+        <el-radio-button label="NOT_BEGIN">未生效</el-radio-button>
+        <el-radio-button label="RUNNING">生效中</el-radio-button>
+        <el-radio-button label="EXPIRED">已过期</el-radio-button>
+        <el-radio-button label="DISABLED">已撤销</el-radio-button>
+      </el-radio-group>
       <el-button
         type="primary"
+        class="add-btn"
         @click="
           () =>
             router.push({
@@ -54,7 +64,7 @@
         <el-table-column label="状态" width="200">
           <template #default="scope">
             <el-tag v-if="scope.row?.status == 'DRAFT'" type="">草稿</el-tag>
-            <el-tag v-else-if="scope.row?.status == 'NOT_BEGIN'" type="warning">已发布(未生效)</el-tag>
+            <el-tag v-else-if="scope.row?.status == 'NOT_BEGIN'" type="warning">未生效</el-tag>
             <el-tag v-else-if="scope.row?.status == 'RUNNING'" type="success">生效中</el-tag>
             <el-tag v-else-if="scope.row?.status == 'EXPIRED'" type="info">已过期</el-tag>
             <el-tag v-else-if="scope.row?.status == 'DISABLED'" type="danger">已撤销</el-tag>
@@ -166,7 +176,8 @@ const total = ref(0)
 const searchForm = reactive({
   page: 1,
   size: 10,
-  key: ""
+  key: "",
+  status: "ALL",
 })
 
 const tableData = ref([] as FeatureConfig[])
@@ -185,7 +196,8 @@ const deleteData = (id: string) => {
 }
 const searchData = () => {
   featureConfigs
-    .fetchAll(searchForm.key, searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, featureKey.value)
+    .fetchAll(searchForm.key, searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, featureKey.value,
+      searchForm.status === "ALL" ? null : searchForm.status)
     .then((res) => {
       tableData.value = res.content
       total.value = res.total
@@ -246,5 +258,13 @@ span.title {
   float: left;
   font-size: 14px;
   font-weight:bold;
+}
+
+.add-btn {
+  margin-left: 20px;
+}
+
+.status-check-group {
+  margin-left: 20px;
 }
 </style>
