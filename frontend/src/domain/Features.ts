@@ -75,9 +75,9 @@ export class Features {
     return this.baseUrl + path
   }
 
-  fetchAll(page: number, pageSize: number, featureKey?: string): Promise<PageResponse<Feature>> {
+  fetchAll(page: number, pageSize: number, featureKey?: string, enabled?: boolean): Promise<PageResponse<Feature>> {
     return http
-      .get(this.getUrl(`/features`), { page, pageSize, key: featureKey })
+      .get(this.getUrl(`/features`), { page, pageSize, key: featureKey, enabled})
       .then((res: any) => res?.data as PageResponse<Feature>)
   }
 
@@ -97,11 +97,11 @@ export class Features {
     return http.put(this.getUrl(`/features/${featureKey}/publish`), null).then()
   }
 
-  disable(featureKey: string, type: string): Promise<void> {
+  disable(featureKey: string): Promise<void> {
     return http.put(this.getUrl(`/features/${featureKey}/disable`), null).then()
   }
 
-  enable(featureKey: string, type: string): Promise<void> {
+  enable(featureKey: string): Promise<void> {
     return http.put(this.getUrl(`/features/${featureKey}/enable`), null).then()
   }
 

@@ -8,14 +8,14 @@ export class FeatureConfigs {
     return this.baseUrl + path
   }
 
-  fetchAll(title: string, page: number, pageSize: number, featureKey?: string): Promise<PageResponse<FeatureConfig>> {
+  fetchAll(title: string, page: number, pageSize: number, featureKey: string, status?: string): Promise<PageResponse<FeatureConfig>> {
     return http
       .get(this.getUrl(`/${featureKey}/configs`), {
         title,
         page,
         pageSize,
-        featureKey
-        // status: StaticStatus.DRAFT
+        featureKey,
+        status: status == "ALL" ? null : status
       })
       .then((res: any) => res?.data as PageResponse<FeatureConfig>)
   }

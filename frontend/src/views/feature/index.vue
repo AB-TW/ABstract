@@ -12,10 +12,17 @@
           <el-button icon="Search" @click="searchData" />
         </template>
       </el-input>
+
+      <el-radio-group v-model="searchForm.enabled" @change="searchData"
+                      class="status-check-group">
+        <el-radio-button label="null">全部</el-radio-button>
+        <el-radio-button label="true">启用</el-radio-button>
+        <el-radio-button label="false">禁用</el-radio-button>
+      </el-radio-group>
       <el-button
         type="primary"
         @click="() => router.push({ path: '/feature/edit', query: { type: 'add' } })"
-        class="search-btn"
+        class="add-btn"
       >
         <el-icon>
           <Plus />
@@ -93,7 +100,8 @@ const total = ref(0)
 const searchForm = reactive({
   page: 1,
   size: 10,
-  featureKey: ""
+  featureKey: "",
+  enabled: "null"
 })
 
 const tableData = ref([] as Feature[])
@@ -109,7 +117,8 @@ const goToWatch = (key:string, type: string) => {
 
 const searchData = () => {
   features
-    .fetchAll(searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, searchForm.featureKey)
+    .fetchAll(searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, searchForm.featureKey,
+       (searchForm.enabled == "null" ? null : searchForm.enabled == "true"))
     .then((res) => {
       tableData.value = res.content
       total.value = res.total
@@ -166,7 +175,10 @@ onMounted(() => {
   float: left;
 }
 
-.search-btn {
+.add-btn {
+  margin-left: 20px;
+}
+.status-check-group {
   margin-left: 20px;
 }
 </style>
