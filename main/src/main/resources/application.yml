@@ -25,3 +25,9 @@ spring:
       auto-index: true
       bucket-name: bucket1
 
+  rsocket:
+    server:
+      port: 7001
+logging:
+  level:
+    root: debug
