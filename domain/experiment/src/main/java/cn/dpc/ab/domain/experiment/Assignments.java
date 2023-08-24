@@ -10,5 +10,5 @@ public interface Assignments {
     /**
      * getAssignmentById provides an Assignment of experiment by ids.
      */
-    Mono<Assignment> getAssignmentById(String featureKey, String customerId, String clientId);
+    Mono<Assignment> getAssignmentById(String featureKey, String customerId, Assignment.AssignmentId assignmentId);
 }
