@@ -72,6 +72,9 @@ docker build -t a_bstract/abstract:latest .
 
 ## C端Rsocket接口RSC脚本示例
 
+RSC是类似与curl命令的RSocket客户端命令行工具，方便对RSocket API进行调试，具体安装使用方法可以查看[GitHub - RSocket Client CLI (RSC)
+](https://github.com/making/rsc).
+
 ### 1. Request-Stream模式
 
 ```shell
