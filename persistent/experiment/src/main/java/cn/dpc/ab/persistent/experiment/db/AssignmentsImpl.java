@@ -7,9 +7,9 @@ import reactor.core.publisher.Mono;
 /**
  * AssignmentImpl implements Assignments.
  */
-public class AssignmentImpl implements Assignments {
+public class AssignmentsImpl implements Assignments {
     @Override
-    public Mono<Assignment> getAssignmentById(String featureKey, String customerId, String clientId) {
+    public Mono<Assignment> getAssignmentById(String featureKey, String customerId, Assignment.AssignmentId assignmentId) {
         return null;
     }
 }
