@@ -68,3 +68,30 @@ docker build -t a_bstract/abstract:latest .
 ## 模型
 
 ![domain](resource/domain.png)
+
+
+## C端Rsocket接口RSC脚本示例
+
+RSC是类似与curl命令的RSocket客户端命令行工具，方便对RSocket API进行调试，具体安装使用方法可以查看[GitHub - RSocket Client CLI (RSC)
+](https://github.com/making/rsc).
+
+### 1. Request-Stream模式
+
+```shell
+> rsc --route=customers.featureConfigs.{featureKey} --stream -m '{"customerId": "111","clientId":"610101","attributes":{}}' --mmt application/json   tcp://localhost:7001
+> {"id":"027cc714-d47d-4fd7-b171-7013ffb02a21","featureKey":"{featureKey}","key":"1bd8e02d-7590-4662-86e6-b296a119c9b8","data":{"key1":true,"key2":[""]},"saData":{},"expiredAt":null,"priority":0,"updatedAt":"2023-08-22T17:01:00.497"}
+> {"id":"60854696-4cdd-4d3e-bb3c-16447ae37f7d","featureKey":"{featureKey}","key":"7db5c4be-b513-4dcd-8152-7105ce49b08f","data":{"key1":true,"key2":[""]},"saData":{},"expiredAt":null,"priority":0,"updatedAt":"2023-08-22T17:00:58.056"}
+> {"id":"fe521c69-6816-4557-ac37-04029925b2ad","featureKey":"{featureKey}","key":"b405968a-f117-459e-acea-63e0f1131489","data":{"key1":true,"key2":[""]},"saData":{},"expiredAt":"2023-08-29T16:00:00","priority":0,"updatedAt":"2023-08-22T17:00:47.004"}
+ 
+```
+
+### 2. Request-Channel模式
+
+```shell
+> rsc --route=customers.featureConfigs --channel -m '{"customerId": "111","clientId":"610101","attributes":{}}' --mmt application/json  --data=-  tcp://localhost:7001
+> {featureKey}
+> {"id":"027cc714-d47d-4fd7-b171-7013ffb02a21","featureKey":"{featureKey}","key":"1bd8e02d-7590-4662-86e6-b296a119c9b8","data":{"key1":true,"key2":[""]},"saData":{},"expiredAt":null,"priority":0,"updatedAt":"2023-08-22T17:01:00.497"}
+> {"id":"60854696-4cdd-4d3e-bb3c-16447ae37f7d","featureKey":"{featureKey}","key":"7db5c4be-b513-4dcd-8152-7105ce49b08f","data":{"key1":true,"key2":[""]},"saData":{},"expiredAt":null,"priority":0,"updatedAt":"2023-08-22T17:00:58.056"}
+> {"id":"fe521c69-6816-4557-ac37-04029925b2ad","featureKey":"{featureKey}","key":"b405968a-f117-459e-acea-63e0f1131489","data":{"key1":true,"key2":[""]},"saData":{},"expiredAt":"2023-08-29T16:00:00","priority":0,"updatedAt":"2023-08-22T17:00:47.004"}
+ 
+```
