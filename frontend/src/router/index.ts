@@ -30,37 +30,60 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "Main",
         meta: {
           title: "首页",
-          svgIcon: "main",
+          // svgIcon: "main",
+          elIcon: "HomeFilled",
           affix: true
         }
       }
     ]
   },
   {
-    path: "/feature",
+    path: "/feature/list",
     component: Layout,
     name: "Feature",
     meta: {
       title: "Feature管理",
-      elIcon: "Grid"
+      elIcon: "Opportunity",
+      keepAlive: true
     },
     children: [
       {
         path: "/feature/list",
         component: () => import("@/views/feature/index.vue"),
-        name: "feature",
+        name: "Feature",
         meta: {
-          title: "Feature 列表",
+          title: "Feature管理",
+          elIcon: "Opportunity",
           keepAlive: true
         }
       },
       {
         path: "/feature/edit",
         component: () => import("@/views/feature/edit.vue"),
-        name: "添加Feature",
+        name: "编辑",
         meta: {
-          title: "添加Feature",
+          title: "编辑",
+          keepAlive: true,
+          hidden: true
+        }
+      },
+      {
+        path: "/feature/config/list",
+        component: () => import("@/views/feature/config/index.vue"),
+        name: "featureConigList",
+        meta: {
+          title: "配置管理",
+          hidden: true,
           keepAlive: true
+        }
+      },
+      {
+        path: "/feature/config/edit",
+        component: () => import("@/views/feature/config/edit.vue"),
+        name: "featureConfigEdit",
+        meta: {
+          title: "配置管理",
+          hidden: true
         }
       }
     ]
@@ -117,6 +140,7 @@ export function resetRouter() {
   // 注意：所有动态路由路由必须带有 Name 属性，否则可能会不能完全重置干净
   try {
     router.getRoutes().forEach((route) => {
+
       const { name, meta } = route
       if (name && meta.roles?.length) {
         router.hasRoute(name) && router.removeRoute(name)

@@ -62,7 +62,7 @@ const initTags = () => {
 }
 
 const addTags = () => {
-  if (route.name) {
+  if (route.name && !route.meta?.hidden) {
     tagsViewStore.addVisitedView(route)
     tagsViewStore.addCachedView(route)
   }
@@ -174,7 +174,7 @@ onMounted(() => {
         @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''"
         @contextmenu.prevent="openMenu(tag, $event)"
       >
-        {{ tag.meta?.title }}
+        {{ !!tag?.query?.featureName ? (tag.query.featureName +'列表'): tag.meta?.title }}
         <el-icon v-if="!isAffix(tag)" :size="12" @click.prevent.stop="closeSelectedTag(tag)">
           <Close />
         </el-icon>

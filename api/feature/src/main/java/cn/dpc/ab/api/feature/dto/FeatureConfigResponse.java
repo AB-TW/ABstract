@@ -28,6 +28,8 @@ public class FeatureConfigResponse {
 
     private Object data;
 
+    private String templateData;
+
     private Map<String, String> saData;
 
     private DynamicStatus status;
@@ -56,6 +58,7 @@ public class FeatureConfigResponse {
                 .description(featureConfig.getDescription().description())
                 .key(featureConfig.getDescription().key())
                 .data(featureConfig.getDescription().data())
+                .templateData(featureConfig.getDescription().templateData())
                 .saData(featureConfig.getDescription().saData())
                 .status(featureConfig.getDescription().status().getStatus())
                 .startTime(featureConfig.getDescription().status().getStartTime())
