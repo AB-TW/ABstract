@@ -2,6 +2,7 @@ package cn.dpc.ab.persistent.experiment.db;
 
 import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.experiment.Experiment;
+import cn.dpc.ab.persistent.couchbase.ObjectAdapter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,6 @@ import org.springframework.data.couchbase.core.mapping.id.GenerationStrategy;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -111,11 +111,7 @@ public class ExperimentDb {
 
         private String description;
 
-        private String strConfig;
-
-        private Object objConfig;
-
-        private List<?> arrayConfig;
+        private ObjectAdapter configAdapter;
 
         private int percentage;
 
@@ -125,17 +121,7 @@ public class ExperimentDb {
          * @param config the config
          */
         public void setConfig(Object config) {
-            if (null == config) {
-                return;
-            }
-
-            if (config instanceof String) {
-                this.strConfig = String.valueOf(config);
-            } else if (config instanceof Map<?, ?>) {
-                this.objConfig = config;
-            } else if (config instanceof List) {
-                this.arrayConfig = (List<?>) config;
-            }
+            this.configAdapter = new ObjectAdapter(config);
         }
 
         /**
@@ -144,15 +130,7 @@ public class ExperimentDb {
          * @return the data
          */
         public Object getConfig() {
-            if (null != this.objConfig) {
-                return objConfig;
-            }
-
-            if (null != this.arrayConfig) {
-                return arrayConfig;
-            }
-
-            return this.strConfig;
+            return Optional.ofNullable(this.configAdapter).map(ObjectAdapter::toObject).orElse(null);
         }
 
         /**
