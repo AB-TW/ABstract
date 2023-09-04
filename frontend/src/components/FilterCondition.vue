@@ -8,9 +8,9 @@
     :disabled="false"
     :scroll-to-error="true"
   >
-    <el-form-item label="灰度发布比例" prop="grayReleasePercentage">
+    <el-form-item label="灰度发布比例" prop="grayReleaseCondition.releasePercentage">
       <el-input-number
-        v-model.number="filterCondition.grayReleasePercentage"
+        v-model="filterCondition.grayReleaseCondition.releasePercentage"
         :min="0"
         :max="100"
         :step="10"
@@ -20,10 +20,10 @@
 
     <el-form-item label="自定义字段过滤">
       <el-form-item
-        :prop="`customAttributeConditions.${index}`"
+        :prop="`attributeConditions.${index}`"
         :key="index"
         :rules="{ validator: validateCustomAttributeConditions, trigger: 'blur' }"
-        v-for="(conditionItem, index) in filterCondition.customAttributeConditions"
+        v-for="(conditionItem, index) in filterCondition.attributeConditions"
       >
         <div class="custom-attribute-condition-item">
           <p class="custom-attribute-label" style="margin: 0">
@@ -31,7 +31,7 @@
             {{ index + 1 }}
             <el-icon
               class="delete-custom-attribute-icon"
-              @click="() => filterCondition.customAttributeConditions?.splice(index, 1)"
+              @click="() => filterCondition.attributeConditions?.splice(index, 1)"
             >
               <Delete />
             </el-icon>
@@ -100,8 +100,13 @@
 
 <script lang="ts" setup>
 import _ from "lodash"
-import { reactive, ref, watch } from "vue"
-import { CompareOperator, CustomAttributeCondition, FilterCondition } from "@/model/FilterCondition"
+import { ref, watch } from "vue"
+import {
+  CompareOperator,
+  CustomAttributeCondition,
+  FilterCondition,
+  defaultFilterCondition
+} from "@/domain/FilterConditions"
 import { Delete } from "@element-plus/icons-vue"
 import { ElForm, ElFormItem, ElInput, FormRules } from "element-plus"
 
@@ -109,40 +114,22 @@ defineOptions({
   name: "FilterCondition"
 })
 const props = defineProps({
-  modelValue: {
+  filterCondition: {
     type: Object,
     required: true,
-    default: () => ({
-      grayReleasePercentage: 100,
-      customAttributeConditions: [
-        {
-          key: "",
-          operator: CompareOperator.EQUALS,
-          value: ""
-        }
-      ]
-    })
+    default: () => {
+      return defaultFilterCondition()
+    }
   }
 })
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits(["update:filterCondition"])
 
 // code about filter condition
-const filterCondition = reactive<FilterCondition>(
-  _.isEmpty(props.modelValue)
-    ? {
-        grayReleasePercentage: 100,
-        customAttributeConditions: [
-          {
-            key: "",
-            operator: CompareOperator.EQUALS,
-            value: ""
-          }
-        ]
-      }
-    : props.modelValue
-)
+const filterCondition = ref(props.filterCondition)
+console.log(filterCondition.value)
+
 // watch reactive object then assign parent bind object
-watch<FilterCondition>(filterCondition, (cur, _) => emit("update:modelValue", cur))
+watch<FilterCondition>(filterCondition, (cur, _) => emit("update:filterCondition", cur))
 const validateCustomAttributeConditions = (rule: any, customAttribute: CustomAttributeCondition, callback: any) => {
   if (_.isEmpty(customAttribute.value) || _.isEmpty(customAttribute.key)) {
     callback(new Error("请检查键或值是否填写～"))
@@ -151,14 +138,15 @@ const validateCustomAttributeConditions = (rule: any, customAttribute: CustomAtt
   }
 }
 const filterConditionRules: FormRules = {
-  grayReleasePercentage: [{ required: true, message: "灰度发布比例不可为空", trigger: "blur" }]
+  "grayReleaseCondition.releasePercentage": [{ required: true, message: "灰度发布比例不可为空", trigger: "blur" }]
 }
 const supportOperatorList = _.map(CompareOperator, (operator: string) => ({
   label: operator,
   value: operator
 }))
 const addCustomAttributeItem = () => {
-  filterCondition.customAttributeConditions?.push({
+  filterCondition.value.attributeConditions = filterCondition.value?.attributeConditions || []
+  filterCondition.value.attributeConditions?.push({
     key: "",
     operator: CompareOperator.EQUALS,
     value: ""

@@ -1,12 +1,16 @@
 export interface FilterCondition {
-  grayReleasePercentage: number
-  customAttributeConditions: CustomAttributeCondition[]
+  grayReleaseCondition?: GrayReleaseCondition
+  attributeConditions?: CustomAttributeCondition[]
+}
+
+export interface GrayReleaseCondition {
+  releasePercentage: number
 }
 
 export interface CustomAttributeCondition {
   key: string
-  operator: CompareOperator
   value: string | string[]
+  operator: CompareOperator
 }
 
 export enum CompareOperator {
@@ -20,3 +24,11 @@ export enum CompareOperator {
   IN = "IN",
   NOT_IN = "NOT_IN"
 }
+
+export const defaultFilterCondition = (): FilterCondition =>
+  ({
+    grayReleaseCondition: {
+      releasePercentage: 100
+    },
+    attributeConditions: []
+  } as FilterCondition)
