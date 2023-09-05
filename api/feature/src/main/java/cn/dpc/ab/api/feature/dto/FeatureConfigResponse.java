@@ -1,5 +1,6 @@
 package cn.dpc.ab.api.feature.dto;
 
+import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.feature.FeatureConfig;
 import cn.dpc.ab.domain.feature.FeatureConfig.Status.DynamicStatus;
 import lombok.*;
@@ -44,6 +45,8 @@ public class FeatureConfigResponse {
 
     private LocalDateTime updatedAt;
 
+    private FilterCondition filterCondition;
+
     /**
      * from converts FeatureConfig to FeatureConfigResponse.
      *
@@ -66,6 +69,7 @@ public class FeatureConfigResponse {
                 .priority(featureConfig.getDescription().priority())
                 .createdAt(featureConfig.getDescription().createdAt())
                 .updatedAt(featureConfig.getDescription().updatedAt())
+                .filterCondition(featureConfig.getDescription().filterCondition())
                 .build();
     }
 }
