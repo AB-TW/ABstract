@@ -14,6 +14,7 @@
         :min="0"
         :max="100"
         :step="10"
+        :disabled="props.disabled"
         controls-position="right"
       />
     </el-form-item>
@@ -30,6 +31,7 @@
             条件
             {{ index + 1 }}
             <el-icon
+              v-if="!props.disabled"
               class="delete-custom-attribute-icon"
               @click="() => filterCondition.attributeConditions?.splice(index, 1)"
             >
@@ -42,6 +44,7 @@
             placeholder="请输入要过滤的键"
             show-word-limit
             type="text"
+            :disabled="props.disabled"
           />
 
           <el-select
@@ -49,6 +52,7 @@
             style="width: 100%"
             placeholder="Select One Operator"
             @change="conditionOperatorChanged(conditionItem.operator, conditionItem)"
+            :disabled="props.disabled"
           >
             <el-option
               v-for="operator in supportOperatorList"
@@ -65,6 +69,7 @@
             placeholder="请输入要匹配的值"
             show-word-limit
             type="text"
+            :disabled="props.disabled"
           />
 
           <div v-show="_.isArray(conditionItem.value)">
@@ -93,7 +98,13 @@
           </div>
         </div>
       </el-form-item>
-      <el-button class="add-custom-attribute-button" plain icon="Plus" @click="addCustomAttributeItem" />
+      <el-button
+        v-if="!props.disabled"
+        class="add-custom-attribute-button"
+        plain
+        icon="Plus"
+        @click="addCustomAttributeItem"
+      />
     </el-form-item>
   </el-form>
 </template>
@@ -120,6 +131,11 @@ const props = defineProps({
     default: () => {
       return defaultFilterCondition()
     }
+  },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
 const emit = defineEmits(["update:filterCondition"])
