@@ -44,7 +44,7 @@
               :key="item.index"
               :item="item"
               :index="index"
-              :disable="formType == 'view'"
+              :disabled="formType == 'view'"
               @deleteItem="deleteTrackingData(index)"
             />
             <div>
@@ -60,6 +60,7 @@
           ref="filterConditionRef"
           :key="featureConfig.filterCondition"
           :filterCondition="featureConfig.filterCondition"
+          :disabled="formType == 'view'"
           @update:filterCondition="updateFilterCondition"
         />
         <el-form-item v-if="formType !== 'view'">
@@ -72,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref, nextTick } from "vue"
+import { nextTick, onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance } from "element-plus"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
@@ -107,8 +108,7 @@ onBeforeMount(async () => {
   featureKey.value = "" + route.query.featureKey
   // featureKey 是点击feature 模块跳转过来的
   if (route.query.featureKey) {
-    const res = await features.fetch(route.query.featureKey.toString())
-    feature.value = res
+    feature.value = await features.fetch(route.query.featureKey.toString())
     feature.value.dataSource = [transTempToTreeDataSource(feature.value.template)] as Array<FeatureTemplate>
   }
 
@@ -209,12 +209,11 @@ const submitForm = async () => {
         if (valid) {
           try {
             // featureConfig.value.templateData = JSON.stringify(feature.value.dataSource)
-            const tempRet = convertConfigObject(feature.value.dataSource[0])
             // debugger
             // if (_.isObject(tempRet)) {
             //   featureConfig.value.data = JSON.stringify(tempRet)
             // } else {
-            featureConfig.value.data = tempRet
+            featureConfig.value.data = convertConfigObject(feature.value.dataSource[0])
             // }
             featureConfig.value.featureKey = featureKey.value
             featureConfig.value.status = StaticStatus.DRAFT
