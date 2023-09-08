@@ -20,13 +20,12 @@ public class AssignmentApi {
     /**
      * Get assignments by featureKey and experimentId.
      */
-    @GetMapping("/{featureKey}/assignment/{experimentId}")
-    public Mono<AssignmentResult> getAssignment(@PathVariable("featureKey") String featureKey,
-                                                @PathVariable("experimentId") String experimentId,
-                                                @RequestHeader(value = "x-customer-id", required = false) String customerId,
+    @GetMapping("/{experimentId}/assignment")
+    public Mono<AssignmentResult> getAssignment(@PathVariable("experimentId") String experimentId,
                                                 @RequestHeader("x-device-id") String clientId) {
-        return assignments.getAssignmentById(featureKey, customerId,
-                        new Assignment.AssignmentId(new Experiment.ExperimentId(experimentId), clientId))
+        return assignments.getAssignmentById(new Assignment.AssignmentId(
+                new Experiment.ExperimentId(experimentId), clientId)
+                )
                 .map(AssignmentResult::from);
     }
 }
