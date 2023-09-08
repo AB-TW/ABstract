@@ -1,0 +1,25 @@
+package cn.dpc.ab.persistent.experiment;
+
+import cn.dpc.ab.domain.experiment.Assignment;
+import cn.dpc.ab.domain.experiment.Assignments;
+import cn.dpc.ab.persistent.experiment.db.AssignmentDb;
+import cn.dpc.ab.persistent.experiment.db.AssignmentDbRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
+
+/**
+ * AssignmentImpl implements Assignments.
+ */
+@Component
+@RequiredArgsConstructor
+public class AssignmentsImpl implements Assignments {
+
+    private final AssignmentDbRepository repository;
+
+    @Override
+    public Mono<Assignment> getAssignmentById(Assignment.AssignmentId assignmentId) {
+        return repository.findById(assignmentId.clientId() + assignmentId.experimentId())
+                .map(AssignmentDb::toAssignment);
+    }
+}
