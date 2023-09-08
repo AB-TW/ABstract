@@ -87,6 +87,36 @@ export const constantRoutes: RouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: "/experiment",
+    component: Layout,
+    name: "Experiment",
+    meta: {
+      title: "Experiment管理",
+      elIcon: "ScaleToOriginal"
+    },
+    redirect: "/experiment/list",
+    children: [
+      {
+        path: "/experiment/list",
+        component: () => import("@/views/experiment/list.vue"),
+        name: "Experiment-List",
+        meta: {
+          title: "实验列表",
+          keepAlive: true
+        }
+      },
+      {
+        path: "/experiment/add",
+        component: () => import("@/views/experiment/add.vue"),
+        name: "Add-Experiment",
+        meta: {
+          title: "新增实验",
+          keepAlive: true
+        }
+      }
+    ]
   }
 ]
 
