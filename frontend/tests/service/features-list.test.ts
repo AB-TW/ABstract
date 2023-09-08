@@ -1,8 +1,8 @@
 import http from '@/utils/http/http'
-import {FeatureFlags} from "@/domain/FeatureFlags";
+import {Features} from "@/domain/Features";
 import {describe, expect, vi, it} from 'vitest'
 describe("getFeatures service test", () => {
-  const featureInstance = new FeatureFlags();
+  const featureInstance = new Features();
   const tempResult = {
     "content": [
       {
