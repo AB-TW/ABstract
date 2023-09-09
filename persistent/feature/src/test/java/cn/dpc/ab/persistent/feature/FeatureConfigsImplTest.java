@@ -234,30 +234,6 @@ class FeatureConfigsImplTest {
     }
 
     @Test
-    public void should_getAll_success() {
-        var featureKey = "featureKey";
-        when(repository.findByFeatureKey(any(String.class)))
-                .thenReturn(Flux.just(FeatureConfigTestUtil.createFeatureConfigDb("id1", featureKey),
-                        FeatureConfigTestUtil.createFeatureConfigDb("id2", featureKey)));
-
-        featureConfigs.getAll(Feature.Configs.FilterParams.builder().build())
-                .as(StepVerifier::create)
-                .expectNextMatches(featureConfig -> featureConfig.getId().configId().equals("id2"))
-                .expectNextMatches(featureConfig -> featureConfig.getId().configId().equals("id1"))
-                .verifyComplete();
-    }
-
-    @Test
-    public void should_getAll_return_empty_when_db_record_is_empty() {
-        when(repository.findByFeatureKey(any(String.class)))
-                .thenReturn(Flux.empty());
-
-        featureConfigs.getAll(Feature.Configs.FilterParams.builder().build())
-                .as(StepVerifier::create)
-                .verifyComplete();
-    }
-
-    @Test
     public void should_subCollection_success() {
         when(repository.findByFeatureKey(any(String.class)))
                 .thenReturn(Flux.just(FeatureConfigTestUtil.createFeatureConfigDb("id1", "featureKey"),

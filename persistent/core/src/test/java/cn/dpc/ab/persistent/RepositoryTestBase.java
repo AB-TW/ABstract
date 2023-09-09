@@ -15,13 +15,14 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
  * Base class for repository tests.
  */
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = TestConfiguration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = TestConfiguration.class,
+        properties = {"logging.level.root=DEBUG"})
 @Testcontainers
 @ActiveProfiles("test")
 public class RepositoryTestBase {
     @ClassRule
     @Container
-    static final CouchbaseContainer couchbaseContainer = CouchbaseTestContainer.getInstance();
+    public static final CouchbaseContainer couchbaseContainer = CouchbaseTestContainer.getInstance();
 
     @BeforeAll
     public static void setup() {

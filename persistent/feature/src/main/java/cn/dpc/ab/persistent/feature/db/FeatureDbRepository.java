@@ -15,8 +15,11 @@ import reactor.core.publisher.Mono;
  */
 @ScanConsistency(query = QueryScanConsistency.REQUEST_PLUS)
 public interface FeatureDbRepository extends ReactiveCouchbaseRepository<FeatureDb, String> {
-    String FILTER_CONDITION = "#{#n1ql.filter} AND (#{#param.key == null || #param.key == ''} OR featureKey like '%#{#param.key}%') "
-            + "AND (#{#param.enabled == null} OR description.enabled = #{#param.enabled == null ? true: #param.enabled}) ";
+    String FILTER_CONDITION = """
+            #{#n1ql.filter} \
+            AND (#{#param.key == null || #param.key == ''} OR featureKey like '%#{#param.key}%') \
+            AND (#{#param.enabled == null} OR description.enabled = #{#param.enabled == null ? true: #param.enabled})
+            """;
 
     @Query("#{#n1ql.selectEntity} WHERE " + FILTER_CONDITION)
     Flux<FeatureDb> findByFilterParams(@Param("param") Features.FilterParams filterParams);
