@@ -139,8 +139,7 @@
 
 <script setup lang="ts">
 import { onBeforeMount, onMounted, reactive, ref } from "vue"
-import { useRouter } from "vue-router"
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
 import { ElMessage } from "element-plus"
@@ -155,8 +154,7 @@ const featureName = ref("")
 onBeforeMount(async () => {
   featureKey.value = route.query.featureKey
   featureName.value = <string>route.query.featureName
-  const flag = await features.fetch(featureKey.value)
-  feature.value = flag
+  feature.value = await features.fetch(featureKey.value)
 })
 
 const router = useRouter()
@@ -235,7 +233,8 @@ const handleSizeChange = () => {
   searchData()
 }
 
-const handleCurrentChange = () => {
+const handleCurrentChange = (value: number) => {
+  searchForm.page = value
   searchData()
 }
 
