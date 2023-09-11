@@ -15,6 +15,8 @@ import reactor.test.StepVerifier;
 
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
+
 @ExtendWith(MockitoExtension.class)
 class CustomerFeatureConfigsTest {
 
@@ -32,7 +34,7 @@ class CustomerFeatureConfigsTest {
     @Test
     void should_getByFeatureKey_return_empty_when_no_db_record() {
         String featureKey = "featureKey";
-        Mockito.when(featureConfigDbRepository.findByFeatureKey(featureKey))
+        Mockito.when(featureConfigDbRepository.findByFilterParams(any(), any()))
                 .thenReturn(Flux.empty());
 
         customerFeatureConfigs.getByFeatureKey(new Feature.FeatureId(featureKey))
@@ -43,7 +45,7 @@ class CustomerFeatureConfigsTest {
     @Test
     void should_getByFeatureKey_success() {
         String featureKey = "featureKey";
-        Mockito.when(featureConfigDbRepository.findByFeatureKey(featureKey))
+        Mockito.when(featureConfigDbRepository.findByFilterParams(any(), any()))
                 .thenReturn(Flux.just(FeatureConfigTestUtil.createFeatureConfigDb("id1", featureKey,
                                 FeatureConfig.Status.StaticStatus.DRAFT, 0),
                         FeatureConfigTestUtil.createFeatureConfigDb("id2", featureKey,
