@@ -9,10 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import static cn.dpc.ab.persistent.feature.FeatureConfigTestUtil.createFeatureConfig;
+import static cn.dpc.ab.persistent.feature.FeatureConfigTestUtil.createFeatureConfigDb;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +39,7 @@ class FeatureConfigsImplTest {
                     return Mono.just(featureConfigDb);
                 });
 
-        featureConfigs.add(FeatureConfigTestUtil.createFeatureConfig(null, "featureKey"))
+        featureConfigs.add(createFeatureConfig(null, "featureKey"))
                 .as(StepVerifier::create)
                 .expectNextMatches(featureConfig -> featureConfig.getFeatureKey().featureKey().equals("featureKey")
                         && featureConfig.getDescription().updatedAt() != null
@@ -49,7 +52,7 @@ class FeatureConfigsImplTest {
         when(repository.save(any(FeatureConfigDb.class)))
                 .thenReturn(Mono.error(new RuntimeException("save error")));
 
-        featureConfigs.add(FeatureConfigTestUtil.createFeatureConfig(null, "featureKey"))
+        featureConfigs.add(createFeatureConfig(null, "featureKey"))
                 .as(StepVerifier::create)
                 .expectError(RuntimeException.class)
                 .verify();
@@ -59,7 +62,7 @@ class FeatureConfigsImplTest {
     public void should_update_success() {
         when(repository.findById(any(String.class)))
                 .thenAnswer(invocation ->
-                        Mono.just(FeatureConfigTestUtil.createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
+                        Mono.just(createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
                 );
 
         when(repository.save(any(FeatureConfigDb.class)))
@@ -69,7 +72,7 @@ class FeatureConfigsImplTest {
                 });
         String id = "id";
         featureConfigs.update(new FeatureConfig.FeatureConfigId(id),
-                        FeatureConfigTestUtil.createFeatureConfig("featureConfigId", "featureKey").getDescription())
+                        createFeatureConfig("featureConfigId", "featureKey").getDescription())
                 .as(StepVerifier::create)
                 .verifyComplete();
     }
@@ -80,7 +83,7 @@ class FeatureConfigsImplTest {
                 .thenReturn(Mono.empty());
 
         featureConfigs.update(new FeatureConfig.FeatureConfigId("id"),
-                        FeatureConfigTestUtil.createFeatureConfig("featureConfigId", "featureKey").getDescription())
+                        createFeatureConfig("featureConfigId", "featureKey").getDescription())
                 .as(StepVerifier::create)
                 .expectError(IllegalArgumentException.class)
                 .verify();
@@ -90,14 +93,14 @@ class FeatureConfigsImplTest {
     public void should_update_return_error_when_save_error() {
         when(repository.findById(any(String.class)))
                 .thenAnswer(invocation ->
-                        Mono.just(FeatureConfigTestUtil.createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
+                        Mono.just(createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
                 );
 
         when(repository.save(any(FeatureConfigDb.class)))
                 .thenReturn(Mono.error(new RuntimeException("save error")));
         String id = "id";
         featureConfigs.update(new FeatureConfig.FeatureConfigId(id),
-                        FeatureConfigTestUtil.createFeatureConfig("featureConfigId", "featureKey").getDescription())
+                        createFeatureConfig("featureConfigId", "featureKey").getDescription())
                 .as(StepVerifier::create)
                 .expectError(RuntimeException.class)
                 .verify();
@@ -107,7 +110,7 @@ class FeatureConfigsImplTest {
     public void should_delete_success() {
         when(repository.findById(any(String.class)))
                 .thenAnswer(invocation ->
-                        Mono.just(FeatureConfigTestUtil.createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
+                        Mono.just(createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
                 );
 
         when(repository.delete(any(FeatureConfigDb.class)))
@@ -122,7 +125,7 @@ class FeatureConfigsImplTest {
     public void should_delete_logic_delete_when_status_is_not_draft() {
         when(repository.findById(any(String.class)))
                 .thenAnswer(invocation ->
-                        Mono.just(FeatureConfigTestUtil.createFeatureConfigDb(invocation.getArgument(0), "featureKey",
+                        Mono.just(createFeatureConfigDb(invocation.getArgument(0), "featureKey",
                                 FeatureConfig.Status.StaticStatus.PUBLISHED))
                 );
 
@@ -147,7 +150,7 @@ class FeatureConfigsImplTest {
     public void should_publish_success() {
         when(repository.findById(any(String.class)))
                 .thenAnswer(invocation ->
-                        Mono.just(FeatureConfigTestUtil.createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
+                        Mono.just(createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
                 );
 
         when(repository.save(any(FeatureConfigDb.class)))
@@ -176,7 +179,7 @@ class FeatureConfigsImplTest {
     public void should_publish_return_error_when_save_error() {
         when(repository.findById(any(String.class)))
                 .thenAnswer(invocation ->
-                        Mono.just(FeatureConfigTestUtil.createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
+                        Mono.just(createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
                 );
 
         when(repository.save(any(FeatureConfigDb.class)))
@@ -192,7 +195,7 @@ class FeatureConfigsImplTest {
     public void should_disable_success() {
         when(repository.findById(any(String.class)))
                 .thenAnswer(invocation ->
-                        Mono.just(FeatureConfigTestUtil.createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
+                        Mono.just(createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
                 );
 
         when(repository.save(any(FeatureConfigDb.class)))
@@ -221,7 +224,7 @@ class FeatureConfigsImplTest {
     public void should_disable_return_error_when_save_error() {
         when(repository.findById(any(String.class)))
                 .thenAnswer(invocation ->
-                        Mono.just(FeatureConfigTestUtil.createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
+                        Mono.just(createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
                 );
 
         when(repository.save(any(FeatureConfigDb.class)))
@@ -235,9 +238,9 @@ class FeatureConfigsImplTest {
 
     @Test
     public void should_subCollection_success() {
-        when(repository.findByFeatureKey(any(String.class)))
-                .thenReturn(Flux.just(FeatureConfigTestUtil.createFeatureConfigDb("id1", "featureKey"),
-                        FeatureConfigTestUtil.createFeatureConfigDb("id2", "featureKey")));
+        when(repository.findByFilterParams(any(String.class), any(FeatureConfigDbRepository.FilterParams.class),
+                any(Pageable.class)))
+                .thenReturn(Flux.just(createFeatureConfigDb("id2", "featureKey")));
 
         featureConfigs.subCollection(Feature.Configs.FilterParams.builder().build(), 0, 1)
                 .as(StepVerifier::create)
@@ -247,9 +250,8 @@ class FeatureConfigsImplTest {
 
     @Test
     public void should_size_success() {
-        when(repository.findByFeatureKey(any(String.class)))
-                .thenReturn(Flux.just(FeatureConfigTestUtil.createFeatureConfigDb("id1", "featureKey"),
-                        FeatureConfigTestUtil.createFeatureConfigDb("id2", "featureKey")));
+        when(repository.countByFilterParams(any(String.class), any(FeatureConfigDbRepository.FilterParams.class)))
+                .thenReturn(Mono.just(2L));
 
         featureConfigs.size(Feature.Configs.FilterParams.builder().build())
                 .as(StepVerifier::create)
@@ -260,7 +262,7 @@ class FeatureConfigsImplTest {
     @Test
     public void should_get_success() {
         when(repository.findById(any(String.class)))
-                .thenReturn(Mono.just(FeatureConfigTestUtil.createFeatureConfigDb("id", "featureKey")));
+                .thenReturn(Mono.just(createFeatureConfigDb("id", "featureKey")));
 
         featureConfigs.get(new FeatureConfig.FeatureConfigId("id"))
                 .as(StepVerifier::create)

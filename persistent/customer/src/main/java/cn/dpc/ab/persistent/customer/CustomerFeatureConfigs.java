@@ -25,7 +25,10 @@ public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
     @Override
     public Flux<FeatureConfig> getByFeatureKey(Feature.FeatureId featureKey) {
         // TODO: add cache
-        return featureConfigRepository.findByFeatureKey(featureKey.featureKey())
+        FeatureConfigDbRepository.FilterParams params = FeatureConfigDbRepository.FilterParams.from(Feature.Configs.FilterParams.builder()
+                .status(FeatureConfig.Status.DynamicStatus.RUNNING)
+                .build());
+        return featureConfigRepository.findByFilterParams(featureKey.featureKey(), params)
                 .map(FeatureConfigDb::toFeatureConfig)
                 .filter(featureConfig -> Optional.ofNullable(featureConfig.getDescription())
                         .map(description -> description.status().getStatus() == FeatureConfig.Status.DynamicStatus.RUNNING)
@@ -64,7 +67,7 @@ public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
                     .map(FeatureConfig.Description::updatedAt)
                     .orElse(LocalDateTime.MIN);
 
-            if (updatedAtO2.compareTo(updatedAtO1) != 0) {
+            if (!updatedAtO2.isEqual(updatedAtO1)) {
                 return updatedAtO2.compareTo(updatedAtO1);
             }
 
