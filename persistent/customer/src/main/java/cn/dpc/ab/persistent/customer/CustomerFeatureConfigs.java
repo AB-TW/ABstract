@@ -4,6 +4,7 @@ import cn.dpc.ab.domain.core.CustomerId;
 import cn.dpc.ab.domain.customer.Customer;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
+import cn.dpc.ab.persistent.cache.LocalCacheManager;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDb;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,14 @@ import java.util.Optional;
 public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
     private final FeatureConfigDbRepository featureConfigRepository;
     private final CustomerId customerId;
+    private final LocalCacheManager localCacheManager;
 
 
     @Override
     public Flux<FeatureConfig> getByFeatureKey(Feature.FeatureId featureKey) {
         // TODO: add cache
-        return featureConfigRepository.findByFeatureKey(featureKey.featureKey())
-                .map(FeatureConfigDb::toFeatureConfig)
+
+        return getByFeatureKeyFromCache(featureKey)
                 .filter(featureConfig -> Optional.ofNullable(featureConfig.getDescription())
                         .map(description -> description.status().getStatus() == FeatureConfig.Status.DynamicStatus.RUNNING)
                         .orElse(false))
@@ -34,6 +36,15 @@ public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
                         .map(filterCondition -> filterCondition.match(customerId))
                         .orElse(true))
                 .sort(new FeatureConfigComparator());
+    }
+
+    private Flux<FeatureConfig> getByFeatureKeyFromCache(Feature.FeatureId featureKey) {
+        FeatureConfigDbRepository.FilterParams params = FeatureConfigDbRepository.FilterParams.from(Feature.Configs.FilterParams.builder()
+                .status(FeatureConfig.Status.DynamicStatus.RUNNING)
+                .build());
+        return (Flux<FeatureConfig>) localCacheManager.cacheFlux(featureKey.featureKey(),
+                () -> featureConfigRepository.findByFilterParams(featureKey.featureKey(), params)
+                        .map(FeatureConfigDb::toFeatureConfig));
     }
 
     private static class FeatureConfigComparator implements Comparator<FeatureConfig> {
@@ -64,7 +75,7 @@ public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
                     .map(FeatureConfig.Description::updatedAt)
                     .orElse(LocalDateTime.MIN);
 
-            if (updatedAtO2.compareTo(updatedAtO1) != 0) {
+            if (!updatedAtO2.isEqual(updatedAtO1)) {
                 return updatedAtO2.compareTo(updatedAtO1);
             }
 
