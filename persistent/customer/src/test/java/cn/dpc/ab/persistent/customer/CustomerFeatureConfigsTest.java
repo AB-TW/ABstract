@@ -3,6 +3,8 @@ package cn.dpc.ab.persistent.customer;
 import cn.dpc.ab.domain.core.CustomerId;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
+import cn.dpc.ab.persistent.cache.LocalCacheManager;
+import cn.dpc.ab.persistent.cache.LocalCacheProperties;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +30,8 @@ class CustomerFeatureConfigsTest {
     @BeforeEach
     void setUp() {
         customerFeatureConfigs = new CustomerFeatureConfigs(featureConfigDbRepository,
-                new CustomerId("customer-id", "clientId", Map.of()));
+                new CustomerId("customer-id", "clientId", Map.of()),
+                new LocalCacheManager(new LocalCacheProperties()));
     }
 
     @Test
