@@ -4,6 +4,7 @@ import cn.dpc.ab.domain.core.FilterCondition;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,12 +51,12 @@ public class Experiment {
      */
     @Builder
     public record Description(String name, String description, String featureKey,
-                              Integer samplePercentage,
                               Status status,
                               List<Bucket> buckets,
                               LocalDateTime createdAt,
                               LocalDateTime updatedAt,
-                              FilterCondition filterCondition) {
+                              FilterCondition filterCondition,
+                              long configVersion) {
 
     }
 
@@ -123,26 +124,27 @@ public class Experiment {
          */
         public DynamicStatus getStatus() {
             switch (staticStatus) {
-                case PUBLISHED:
+                case PUBLISHED -> {
                     if (startTime != null && startTime.isAfter(LocalDateTime.now())) {
                         return DynamicStatus.NOT_BEGIN;
                     }
-
                     if (endTime != null && endTime.isBefore(LocalDateTime.now())) {
                         return DynamicStatus.STOPPED;
                     }
-
                     if (endCollectTime != null && endCollectTime.isBefore(LocalDateTime.now())) {
                         return DynamicStatus.FINISH_COLLECT;
                     }
-
                     return DynamicStatus.COLLECTING;
-                case PAUSED:
+                }
+                case PAUSED -> {
                     return DynamicStatus.PAUSED;
-                case STOPPED:
+                }
+                case STOPPED -> {
                     return DynamicStatus.STOPPED;
-                default:
+                }
+                default -> {
                     return DynamicStatus.DRAFT;
+                }
             }
         }
     }
@@ -161,11 +163,30 @@ public class Experiment {
                 .description(description.description)
                 .featureKey(description.featureKey)
                 .name(description.name)
-                .samplePercentage(description.samplePercentage)
                 .status(description.status)
                 .filterCondition(description.filterCondition)
+                .configVersion(shouldUpdateConfigVersion(this.description, description)
+                        ? this.description.configVersion + 1
+                        : this.description.configVersion)
                 .build();
         return this;
+    }
+
+    /**
+     * Check should update the config version.
+     *
+     * @param oldDescription the old description
+     * @param newDescription the new description
+     */
+    private boolean shouldUpdateConfigVersion(Description oldDescription, Description newDescription) {
+        List<String> oldBucketKeys = oldDescription.buckets.stream().map(bucket -> bucket.key).toList();
+        List<String> newBucketKeys = newDescription.buckets.stream().map(bucket -> bucket.key).toList();
+
+        return !(new HashSet<>(oldBucketKeys).containsAll(newBucketKeys) && new HashSet<>(newBucketKeys).containsAll(oldBucketKeys))
+                || oldDescription.buckets.stream().anyMatch(bucket ->
+                newDescription.buckets.stream().anyMatch(newBucket -> newBucket.key.equals(bucket.key)
+                        && newBucket.percentage != bucket.percentage))
+                || !oldDescription.filterCondition.equals(newDescription.filterCondition);
     }
 
     /**
@@ -202,22 +223,7 @@ public class Experiment {
      */
     private void validate() {
         validateBuckets();
-        validateSamplePercentage();
     }
-
-    /**
-     * Validate the sample percentage of the experiment.
-     */
-    public void validateSamplePercentage() {
-        if (this.description.samplePercentage == null || this.description.samplePercentage <= 0) {
-            throw new IllegalArgumentException("The sample percentage of an experiment must be greater than 0");
-        }
-
-        if (this.description.samplePercentage > 100) {
-            throw new IllegalArgumentException("The sample percentage of an experiment must be less than or equal to 100");
-        }
-    }
-
 
     /**
      * Validate the buckets of the experiment.
