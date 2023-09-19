@@ -1,5 +1,6 @@
 package cn.dpc.ab.domain.experiment;
 
+import cn.dpc.ab.domain.core.FilterCondition;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -23,7 +24,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(100)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of())
                 .build()));
     }
@@ -40,7 +44,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(100)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
+                        .build())
+                .configVersion(0L)
                 .buckets(null)
                 .build()));
     }
@@ -57,7 +64,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(100)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
                         Experiment.Bucket.builder().key("key1").name("name2").percentage(50).build()))
                 .build()));
@@ -75,7 +85,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(100)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
                         Experiment.Bucket.builder().key("key2").name("name2").percentage(51).build()))
                 .build()));
@@ -93,7 +106,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(-1)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(-1))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
                         Experiment.Bucket.builder().key("key2").name("name2").percentage(50).build()))
                 .build()));
@@ -111,7 +127,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(101)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(101))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
                         Experiment.Bucket.builder().key("key2").name("name2").percentage(50).build()))
                 .build()));
@@ -129,7 +148,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(99)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
                         Experiment.Bucket.builder().key("key2").name("name2").percentage(50).build()))
                 .build());
@@ -148,7 +170,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(99)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
                         Experiment.Bucket.builder().key("key2").name("name2").percentage(50).build()))
                 .build());
@@ -171,7 +196,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(99)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
                         Experiment.Bucket.builder().key("key2").name("name2").percentage(50).build()))
                 .build());
@@ -191,7 +219,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(99)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
                         Experiment.Bucket.builder().key("key2").name("name2").percentage(50).build()))
                 .build());
@@ -213,7 +244,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(99)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
                         Experiment.Bucket.builder().key("key2").name("name2").percentage(50).build()))
                 .build());
@@ -236,7 +270,10 @@ class ExperimentTest {
                         .endCollectTime(null)
                         .build())
                 .featureKey("featureKey")
-                .samplePercentage(99)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
+                        .build())
+                .configVersion(0L)
                 .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
                         Experiment.Bucket.builder().key("key2").name("name2").percentage(50).build()))
                 .build());

@@ -41,8 +41,6 @@ public class ExperimentDb {
 
     private String featureKey;
 
-    private Integer samplePercentage;
-
     private Experiment.Status status;
 
     private List<BucketDb> buckets;
@@ -52,6 +50,8 @@ public class ExperimentDb {
     private LocalDateTime updatedAt;
 
     private FilterCondition filterCondition;
+
+    private long configVersion;
 
     /**
      * toExperiment converts ExperimentDb to Experiment.
@@ -65,12 +65,12 @@ public class ExperimentDb {
                         this.name,
                         this.description,
                         this.featureKey,
-                        this.samplePercentage,
                         this.status,
                         this.buckets.stream().map(BucketDb::toBucket).collect(Collectors.toList()),
                         this.createdAt,
                         this.updatedAt,
-                        this.filterCondition
+                        this.filterCondition,
+                        this.configVersion
                 )
         );
     }
@@ -88,11 +88,12 @@ public class ExperimentDb {
                 .name(experiment.getDescription().name())
                 .description(experiment.getDescription().description())
                 .featureKey(experiment.getDescription().featureKey())
-                .samplePercentage(experiment.getDescription().samplePercentage())
                 .status(experiment.getDescription().status())
                 .buckets(experiment.getDescription().buckets().stream().map(BucketDb::from).collect(Collectors.toList()))
                 .createdAt(Optional.ofNullable(experiment.getDescription().createdAt()).orElse(LocalDateTime.now()))
                 .updatedAt(Optional.ofNullable(experiment.getDescription().createdAt()).orElse(LocalDateTime.now()))
+                .filterCondition(experiment.getDescription().filterCondition())
+                .configVersion(experiment.getDescription().configVersion())
                 .build();
     }
 
