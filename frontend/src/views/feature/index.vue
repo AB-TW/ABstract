@@ -13,8 +13,7 @@
         </template>
       </el-input>
 
-      <el-radio-group v-model="searchForm.enabled" @change="searchData"
-                      class="status-check-group">
+      <el-radio-group v-model="searchForm.enabled" @change="searchData" class="status-check-group">
         <el-radio-button label="null">全部</el-radio-button>
         <el-radio-button label="true">启用</el-radio-button>
         <el-radio-button label="false">禁用</el-radio-button>
@@ -48,7 +47,7 @@
         </el-table-column>
         <el-table-column prop="name" label="名称" width="200" />
         <el-table-column prop="description" label="描述" width="300" />
-        <el-table-column label="是否启用" width="240" >
+        <el-table-column label="是否启用" width="240">
           <template #default="scope">
             <el-tag v-if="scope.row?.enabled == true" type="success">启用</el-tag>
             <el-tag v-else type="danger">禁用</el-tag>
@@ -58,16 +57,10 @@
           <template #default="scope">
             <el-button size="small" @click="goToWatch(scope.row.featureKey, 'view')">查看</el-button>
             <el-button type="primary" size="small" @click="goToWatch(scope.row.featureKey, 'edit')">编辑</el-button>
-            <el-button
-              v-if="scope.row?.enabled == true"
-              type="info"
-              size="small"
-              @click="disable(scope.row.featureKey)"
+            <el-button v-if="scope.row?.enabled == true" type="info" size="small" @click="disable(scope.row.featureKey)"
               >禁用
             </el-button>
-            <el-button v-else type="success" size="small" @click="enable(scope.row.featureKey)"
-              >启用
-            </el-button>
+            <el-button v-else type="success" size="small" @click="enable(scope.row.featureKey)">启用 </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -89,7 +82,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue"
 import { useRouter } from "vue-router"
-import { Feature, Features } from "../../domain/Features"
+import { Feature, Features } from "@/domain/Features"
 import { ElMessage } from "element-plus"
 
 const router = useRouter()
@@ -105,7 +98,7 @@ const searchForm = reactive({
 })
 
 const tableData = ref([] as Feature[])
-const goToWatch = (key:string, type: string) => {
+const goToWatch = (key: string, type: string) => {
   router.push({
     path: "/feature/edit",
     query: {
@@ -117,8 +110,12 @@ const goToWatch = (key:string, type: string) => {
 
 const searchData = () => {
   features
-    .fetchAll(searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, searchForm.featureKey,
-       (searchForm.enabled == "null" ? null : searchForm.enabled == "true"))
+    .fetchAll(
+      searchForm.page > 1 ? searchForm.page - 1 : 0,
+      searchForm.size,
+      searchForm.featureKey,
+      searchForm.enabled == "null" ? null : searchForm.enabled == "true"
+    )
     .then((res) => {
       tableData.value = res.content
       total.value = res.total
@@ -145,22 +142,23 @@ const disable = (featureKey: string) => {
 
 const enable = (featureKey: string) => {
   features
-      .enable(featureKey)
-      .then(() => {
-        ElMessage.success("操作成功")
-        searchData()
-      })
-      .catch((err) => {
-        console.log(err)
-        ElMessage.error("操作失败，请重试")
-      })
+    .enable(featureKey)
+    .then(() => {
+      ElMessage.success("操作成功")
+      searchData()
+    })
+    .catch((err) => {
+      console.log(err)
+      ElMessage.error("操作失败，请重试")
+    })
 }
 
 const handleSizeChange = () => {
   searchData()
 }
 
-const handleCurrentChange = () => {
+const handleCurrentChange = (value: number) => {
+  searchForm.page = value
   searchData()
 }
 
