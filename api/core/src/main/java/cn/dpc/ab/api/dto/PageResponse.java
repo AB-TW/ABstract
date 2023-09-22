@@ -17,13 +17,16 @@ import java.util.List;
 public class PageResponse<T> {
     List<T> content;
 
+    @Builder.Default
     long total = 0;
 
+    @Builder.Default
     int page = 0;
 
+    @Builder.Default
     int pageSize = 10;
 
     public int getPage() {
-        return total <= page * pageSize ? 0 : page;
+        return total <= (long) page * pageSize ? 0 : page;
     }
 }

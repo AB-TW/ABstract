@@ -1,5 +1,5 @@
 plugins {
-    id 'persistent'
+    id 'persistent-couchbase'
 }
 
 dependencies {
@@ -8,7 +8,8 @@ dependencies {
     implementation project(':domain:experiment')
     implementation project(':domain:customer')
     implementation project(':persistent:persistent-core')
+    implementation project(':persistent:persistent-core-couchbase')
     implementation project(':persistent:persistent-feature')
     implementation project(':persistent:persistent-experiment')
-    testImplementation  project(':persistent:persistent-core').sourceSets.test.output
+    testImplementation  project(':persistent:persistent-core-couchbase').sourceSets.test.output
 }
