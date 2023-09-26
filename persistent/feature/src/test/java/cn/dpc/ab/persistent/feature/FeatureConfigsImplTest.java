@@ -237,6 +237,17 @@ class FeatureConfigsImplTest {
     }
 
     @Test
+    public void should_all_success() {
+        when(repository.findByFilterParams(any(String.class), any(FeatureConfigDbRepository.FilterParams.class)))
+                .thenReturn(Flux.just(createFeatureConfigDb("id2", "featureKey")));
+
+        featureConfigs.all(Feature.Configs.FilterParams.builder().build())
+                .as(StepVerifier::create)
+                .expectNextMatches(featureConfig -> featureConfig.getId().configId().equals("id2"))
+                .verifyComplete();
+    }
+
+    @Test
     public void should_subCollection_success() {
         when(repository.findByFilterParams(any(String.class), any(FeatureConfigDbRepository.FilterParams.class),
                 any(Pageable.class)))
