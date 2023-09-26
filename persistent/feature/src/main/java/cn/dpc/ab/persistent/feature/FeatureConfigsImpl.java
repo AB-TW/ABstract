@@ -18,6 +18,11 @@ public class FeatureConfigsImpl implements Feature.Configs {
     private final FeatureConfigDbRepository repository;
     private final Feature.FeatureId featureId;
 
+    public Flux<FeatureConfig> all(FilterParams params) {
+        return repository.findByFilterParams(featureId.featureKey(), FeatureConfigDbRepository.FilterParams.from(params))
+                .map(FeatureConfigDb::toFeatureConfig);
+    }
+
     @Override
     public Flux<FeatureConfig> subCollection(FilterParams params, long from, long to) {
         int pageSize = (int) (to - from);

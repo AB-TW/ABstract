@@ -9,7 +9,5 @@ dependencies {
     implementation project(':domain:customer')
     implementation project(':persistent:persistent-core')
     implementation project(':persistent:persistent-core-couchbase')
-    implementation project(':persistent:persistent-feature')
-    implementation project(':persistent:persistent-experiment')
     testImplementation  project(':persistent:persistent-core-couchbase').sourceSets.test.output
 }
