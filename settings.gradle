@@ -28,4 +28,8 @@ include 'api:customer'
 findProject(':api:customer')?.name = 'api-customer'
 include 'persistent:core-couchbase'
 findProject(':persistent:core-couchbase')?.name = 'persistent-core-couchbase'
+include 'persistent:core-r2dbc'
+findProject(':persistent:core-r2dbc')?.name = 'persistent-core-r2dbc'
+include 'persistent:feature-r2dbc'
+findProject(':persistent:feature-r2dbc')?.name = 'persistent-feature-r2dbc'
 
