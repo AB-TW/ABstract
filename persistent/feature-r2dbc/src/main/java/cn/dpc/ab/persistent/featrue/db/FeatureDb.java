@@ -49,16 +49,15 @@ public class FeatureDb {
      * @param feature the feature to convert
      * @return the FeatureDb
      */
-    public static FeatureDb fromFeature(Feature feature) {
+    public static FeatureDb from(Feature feature) {
         FeatureDb featureDb = new FeatureDb();
         featureDb.setFeatureKey(feature.getId().featureKey());
-        featureDb.setId(feature.getId().featureKey());
         featureDb.setName(feature.getDescription().name());
         featureDb.setDescription(feature.getDescription().description());
         featureDb.setTemplate(feature.getDescription().template());
         featureDb.setEnabled(feature.getDescription().enabled());
         featureDb.setCreatedAt(Optional.ofNullable(feature.getDescription().createdAt()).orElse(LocalDateTime.now()));
-        featureDb.setUpdatedAt(Optional.ofNullable(feature.getDescription().createdAt()).orElse(LocalDateTime.now()));
+        featureDb.setUpdatedAt(Optional.ofNullable(feature.getDescription().updatedAt()).orElse(LocalDateTime.now()));
         return featureDb;
     }
 
@@ -67,12 +66,25 @@ public class FeatureDb {
      *
      * @return the feature
      */
-    public Feature toFeature() {
+    public Feature to() {
         return Feature.builder()
                 .id(new Feature.FeatureId(featureKey))
                 .description(new Feature.Description(name, description,
                         JsonUtil.fromJson(template, Feature.FeatureTemplate.class),
                         enabled, createdAt, updatedAt))
                 .build();
+    }
+
+    /**
+     * Update a feature description.
+     *
+     * @param description the description to update
+     */
+    public void updateDescription(Feature.Description description) {
+        this.setName(description.name());
+        this.setDescription(description.description());
+        this.setTemplate(description.template());
+        this.setEnabled(description.enabled());
+        this.setUpdatedAt(Optional.ofNullable(description.updatedAt()).orElse(LocalDateTime.now()));
     }
 }

@@ -1,47 +1,55 @@
 package cn.dpc.ab.persistent.featrue.db;
 
-import cn.dpc.ab.domain.feature.Feature;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
-import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.test.StepVerifier;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
+
+import static cn.dpc.ab.persistent.featrue.db.FeatureTestUtil.createFeatureDb;
 
 @ExtendWith(SpringExtension.class)
-@DataR2dbcTest
+@DataR2dbcTest(properties = "logging.level.org.springframework.data.r2dbc=DEBUG")
 class FeatureRepositoryTest {
-
-    @Autowired
-    private DatabaseClient databaseClient;
 
     @Autowired
     private FeatureRepository featureRepository;
 
+    @BeforeEach
+    public void setUp() {
+        featureRepository.deleteAll().block();
+    }
+
     @Test
     public void should_find_all_success() {
-        FeatureDb featureDb = new FeatureDb();
-        featureDb.setFeatureKey("test");
-        featureDb.setName("test");
-        featureDb.setDescription("test");
-        featureDb.setTemplate(Feature.FeatureTemplate.builder()
-                .dataType(Feature.FeatureTemplate.DataType.BOOLEAN)
-                .defaultValue("true")
-                .build());
-        featureDb.setUpdatedAt(LocalDateTime.now());
-        featureDb.setCreatedAt(LocalDateTime.now());
-        featureDb.setEnabled(true);
+        FeatureDb featureDb = createFeatureDb(UUID.randomUUID().toString());
         featureRepository.save(featureDb).block();
+
         featureRepository.findAll()
-                .map(featureDb1 -> {
-                    System.out.println(featureDb1);
-                    return featureDb1;
-                })
                 .as(StepVerifier::create)
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
+    @Test
+    public void should_find_by_featureKey_success() {
+        String featureKey = UUID.randomUUID().toString();
+        FeatureDb featureDb = createFeatureDb(featureKey);
+        featureRepository.save(featureDb).block();
+
+        featureRepository.findByFeatureKey(featureKey)
+                .as(StepVerifier::create)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        featureRepository.findByFeatureKey("notExistFeatureKey")
+                .as(StepVerifier::create)
+                .verifyComplete();
+    }
+
+
 }
