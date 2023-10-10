@@ -19,7 +19,7 @@ public class AssignmentsImpl implements Assignments {
 
     @Override
     public Mono<Assignment> getAssignmentById(Assignment.AssignmentId assignmentId) {
-        return repository.findById(assignmentId.clientId() + assignmentId.experimentId())
+        return repository.findById("ci:" + assignmentId.clientId() + "-" + "ei:" + assignmentId.experimentId())
                 .map(AssignmentDb::toAssignment);
     }
 }
