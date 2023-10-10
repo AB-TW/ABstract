@@ -65,7 +65,7 @@ public class Assignment {
                 .experimentConfigVersion(experiment.getDescription().configVersion())
                 .customerIds(new HashSet<>()).build();
 
-        if (!customerId.customerId().isEmpty()) {
+        if (Optional.ofNullable(customerId.customerId()).filter(s -> !s.isEmpty()).isPresent()) {
             assignment.addCustomerId(customerId.customerId());
         }
 
@@ -77,13 +77,16 @@ public class Assignment {
      */
     public void addCustomerId(String customerId) {
         this.customerIds = null == customerIds ? new HashSet<>() : customerIds;
-        if (!customerId.isEmpty()) {
+        if (Optional.ofNullable(customerId).filter(s -> !s.isEmpty()).isPresent()) {
             customerIds.add(customerId);
         }
     }
 
+    /**
+     * containsCustomerId.
+     */
     public boolean containsCustomerId(CustomerId customerId) {
-        return !customerId.customerId().isEmpty()
+        return Optional.ofNullable(customerId.customerId()).filter(s -> !s.isEmpty()).isPresent()
                 && Optional.ofNullable(customerIds).map(ids -> ids.contains(customerId.customerId())).orElse(false);
     }
 }
