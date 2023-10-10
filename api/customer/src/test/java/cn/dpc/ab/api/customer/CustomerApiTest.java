@@ -35,6 +35,9 @@ class CustomerApiTest {
     @Mock
     Customer.FeatureConfigs configs;
 
+    @Mock
+    Customer.Assignments assignments;
+
     @Test
     void should_getFeatureConfigs_return_empty_when_customers_return_empty() {
         when(customers.getById(Mockito.any()))
@@ -58,11 +61,14 @@ class CustomerApiTest {
                 .thenAnswer(invocation -> {
                     Customer customer = new Customer((CustomerId) invocation.getArguments()[0]);
                     customer.setFeatureConfigs(configs);
+                    customer.setAssignments(assignments);
                     return Mono.just(customer);
                 });
 
         when(configs.getByFeatureKey(Mockito.any()))
                 .thenReturn(Flux.empty());
+        when(assignments.getByFeatureKey(Mockito.any()))
+                .thenReturn(Mono.empty());
 
 
         webClient.post()
@@ -83,6 +89,7 @@ class CustomerApiTest {
                 .thenAnswer(invocation -> {
                     Customer customer = new Customer((CustomerId) invocation.getArguments()[0]);
                     customer.setFeatureConfigs(configs);
+                    customer.setAssignments(assignments);
                     return Mono.just(customer);
                 });
 
@@ -90,6 +97,9 @@ class CustomerApiTest {
         when(configs.getByFeatureKey(Mockito.any()))
                 .thenReturn(Flux.just(createFeatureConfig("id1", featureKey),
                         createFeatureConfig("id2", featureKey)));
+
+        when(assignments.getByFeatureKey(Mockito.any()))
+                .thenReturn(Mono.empty());
 
 
         webClient.post()

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
@@ -66,7 +65,7 @@ public class Assignment {
                 .experimentConfigVersion(experiment.getDescription().configVersion())
                 .customerIds(new HashSet<>()).build();
 
-        if (StringUtils.hasLength(customerId.customerId())) {
+        if (!customerId.customerId().isEmpty()) {
             assignment.addCustomerId(customerId.customerId());
         }
 
@@ -78,13 +77,13 @@ public class Assignment {
      */
     public void addCustomerId(String customerId) {
         this.customerIds = null == customerIds ? new HashSet<>() : customerIds;
-        if (StringUtils.hasLength(customerId)) {
+        if (!customerId.isEmpty()) {
             customerIds.add(customerId);
         }
     }
 
     public boolean containsCustomerId(CustomerId customerId) {
-        return StringUtils.hasLength(customerId.customerId())
+        return !customerId.customerId().isEmpty()
                 && Optional.ofNullable(customerIds).map(ids -> ids.contains(customerId.customerId())).orElse(false);
     }
 }
