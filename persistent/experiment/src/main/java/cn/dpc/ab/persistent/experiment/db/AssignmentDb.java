@@ -10,7 +10,6 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.couchbase.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,7 +27,7 @@ public class AssignmentDb {
     @Version
     private long version;
 
-    private long experimentVersion;
+    private long experimentConfigVersion;
 
     private String bucketKey;
 
@@ -53,6 +52,7 @@ public class AssignmentDb {
         return new Assignment(
                 new Assignment.AssignmentId(new Experiment.ExperimentId(this.experimentId),
                         this.clientId),
+                this.experimentConfigVersion,
                 Experiment.Bucket.builder().key(this.bucketKey).build(),
                 this.extraInfo
         );

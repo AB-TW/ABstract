@@ -18,11 +18,11 @@ public class AssignmentApi {
     private final Assignments assignments;
 
     /**
-     * Get assignments by featureKey and experimentId.
+     * Get assignments by clientId and experimentId.
      */
-    @GetMapping("/{experimentId}/assignment")
+    @GetMapping("/{experimentId}/assignment/{clientId}")
     public Mono<AssignmentResult> getAssignment(@PathVariable("experimentId") String experimentId,
-                                                @RequestHeader("x-device-id") String clientId) {
+                                                @PathVariable("clientId") String clientId) {
         return assignments.getAssignmentById(new Assignment.AssignmentId(
                 new Experiment.ExperimentId(experimentId), clientId)
                 )

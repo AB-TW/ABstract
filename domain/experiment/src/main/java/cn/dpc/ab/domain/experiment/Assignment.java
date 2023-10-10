@@ -17,6 +17,7 @@ import java.util.Map;
 public class Assignment {
 
     private AssignmentId id;
+    private long experimentConfigVersion;
     private Experiment.Bucket bucket;
     private Map<String, Object> extraInfo;
 
