@@ -5,6 +5,8 @@ import cn.dpc.ab.domain.customer.Customer;
 import cn.dpc.ab.domain.customer.Customers;
 import cn.dpc.ab.domain.feature.Features;
 import cn.dpc.ab.persistent.cache.LocalCacheManager;
+import cn.dpc.ab.domain.experiment.Assignments;
+import cn.dpc.ab.domain.experiment.Experiments;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -17,12 +19,15 @@ import reactor.core.publisher.Mono;
 public class CustomersImpl implements Customers {
     private final Features features;
     private final LocalCacheManager localCacheManager;
+    private final Experiments experiments;
+    private final Assignments assignments;
 
     @Override
     public Mono<Customer> getById(CustomerId customerId) {
         Customer customer = new Customer(customerId);
         customer.setFeatureConfigs(new CustomerFeatureConfigs(features,
                 customerId, localCacheManager));
+        customer.setAssignments(new CustomerAssignments(experiments, assignments, customerId));
         return Mono.just(customer);
     }
 }
