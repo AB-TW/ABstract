@@ -20,14 +20,15 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class Assignment {
+    private static final String CUSTOMER_ID_KEY = "customerIds";
 
     public static final Assignment EMPTY = new Assignment();
 
     private AssignmentId id;
+
     private Experiment.Bucket bucket;
 
     private long experimentConfigVersion;
-    private Set<String> customerIds;
 
     private Map<String, Object> extraInfo;
 
@@ -63,7 +64,7 @@ public class Assignment {
         Assignment assignment = Assignment.builder()
                 .id(new AssignmentId(experiment.getId(), customerId.clientId()))
                 .experimentConfigVersion(experiment.getDescription().configVersion())
-                .customerIds(new HashSet<>()).build();
+                .build();
 
         if (Optional.ofNullable(customerId.customerId()).filter(s -> !s.isEmpty()).isPresent()) {
             assignment.addCustomerId(customerId.customerId());
@@ -73,20 +74,33 @@ public class Assignment {
     }
 
     /**
-     * addCustomerId.
+     * add customerId to extraInfo.
+     *
+     * @param customerId the customerId to add
      */
     public void addCustomerId(String customerId) {
-        this.customerIds = null == customerIds ? new HashSet<>() : customerIds;
-        if (Optional.ofNullable(customerId).filter(s -> !s.isEmpty()).isPresent()) {
-            customerIds.add(customerId);
+        Set<String> customerIds = (Set<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new HashSet<String>());
+
+        if (Optional.ofNullable(customerId).filter(s -> !s.isEmpty()).isEmpty()) {
+            return;
         }
+
+        customerIds.add(customerId);
+        this.extraInfo.put(CUSTOMER_ID_KEY, customerIds);
     }
 
     /**
-     * containsCustomerId.
+     * contains customerId.
+     *
+     * @param customerId the customerId to check
+     * @return true if contains
      */
     public boolean containsCustomerId(CustomerId customerId) {
-        return Optional.ofNullable(customerId.customerId()).filter(s -> !s.isEmpty()).isPresent()
-                && Optional.ofNullable(customerIds).map(ids -> ids.contains(customerId.customerId())).orElse(false);
+        if (Optional.ofNullable(customerId.customerId()).filter(s -> !s.isEmpty()).isEmpty()) {
+            return false;
+        }
+
+        Set<String> customerIds = (Set<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new HashSet<String>());
+        return customerIds.contains(customerId.customerId());
     }
 }
