@@ -32,4 +32,5 @@ include 'persistent:core-r2dbc'
 findProject(':persistent:core-r2dbc')?.name = 'persistent-core-r2dbc'
 include 'persistent:feature-r2dbc'
 findProject(':persistent:feature-r2dbc')?.name = 'persistent-feature-r2dbc'
-
+include 'api:experiment'
+findProject(':api:experiment')?.name = 'api-experiment'
