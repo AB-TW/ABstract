@@ -3,9 +3,7 @@ package cn.dpc.ab.persistent.featrue;
 import cn.dpc.ab.domain.feature.AbstractFeatures;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Features;
-import cn.dpc.ab.persistent.featrue.db.CustomerFeatureRepository;
-import cn.dpc.ab.persistent.featrue.db.FeatureDb;
-import cn.dpc.ab.persistent.featrue.db.FeatureRepository;
+import cn.dpc.ab.persistent.featrue.db.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -21,6 +19,9 @@ import reactor.core.publisher.Mono;
 public class FeaturesImpl extends AbstractFeatures {
     private final FeatureRepository repository;
     private final CustomerFeatureRepository customerFeatureRepository;
+    private final FeatureConfigRepository featureConfigRepository;
+    private final CustomerFeatureConfigRepository customerFeatureConfigRepository;
+
 
     /**
      * enableToDb enables a feature in the database.
@@ -61,11 +62,11 @@ public class FeaturesImpl extends AbstractFeatures {
     @Override
     public Mono<Feature> get(Feature.FeatureId id) {
         return repository.findByFeatureKey(id.featureKey())
-                .map(FeatureDb::to);
-//                .map(feature -> {
-//                    feature.setConfigs(new FeatureConfigsImpl(featureConfigDbRepository, feature.getId()));
-//                    return feature;
-//                });
+                .map(FeatureDb::to)
+                .map(feature -> {
+                    feature.setConfigs(new FeatureConfigsImpl(featureConfigRepository, customerFeatureConfigRepository, feature.getId()));
+                    return feature;
+                });
     }
 
     /**
