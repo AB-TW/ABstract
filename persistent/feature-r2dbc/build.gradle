@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation project(':domain:feature')
+    implementation project(':domain:core')
     implementation project(':persistent:persistent-core-r2dbc')
     testImplementation  project(':persistent:persistent-core-r2dbc').sourceSets.test.output
 }

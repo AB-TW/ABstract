@@ -96,7 +96,7 @@ class CustomerFeatureRepositoryTest {
                 .key("key")
                 .build();
 
-        PageRequest pageRequest = PageRequest.of(0, 1, by("feature_key").descending());
+        PageRequest pageRequest = PageRequest.of(0, 1, by("featureKey").descending());
         repository.findAll(params, pageRequest)
                 .as(StepVerifier::create)
                 .expectNextMatches(feature -> feature.getFeatureKey().equals(featureKey2))

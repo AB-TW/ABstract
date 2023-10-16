@@ -21,19 +21,27 @@ public class JsonUtil {
      */
     @SneakyThrows
     public static String toJson(Object object) {
+        if (null == object) {
+            return null;
+        }
+
         return objectMapper.writeValueAsString(object);
     }
 
     /**
      * Convert a json string to an object.
      *
-     * @param template the json string
-     * @param clazz    the class of the object
-     * @param <T>      the type of the object
+     * @param jsonString the json string
+     * @param clazz      the class of the object
+     * @param <T>        the type of the object
      * @return the object
      */
     @SneakyThrows
-    public static <T> T fromJson(String template, Class<T> clazz) {
-        return objectMapper.readValue(template, clazz);
+    public static <T> T fromJson(String jsonString, Class<T> clazz) {
+        if (null == jsonString || jsonString.isEmpty()) {
+            return null;
+        }
+
+        return objectMapper.readValue(jsonString, clazz);
     }
 }
