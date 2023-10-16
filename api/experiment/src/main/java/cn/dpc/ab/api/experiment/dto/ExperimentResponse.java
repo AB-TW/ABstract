@@ -2,7 +2,7 @@ package cn.dpc.ab.api.experiment.dto;
 
 import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.experiment.Experiment;
-import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
+import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDateTime;
@@ -11,6 +11,7 @@ import java.util.List;
 /**
  * ExperimentRequest provides for experiment api.
  */
+@Data
 public class ExperimentResponse {
 
     private String id;
@@ -25,7 +26,7 @@ public class ExperimentResponse {
 
     private Experiment.Status status;
 
-    private List<ExperimentDb.BucketDb> buckets;
+    private List<Experiment.Bucket> buckets;
 
     private LocalDateTime createdAt;
 
@@ -36,9 +37,10 @@ public class ExperimentResponse {
     /**
      * create ExperimentResponse from ExperimentDb.
      */
-    public static ExperimentResponse from(ExperimentDb experimentDb) {
+    public static ExperimentResponse from(Experiment experiment) {
         ExperimentResponse experimentResponse = new ExperimentResponse();
-        BeanUtils.copyProperties(experimentDb, experimentResponse);
+        BeanUtils.copyProperties(experiment.getDescription(), experimentResponse);
+        experimentResponse.setId(experiment.getId().id());
         return experimentResponse;
     }
 }
