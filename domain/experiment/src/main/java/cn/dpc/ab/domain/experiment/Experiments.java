@@ -89,4 +89,6 @@ public interface Experiments {
      * @return a Mono that completes when the experiment has been stopped
      */
     Mono<Void> stop(Experiment.ExperimentId id);
+
+    Flux<Experiment> getByFeatureKey(String featureKey);
 }
