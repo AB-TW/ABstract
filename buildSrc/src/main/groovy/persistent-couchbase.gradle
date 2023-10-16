@@ -1,0 +1,11 @@
+plugins {
+    id "persistent"
+}
+
+
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-couchbase-reactive'
+    testImplementation 'org.testcontainers:couchbase:1.18.0'
+    testImplementation "org.testcontainers:junit-jupiter:1.18.0"
+}

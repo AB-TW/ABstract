@@ -1,0 +1,8 @@
+plugins {
+    id 'persistent-couchbase'
+}
+
+dependencies {
+    implementation project(':persistent:persistent-core')
+    testImplementation  project(':persistent:persistent-core').sourceSets.test.output
+}

@@ -2,8 +2,7 @@ package cn.dpc.ab.api.experiment;
 
 import cn.dpc.ab.api.experiment.dto.ExperimentRequest;
 import cn.dpc.ab.api.experiment.dto.ExperimentResponse;
-import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
-import cn.dpc.ab.persistent.experiment.db.ExperimentDbRepository;
+import cn.dpc.ab.domain.experiment.Experiments;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,11 +18,11 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ExperimentApi {
 
-    private ExperimentDbRepository experimentDbRepository;
+    private final Experiments experiments;
 
     @PostMapping
     Mono<ExperimentResponse> add(@RequestBody ExperimentRequest experimentRequest) {
-        return experimentDbRepository.save(ExperimentDb.from(experimentRequest.to()))
+        return experiments.add(experimentRequest.to())
                 .map(ExperimentResponse::from);
     }
 }
