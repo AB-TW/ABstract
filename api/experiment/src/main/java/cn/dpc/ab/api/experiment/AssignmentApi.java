@@ -28,4 +28,18 @@ public class AssignmentApi {
                 )
                 .map(AssignmentResult::from);
     }
+
+
+    /**
+     * Get assignments by clientId and experimentId.
+     */
+    @PutMapping("/{experimentId}/assignment/{clientId}")
+    public Mono<AssignmentResult> addAssignment(@PathVariable("experimentId") String experimentId,
+                                                @PathVariable("clientId") String clientId) {
+        return assignments.add(Assignment.builder()
+                        .id(new Assignment.AssignmentId(
+                                new Experiment.ExperimentId(experimentId), clientId))
+                        .build())
+                .map(AssignmentResult::from);
+    }
 }

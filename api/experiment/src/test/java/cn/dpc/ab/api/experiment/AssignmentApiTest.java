@@ -2,6 +2,7 @@ package cn.dpc.ab.api.experiment;
 
 import cn.dpc.ab.api.TestConfiguration;
 import cn.dpc.ab.api.experiment.dto.AssignmentResult;
+import cn.dpc.ab.domain.experiment.Assignment;
 import cn.dpc.ab.domain.experiment.Assignments;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -58,6 +60,23 @@ public class AssignmentApiTest {
         webClient.get()
                 .uri((builder) -> builder.path("/assignments/" + experimentId
                                 + "/assignment/" + clientId).build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(AssignmentResult.class)
+                .hasSize(1);
+    }
+
+    @Test
+    void should_add_assignment_success() {
+        String experimentId = "experimentId";
+        String clientId = "clientId";
+        String bucketKey = "bucketKey";
+        long experimentConfigVersion = 123456;
+        when(assignments.add(any(Assignment.class))).thenReturn(Mono.just(AssignmentTestUtil.createAssignment(
+                clientId, experimentId, bucketKey, experimentConfigVersion)));
+        webClient.put()
+                .uri((builder) -> builder.path("/assignments/" + experimentId
+                        + "/assignment/" + clientId).build())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(AssignmentResult.class)

@@ -25,7 +25,8 @@ public class AssignmentsImpl implements Assignments {
 
     @Override
     public Mono<Assignment> add(Assignment assignment) {
-        return null;
+        return repository.save(AssignmentDb.from(assignment))
+                .map(AssignmentDb::toAssignment);
     }
 
     @Override
@@ -35,7 +36,7 @@ public class AssignmentsImpl implements Assignments {
 
     @Override
     public Mono<Assignment> getAssignmentById(Assignment.AssignmentId assignmentId) {
-        return repository.findById("ci:" + assignmentId.clientId() + "-" + "ei:" + assignmentId.experimentId())
+        return repository.findById("ci:" + assignmentId.clientId() + "-" + "ei:" + assignmentId.experimentId().id())
                 .map(AssignmentDb::toAssignment);
     }
 }

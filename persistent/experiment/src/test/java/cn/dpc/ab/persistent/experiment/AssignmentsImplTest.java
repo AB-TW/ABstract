@@ -3,16 +3,19 @@ package cn.dpc.ab.persistent.experiment;
 import cn.dpc.ab.domain.experiment.Assignment;
 import cn.dpc.ab.domain.experiment.Assignments;
 import cn.dpc.ab.domain.experiment.Experiment;
+import cn.dpc.ab.persistent.experiment.db.AssignmentDb;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDbRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -28,6 +31,36 @@ public class AssignmentsImplTest {
     @BeforeEach
     void setUp() {
         assignments = new AssignmentsImpl(repository);
+    }
+
+    @Test
+    void should_add_success() {
+        when(repository.save(any(AssignmentDb.class))).thenReturn(Mono.just(AssignmentTestUtil.createAssignmentDb(
+                "123123", "234234", 111111
+                )));
+
+        assignments.add(Assignment.builder()
+                        .id(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"),
+                                "123123"))
+                        .build())
+                .as(StepVerifier::create)
+                .expectNextMatches(assignment -> assignment.getId().clientId().equals("123123")
+                && assignment.getId().experimentId().id().equals("234234"))
+                .verifyComplete();
+    }
+
+    @Test
+    void should_add_return_error_when_repository_save_error() {
+        when(repository.save(any(AssignmentDb.class)))
+                .thenReturn(Mono.error(new DuplicateKeyException("save error")));
+
+        assignments.add(Assignment.builder()
+                        .id(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"),
+                                "123123"))
+                        .build())
+                .as(StepVerifier::create)
+                .expectError()
+                .verify();
     }
 
     @Test

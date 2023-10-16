@@ -63,4 +63,22 @@ public class AssignmentDb {
                 this.extraInfo
         );
     }
+
+    /**
+     * from converts Experiment to ExperimentDb.
+     *
+     * @param assignment the assignment
+     * @return the assignment db
+     */
+    public static AssignmentDb from(Assignment assignment) {
+        return AssignmentDb.builder()
+                .id("ci:" + assignment.getId().clientId() + "-" + "ei:" + assignment.getId().experimentId().id())
+                .experimentConfigVersion(assignment.getExperimentConfigVersion())
+                .experimentId(assignment.getId().experimentId().id())
+                .clientId(assignment.getId().clientId())
+                .customerIds(assignment.getCustomerIds())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
 }
