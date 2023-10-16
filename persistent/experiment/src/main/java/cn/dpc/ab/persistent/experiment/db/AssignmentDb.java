@@ -1,19 +1,21 @@
 package cn.dpc.ab.persistent.experiment.db;
 
-import cn.dpc.ab.domain.experiment.Assignment;
 import cn.dpc.ab.domain.experiment.Experiment;
+import cn.dpc.ab.domain.experiment.Assignment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.couchbase.core.index.QueryIndexed;
 import org.springframework.data.couchbase.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * AssignmentDb represents an assignment.
+ * AssignmentDb provides for save assignments.
  */
 @Document
 @Data
@@ -23,6 +25,9 @@ import java.util.Map;
 public class AssignmentDb {
 
     private String id;
+
+    @QueryIndexed
+    private String featureKey;
 
     @Version
     private long version;
@@ -35,7 +40,7 @@ public class AssignmentDb {
 
     private String clientId;
 
-    private String customerId;
+    private Set<String> customerIds;
 
     private Map<String, Object> extraInfo;
 
@@ -54,6 +59,7 @@ public class AssignmentDb {
                         this.clientId),
                 this.experimentConfigVersion,
                 Experiment.Bucket.builder().key(this.bucketKey).build(),
+                this.customerIds,
                 this.extraInfo
         );
     }

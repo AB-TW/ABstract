@@ -5,12 +5,15 @@ import cn.dpc.ab.domain.experiment.Experiments;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDbRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * ExperimentsImpl implements Experiments.
+ * Implement experiments.
  */
+@Component
 @RequiredArgsConstructor
 public class ExperimentsImpl implements Experiments {
 
@@ -38,7 +41,7 @@ public class ExperimentsImpl implements Experiments {
 
     @Override
     public Mono<Experiment> getExperiment(Experiment.ExperimentId id) {
-        return null;
+        return experimentDbRepository.findById(id.id()).map(ExperimentDb::toExperiment);
     }
 
     @Override
@@ -59,5 +62,11 @@ public class ExperimentsImpl implements Experiments {
     @Override
     public Mono<Void> stop(Experiment.ExperimentId id) {
         return null;
+    }
+
+    @Override
+    public Flux<Experiment> getByFeatureKey(String featureKey) {
+        return experimentDbRepository.findByFeatureKey(featureKey, Sort.by("description.updatedAt").descending())
+                .map(ExperimentDb::toExperiment);
     }
 }
