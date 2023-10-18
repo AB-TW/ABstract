@@ -1,5 +1,6 @@
 package cn.dpc.ab.persistent.experiment;
 
+import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
 
@@ -27,7 +28,10 @@ public class ExperimentTestUtil {
                 .updatedAt(LocalDateTime.now())
                 .buckets(List.of())
                 .status(Experiment.Status.builder().staticStatus(Experiment.Status.StaticStatus.DRAFT).build())
-                .samplePercentage(100)
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
+                        .build())
+                .configVersion(0L)
                 .featureKey("featureKey")
                 .description("description")
                 .build();

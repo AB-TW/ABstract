@@ -6,7 +6,7 @@ export interface Feature {
   featureKey: string
   name: string
   description?: string
-  status: string
+  enabled: boolean
   dataSource: Array<FeatureTemplate>
   template: FeatureTemplate
 }
@@ -77,7 +77,7 @@ export class Features {
 
   fetchAll(page: number, pageSize: number, featureKey?: string, enabled?: boolean): Promise<PageResponse<Feature>> {
     return http
-      .get(this.getUrl(`/features`), { page, pageSize, key: featureKey, enabled})
+      .get(this.getUrl(`/features`), { page, pageSize, key: featureKey, enabled })
       .then((res: any) => res?.data as PageResponse<Feature>)
   }
 
@@ -86,6 +86,7 @@ export class Features {
   }
 
   create(feature: Feature): Promise<Feature> {
+    feature.enabled = true
     return http.post(this.getUrl(`/features`), feature).then((res: any) => res?.data as Feature)
   }
 

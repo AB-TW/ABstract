@@ -1,11 +1,14 @@
 package cn.dpc.ab.persistent.feature.db;
 
+import cn.dpc.ab.domain.feature.Feature;
+import cn.dpc.ab.domain.feature.FeatureConfig;
 import cn.dpc.ab.persistent.RepositoryTestBase;
 import cn.dpc.ab.persistent.feature.FeatureConfigTestUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import reactor.test.StepVerifier;
 
 import java.util.List;
@@ -101,6 +104,62 @@ public class FeatureConfigDbRepositoryTest extends RepositoryTestBase {
                 .as(StepVerifier::create)
                 .expectNextMatches(config -> config.getId().equals(id) && config.getFeatureKey().equals(featureKey)
                         && config.getDescription().getData() instanceof List<?>)
+                .verifyComplete();
+    }
+
+    @Test
+    public void should_findByFilterParams_success() {
+        String id = "id";
+        String featureKey = "feature1";
+
+        repository.save(FeatureConfigTestUtil.createFeatureConfigDb(id, featureKey)).block();
+        repository.save(FeatureConfigTestUtil.createFeatureConfigDb("id2", featureKey)).block();
+
+        Feature.Configs.FilterParams params = Feature.Configs.FilterParams.builder()
+                .title("tit")
+                .status(FeatureConfig.Status.DynamicStatus.DRAFT)
+                .build();
+        repository.findByFilterParams(featureKey, FeatureConfigDbRepository.FilterParams.from(params))
+                .as(StepVerifier::create)
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void should_findByFilterParams_with_page_success() {
+        String id = "id";
+        String featureKey = "feature1";
+
+        repository.save(FeatureConfigTestUtil.createFeatureConfigDb(id, featureKey)).block();
+        repository.save(FeatureConfigTestUtil.createFeatureConfigDb("id2", featureKey)).block();
+
+        Feature.Configs.FilterParams params = Feature.Configs.FilterParams.builder()
+                .title("tit")
+                .status(FeatureConfig.Status.DynamicStatus.DRAFT)
+                .build();
+
+        repository.findByFilterParams(featureKey, FeatureConfigDbRepository.FilterParams.from(params), Pageable.ofSize(1))
+                .as(StepVerifier::create)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    public void should_countByFilterParams_success() {
+        String id = "id";
+        String featureKey = "feature1";
+
+        repository.save(FeatureConfigTestUtil.createFeatureConfigDb(id, featureKey)).block();
+        repository.save(FeatureConfigTestUtil.createFeatureConfigDb("id2", featureKey)).block();
+
+        Feature.Configs.FilterParams params = Feature.Configs.FilterParams.builder()
+                .title("tit")
+                .status(FeatureConfig.Status.DynamicStatus.DRAFT)
+                .build();
+
+        repository.countByFilterParams(featureKey, FeatureConfigDbRepository.FilterParams.from(params))
+                .as(StepVerifier::create)
+                .expectNext(2L)
                 .verifyComplete();
     }
 }

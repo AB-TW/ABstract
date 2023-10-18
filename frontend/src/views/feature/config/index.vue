@@ -19,8 +19,7 @@
           <el-button icon="Search" @click="searchData" />
         </template>
       </el-input>
-      <el-radio-group v-model="searchForm.status" @change="searchData"
-                      class="status-check-group">
+      <el-radio-group v-model="searchForm.status" @change="searchData" class="status-check-group">
         <el-radio-button label="ALL">全部</el-radio-button>
         <el-radio-button label="DRAFT">草稿</el-radio-button>
         <el-radio-button label="NOT_BEGIN">未生效</el-radio-button>
@@ -50,15 +49,15 @@
         新增
       </el-button>
       <el-table :data="tableData" border style="width: 100%; margin-top: 50px">
-<!--        <el-table-column label="id" prop="id" width="320" />-->
-<!--        <el-table-column prop="featureKey" label="Feature Key" width="180" />-->
+        <!--        <el-table-column label="id" prop="id" width="320" />-->
+        <!--        <el-table-column prop="featureKey" label="Feature Key" width="180" />-->
         <el-table-column prop="title" label="标题" width="230" />
         <el-table-column label="有效期" width="350">
           <template #default="scope">
             <span v-if="!scope.row?.startTime && !scope.row?.endTime">长期有效</span>
-            <span v-else-if="scope.row?.startTime && !scope.row?.endTime">{{scope.row?.startTime}} ～ 不限</span>
-            <span v-else-if="!scope.row?.startTime && scope.row?.endTime"> 不限 ～ {{scope.row?.endTime}}</span>
-            <span v-else >{{scope.row?.startTime}} ～ {{scope.row?.endTime}}</span>
+            <span v-else-if="scope.row?.startTime && !scope.row?.endTime">{{ scope.row?.startTime }} ～ 不限</span>
+            <span v-else-if="!scope.row?.startTime && scope.row?.endTime"> 不限 ～ {{ scope.row?.endTime }}</span>
+            <span v-else>{{ scope.row?.startTime }} ～ {{ scope.row?.endTime }}</span>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="200">
@@ -75,18 +74,10 @@
         <el-table-column prop="updatedAt" label="更新时间" width="200" />
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button
-              v-if="scope.row?.status !== 'RUNNING'"
-              type="warning"
-              size="small"
-              @click="publish(scope.row.id)"
+            <el-button v-if="scope.row?.status !== 'RUNNING'" type="warning" size="small" @click="publish(scope.row.id)"
               >发布
             </el-button>
-            <el-button
-              v-if="scope.row?.status === 'RUNNING'"
-              type="warning"
-              size="small"
-              @click="disable(scope.row.id)"
+            <el-button v-if="scope.row?.status === 'RUNNING'" type="warning" size="small" @click="disable(scope.row.id)"
               >撤销
             </el-button>
             <el-button type="danger" size="small" @click="deleteData(scope.row.id)">删除 </el-button>
@@ -110,9 +101,9 @@
               编辑
             </el-button>
             <el-button
-                v-if="scope.row?.status === 'RUNNING'"
-                size="small"
-                @click="
+              v-if="scope.row?.status === 'RUNNING'"
+              size="small"
+              @click="
                 () =>
                   router.push({
                     path: '/feature/config/edit',
@@ -148,12 +139,11 @@
 
 <script setup lang="ts">
 import { onBeforeMount, onMounted, reactive, ref } from "vue"
-import { useRouter } from "vue-router"
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 
-import { FeatureConfig, FeatureConfigs } from "../../../domain/FeatureConfigs"
+import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
 import { ElMessage } from "element-plus"
-import { Features } from "../../../domain/Features"
+import { Features } from "@/domain/Features"
 
 const route = useRoute()
 const feature = ref()
@@ -164,8 +154,7 @@ const featureName = ref("")
 onBeforeMount(async () => {
   featureKey.value = route.query.featureKey
   featureName.value = <string>route.query.featureName
-  const flag = await features.fetch(featureKey.value)
-  feature.value = flag
+  feature.value = await features.fetch(featureKey.value)
 })
 
 const router = useRouter()
@@ -177,7 +166,7 @@ const searchForm = reactive({
   page: 1,
   size: 10,
   key: "",
-  status: "ALL",
+  status: "ALL"
 })
 
 const tableData = ref([] as FeatureConfig[])
@@ -196,8 +185,13 @@ const deleteData = (id: string) => {
 }
 const searchData = () => {
   featureConfigs
-    .fetchAll(searchForm.key, searchForm.page > 1 ? searchForm.page - 1 : 0, searchForm.size, featureKey.value,
-      searchForm.status === "ALL" ? null : searchForm.status)
+    .fetchAll(
+      searchForm.key,
+      searchForm.page > 1 ? searchForm.page - 1 : 0,
+      searchForm.size,
+      featureKey.value,
+      searchForm.status === "ALL" ? null : searchForm.status
+    )
     .then((res) => {
       tableData.value = res.content
       total.value = res.total
@@ -239,7 +233,8 @@ const handleSizeChange = () => {
   searchData()
 }
 
-const handleCurrentChange = () => {
+const handleCurrentChange = (value: number) => {
+  searchForm.page = value
   searchData()
 }
 
@@ -257,7 +252,7 @@ onMounted(() => {
 span.title {
   float: left;
   font-size: 14px;
-  font-weight:bold;
+  font-weight: bold;
 }
 
 .add-btn {

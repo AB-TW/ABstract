@@ -8,6 +8,8 @@ import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import cn.dpc.ab.persistent.feature.db.FeatureDb;
 import cn.dpc.ab.persistent.feature.db.FeatureDbRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -74,22 +76,8 @@ public class FeaturesImpl extends AbstractFeatures {
      */
     @Override
     public Flux<Feature> getAll(FilterParams params) {
-        return getAllByFilter(params)
+        return repository.findByFilterParams(params)
                 .map(FeatureDb::to);
-    }
-
-    /**
-     * getAllByFilter retrieves all features from the database that match the
-     * given filter.
-     *
-     * @param params the filter parameters
-     * @return a Flux of FeatureDb
-     */
-    private Flux<FeatureDb> getAllByFilter(FilterParams params) {
-        return repository.findAll()
-                .filter(db -> (params.key() == null || db.getFeatureKey().contains(params.key()))
-                        && (params.enabled() == null || db.getDescription().enabled() == params.enabled())
-                );
     }
 
     /**
@@ -101,7 +89,13 @@ public class FeaturesImpl extends AbstractFeatures {
      */
     @Override
     public Flux<Feature> subCollection(FilterParams params, long from, long to) {
-        return this.getAll(params).skip(from).take(to - from);
+        int pageSize = (int) (to - from);
+        pageSize = pageSize < 0 ? 10 : pageSize;
+        int page = (int) (from / pageSize);
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("description.updatedAt").descending());
+
+        return repository.findByFilterParams(params, pageRequest)
+                .map(FeatureDb::to);
     }
 
     /**
@@ -112,7 +106,7 @@ public class FeaturesImpl extends AbstractFeatures {
      */
     @Override
     public Mono<Long> size(FilterParams params) {
-        return getAllByFilter(params).count();
+        return repository.countByFilterParams(params);
     }
 
     /**

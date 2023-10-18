@@ -126,7 +126,7 @@ public class Feature {
         record FilterParams(String title, FeatureConfig.Status.DynamicStatus status) {
         }
 
-        Flux<FeatureConfig> getAll(FilterParams params);
+        Flux<FeatureConfig> all(FilterParams params);
 
         Flux<FeatureConfig> subCollection(FilterParams params, long from, long to);
 

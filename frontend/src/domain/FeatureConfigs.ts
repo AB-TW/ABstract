@@ -1,5 +1,6 @@
 import { PageResponse } from "./Features"
 import http from "../utils/http/http"
+import { FilterCondition } from "./FilterConditions"
 
 export class FeatureConfigs {
   constructor(private readonly baseUrl: string = "/api/features") {}
@@ -8,7 +9,13 @@ export class FeatureConfigs {
     return this.baseUrl + path
   }
 
-  fetchAll(title: string, page: number, pageSize: number, featureKey: string, status?: string): Promise<PageResponse<FeatureConfig>> {
+  fetchAll(
+    title: string,
+    page: number,
+    pageSize: number,
+    featureKey: string,
+    status?: string
+  ): Promise<PageResponse<FeatureConfig>> {
     return http
       .get(this.getUrl(`/${featureKey}/configs`), {
         title,
@@ -58,52 +65,9 @@ export interface FeatureConfig {
   status?: string
   startTime?: string
   endTime?: string
-  displayRule?: DisplayRule
   priority?: number
   templateData?: any
-  customerCriteriaCondition?: CustomerCriteriaCondition
-}
-
-interface CustomerCriteriaCondition {
-  whiteListCondition?: WhiteListCondition
-  locationCondition?: LocationCondition
-  abTestingCondition?: AbTestingCondition
-}
-
-interface WhiteListCondition {
-  whiteList: string[]
-}
-
-interface LocationCondition {
-  adCodes: string[]
-}
-
-interface AbTestingCondition {
-  experimentId: string
-  bucketKey: string
-}
-
-interface DisplayRule {
-  type: DisplayRuleType
-  times: number
-  dailyConditions?: DailyCondition[]
-}
-
-enum DisplayRuleType {
-  EVERYTIME = "EVERYTIME",
-  FIX_TIMES = "FIX_TIMES",
-  DAY_FIX_TIMES = "DAY_FIX_TIMES"
-}
-
-interface DailyCondition {
-  dayOfWeek: number
-  start: string
-  end: string
-}
-
-interface TimeRange {
-  startDate: string
-  endDate: string
+  filterCondition?: FilterCondition
 }
 
 enum StaticStatus {
