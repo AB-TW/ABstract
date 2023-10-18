@@ -5,8 +5,12 @@ plugins {
 
 dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation project(':api:api-feature')
     implementation project(':api:api-customer')
+    implementation project(':persistent:persistent-feature')
+    implementation project(':persistent:persistent-customer')
+    implementation project(':persistent:persistent-experiment')
 }
 
 bootRun {

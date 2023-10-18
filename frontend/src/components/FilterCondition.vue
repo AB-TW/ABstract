@@ -8,40 +8,32 @@
     :disabled="false"
     :scroll-to-error="true"
   >
-    <el-form-item label="灰度发布比例" prop="grayReleasePercentage">
+    <el-form-item label="灰度发布比例" prop="grayReleaseCondition.releasePercentage">
       <el-input-number
-        v-model.number="filterCondition.grayReleasePercentage"
+        v-model="filterCondition.grayReleaseCondition.releasePercentage"
         :min="0"
         :max="100"
         :step="10"
+        :disabled="props.disabled"
         controls-position="right"
       />
     </el-form-item>
 
-    <el-form-item>
-      <template #label>
-        <div style="display: flex; align-items: center; gap: 1px">
-          自定义字段过滤
-          <el-tooltip effect="dark" content="点击条件名可更改哦" placement="right">
-            <el-icon style="cursor: pointer; font-size: 18px">
-              <QuestionFilled />
-            </el-icon>
-          </el-tooltip>
-        </div>
-      </template>
+    <el-form-item label="自定义字段过滤">
       <el-form-item
-        :prop="`customAttributeConditions.${index}`"
+        :prop="`attributeConditions.${index}`"
         :key="index"
         :rules="{ validator: validateCustomAttributeConditions, trigger: 'blur' }"
-        v-for="(conditionItem, index) in filterCondition.customAttributeConditions"
+        v-for="(conditionItem, index) in filterCondition.attributeConditions"
       >
         <div class="custom-attribute-condition-item">
           <p class="custom-attribute-label" style="margin: 0">
             条件
             {{ index + 1 }}
             <el-icon
+              v-if="!props.disabled"
               class="delete-custom-attribute-icon"
-              @click="() => filterCondition.customAttributeConditions?.splice(index, 1)"
+              @click="() => filterCondition.attributeConditions?.splice(index, 1)"
             >
               <Delete />
             </el-icon>
@@ -52,6 +44,7 @@
             placeholder="请输入要过滤的键"
             show-word-limit
             type="text"
+            :disabled="props.disabled"
           />
 
           <el-select
@@ -59,6 +52,7 @@
             style="width: 100%"
             placeholder="Select One Operator"
             @change="conditionOperatorChanged(conditionItem.operator, conditionItem)"
+            :disabled="props.disabled"
           >
             <el-option
               v-for="operator in supportOperatorList"
@@ -75,6 +69,7 @@
             placeholder="请输入要匹配的值"
             show-word-limit
             type="text"
+            :disabled="props.disabled"
           />
 
           <div v-show="_.isArray(conditionItem.value)">
@@ -103,15 +98,26 @@
           </div>
         </div>
       </el-form-item>
-      <el-button class="add-custom-attribute-button" plain icon="Plus" @click="addCustomAttributeItem" />
+      <el-button
+        v-if="!props.disabled"
+        class="add-custom-attribute-button"
+        plain
+        icon="Plus"
+        @click="addCustomAttributeItem"
+      />
     </el-form-item>
   </el-form>
 </template>
 
 <script lang="ts" setup>
 import _ from "lodash"
-import { reactive, ref, watch } from "vue"
-import { CompareOperator, CustomAttributeCondition, FilterCondition } from "@/model/FilterCondition"
+import { ref, watch } from "vue"
+import {
+  CompareOperator,
+  CustomAttributeCondition,
+  FilterCondition,
+  defaultFilterCondition
+} from "@/domain/FilterConditions"
 import { Delete, QuestionFilled } from "@element-plus/icons-vue"
 import { ElForm, ElFormItem, ElInput, FormRules } from "element-plus"
 
@@ -119,40 +125,27 @@ defineOptions({
   name: "FilterCondition"
 })
 const props = defineProps({
-  modelValue: {
+  filterCondition: {
     type: Object,
     required: true,
-    default: () => ({
-      grayReleasePercentage: 100,
-      customAttributeConditions: [
-        {
-          key: "",
-          operator: CompareOperator.EQUALS,
-          value: ""
-        }
-      ]
-    })
+    default: () => {
+      return defaultFilterCondition()
+    }
+  },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits(["update:filterCondition"])
 
 // code about filter condition
-const filterCondition = reactive<FilterCondition>(
-  _.isEmpty(props.modelValue)
-    ? {
-        grayReleasePercentage: 100,
-        customAttributeConditions: [
-          {
-            key: "",
-            operator: CompareOperator.EQUALS,
-            value: ""
-          }
-        ]
-      }
-    : props.modelValue
-)
+const filterCondition = ref(props.filterCondition)
+console.log(filterCondition.value)
+
 // watch reactive object then assign parent bind object
-watch<FilterCondition>(filterCondition, (cur, _) => emit("update:modelValue", cur))
+watch<FilterCondition>(filterCondition, (cur, _) => emit("update:filterCondition", cur))
 const validateCustomAttributeConditions = (rule: any, customAttribute: CustomAttributeCondition, callback: any) => {
   if (_.isEmpty(customAttribute.value) || _.isEmpty(customAttribute.key)) {
     callback(new Error("请检查键或值是否填写～"))
@@ -161,14 +154,15 @@ const validateCustomAttributeConditions = (rule: any, customAttribute: CustomAtt
   }
 }
 const filterConditionRules: FormRules = {
-  grayReleasePercentage: [{ required: true, message: "灰度发布比例不可为空", trigger: "blur" }]
+  "grayReleaseCondition.releasePercentage": [{ required: true, message: "灰度发布比例不可为空", trigger: "blur" }]
 }
 const supportOperatorList = _.map(CompareOperator, (operator: string) => ({
   label: operator,
   value: operator
 }))
 const addCustomAttributeItem = () => {
-  filterCondition.customAttributeConditions?.push({
+  filterCondition.value.attributeConditions = filterCondition.value?.attributeConditions || []
+  filterCondition.value.attributeConditions?.push({
     key: "",
     operator: CompareOperator.EQUALS,
     value: ""

@@ -24,6 +24,20 @@ public class FilterCondition {
      * GrayReleaseCondition represents the gray release condition of a filter.
      */
     public record GrayReleaseCondition(Integer releasePercentage) {
+
+        /**
+         * GrayReleaseCondition creates a new gray release condition.
+         */
+        public GrayReleaseCondition {
+            if (releasePercentage == null || releasePercentage <= 0) {
+                throw new IllegalArgumentException("The sample percentage must be greater than 0");
+            }
+
+            if (releasePercentage > 100) {
+                throw new IllegalArgumentException("The sample percentage must be less than or equal to 100");
+            }
+        }
+
         /**
          * Match returns true if the filter condition matches the customer.
          *
@@ -36,7 +50,7 @@ public class FilterCondition {
             }
 
             return Optional.ofNullable(clientId)
-                    .filter(id -> id.length() > 0)
+                    .filter(id -> !id.isEmpty())
                     .map(id -> id.hashCode() % 100 >= releasePercentage)
                     .orElse(false);
         }

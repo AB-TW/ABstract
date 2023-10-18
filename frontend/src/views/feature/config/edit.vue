@@ -44,7 +44,7 @@
               :key="item.index"
               :item="item"
               :index="index"
-              :disable="formType == 'view'"
+              :disabled="formType == 'view'"
               @deleteItem="deleteTrackingData(index)"
             />
             <div>
@@ -56,6 +56,13 @@
             </div>
           </div>
         </el-form-item>
+        <FilterConditionComponent
+          ref="filterConditionRef"
+          :key="featureConfig.filterCondition"
+          :filterCondition="featureConfig.filterCondition"
+          :disabled="formType == 'view'"
+          @update:filterCondition="updateFilterCondition"
+        />
         <el-form-item v-if="formType !== 'view'">
           <el-button type="default" @click="resetForm()">重置</el-button>
           <el-button type="primary" @click="submitForm()">提交</el-button>
@@ -66,14 +73,15 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref, nextTick } from "vue"
+import { nextTick, onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { ElButton, ElForm, ElFormItem, ElInput, ElMessage } from "element-plus"
-import { FeatureConfig, FeatureConfigs } from "../../../domain/FeatureConfigs"
-import { Feature, Features, FeatureTemplate, getDefaultValue } from "../../../domain/Features"
+import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance } from "element-plus"
+import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
+import { Feature, Features, FeatureTemplate, getDefaultValue } from "@/domain/Features"
+import { defaultFilterCondition } from "@/domain/FilterConditions"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
-// import FeatureTemplateConfig from "@/components/FeatureTemplateItemNew.vue"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
+import FilterConditionComponent from "@/components/FilterCondition.vue"
 import { convertConfigObject, mapDataToTemplate, transTempToTreeDataSource } from "@/utils"
 import { StaticStatus } from "@/constants/common"
 import _ from "lodash"
@@ -100,15 +108,16 @@ onBeforeMount(async () => {
   featureKey.value = "" + route.query.featureKey
   // featureKey 是点击feature 模块跳转过来的
   if (route.query.featureKey) {
-    const res = await features.fetch(route.query.featureKey.toString())
-    feature.value = res
+    feature.value = await features.fetch(route.query.featureKey.toString())
     feature.value.dataSource = [transTempToTreeDataSource(feature.value.template)] as Array<FeatureTemplate>
   }
 
   if (route.query.id) {
     id.value = route.query.id as string
     featureConfig.value = await featureConfigs.fetchById(featureKey.value, route.query.id as string)
-
+    if (!featureConfig.value.filterCondition) {
+      featureConfig.value.filterCondition = defaultFilterCondition()
+    }
     if (!_.isNil(featureConfig.value.data)) {
       let templateInfo
       // 如果返回的数据是一个对象：
@@ -122,7 +131,8 @@ onBeforeMount(async () => {
     }
   } else {
     featureConfig.value = {
-      data: getDefaultValue(feature.value)
+      data: getDefaultValue(feature.value),
+      filterCondition: defaultFilterCondition()
     } as FeatureConfig
   }
 
@@ -170,7 +180,8 @@ const formRules = {
     }
   ]
 }
-const form = ref<ElForm>(null)
+const form = ref<FormInstance>(null)
+const filterConditionRef = ref<FormInstance>(null)
 
 const deleteTrackingData = (index: number) => {
   saData.value.splice(index, 1)
@@ -183,6 +194,10 @@ const addTrackingData = () => {
   })
 }
 
+const updateFilterCondition = (value: any) => {
+  featureConfig.value.filterCondition = value
+}
+
 const submitForm = async () => {
   if (!featureKey.value) {
     ElMessage.error("featureKey 不能为空！")
@@ -190,40 +205,46 @@ const submitForm = async () => {
   }
   form?.value?.validate(async (valid: boolean) => {
     if (valid) {
-      try {
-        // featureConfig.value.templateData = JSON.stringify(feature.value.dataSource)
-        const tempRet = convertConfigObject(feature.value.dataSource[0])
-        // debugger
-        // if (_.isObject(tempRet)) {
-        //   featureConfig.value.data = JSON.stringify(tempRet)
-        // } else {
-        featureConfig.value.data = tempRet
-        // }
-        featureConfig.value.featureKey = featureKey.value
-        featureConfig.value.status = StaticStatus.DRAFT
-        featureConfig.value.saData = saData.value.reduce((acc, cur) => {
-          acc[cur.key] = cur.value
-          return acc
-        }, {} as any)
-        debugger
-        if (formType.value.toLowerCase() == "add") {
-          const response = await featureConfigs.create(featureKey.value, featureConfig.value)
-          console.log("response = ", response)
-          // const ret = await features.updateConfig(featureKey.value, response.id, response)
-          // console.log(ret)
+      await filterConditionRef?.value?.$refs?.filterConditionFormRef?.validate(async (valid: boolean) => {
+        if (valid) {
+          try {
+            // featureConfig.value.templateData = JSON.stringify(feature.value.dataSource)
+            // debugger
+            // if (_.isObject(tempRet)) {
+            //   featureConfig.value.data = JSON.stringify(tempRet)
+            // } else {
+            featureConfig.value.data = convertConfigObject(feature.value.dataSource[0])
+            // }
+            featureConfig.value.featureKey = featureKey.value
+            featureConfig.value.status = StaticStatus.DRAFT
+            debugger
+            featureConfig.value.saData = saData.value.reduce((acc, cur) => {
+              acc[cur.key] = cur.value
+              return acc
+            }, {} as any)
+            debugger
+            if (formType.value.toLowerCase() == "add") {
+              const response = await featureConfigs.create(featureKey.value, featureConfig.value)
+              console.log("response = ", response)
+              // const ret = await features.updateConfig(featureKey.value, response.id, response)
+              // console.log(ret)
+            } else {
+              await featureConfigs.update(featureKey.value, id.value, featureConfig.value)
+            }
+            ElMessage.success("操作成功！")
+            setTimeout(() => {
+              router.push({
+                path: "/feature/config/list",
+                query: { featureKey: featureKey.value }
+              })
+            }, 1000)
+          } catch (error: any) {
+            ElMessage.error("操作失败，请稍后重试！")
+          }
         } else {
-          await featureConfigs.update(featureKey.value, id.value, featureConfig.value)
+          return false
         }
-        ElMessage.success("操作成功！")
-        setTimeout(() => {
-          router.push({
-            path: "/feature/config/list",
-            query: { featureKey: featureKey.value }
-          })
-        }, 1000)
-      } catch (error: any) {
-        ElMessage.error("操作失败，请稍后重试！")
-      }
+      })
     } else {
       return false
     }
@@ -233,6 +254,7 @@ const submitForm = async () => {
 const resetForm = () => {
   if (formType.value.toLowerCase() == "add") {
     form.value.resetFields()
+    filterConditionRef.value.resetFields()
   } else {
     featureConfig.value = originalFeatureConfig.value
   }
