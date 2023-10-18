@@ -14,7 +14,7 @@ const props = defineProps({
         <img src="@/assets/layout/logo.png" class="sidebar-logo" />
       </router-link>
       <router-link v-else key="expand" to="/">
-        <div class="sidebar-logo-text">ABStract</div>
+        <div class="sidebar-logo-text">ABstract</div>
       </router-link>
     </transition>
   </div>
