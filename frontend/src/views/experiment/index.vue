@@ -23,7 +23,7 @@
       <el-table-column align="center" prop="createdAt" label="创建时间" />
       <el-table-column align="center" label="操作">
         <template #default="scope">
-          <div style="display: flex; justify-content: center">
+          <div style="display: flex">
             <el-button type="success" text>查看</el-button>
             <el-button type="primary" text v-if="scope.row?.status === ExperimentStatus.DRAFT">编辑</el-button>
             <el-button type="primary" text v-if="scope.row?.status === ExperimentStatus.DRAFT">发布</el-button>

@@ -22,13 +22,19 @@
         <el-input v-model="experimentForm.description" placeholder="请输入实验描述" type="text" />
       </el-form-item>
 
+      <el-form-item label="关联Feature" prop="feature">
+        <el-select v-model="experimentForm.featureKey" @change="selectFeature" placeholder="请选择实验项">
+          <el-option v-for="feature in allFeatures" :key="feature.id" :label="feature.name" :value="feature.featureKey">
+            <span style="float: left">{{ feature.name }}</span>
+            <span style="float: right; color: var(--el-text-color-secondary); font-size: 13px">
+              {{ feature.featureKey }}
+            </span>
+          </el-option>
+        </el-select>
+      </el-form-item>
+
       <el-form-item label="实验分组">
-        <el-form-item
-          :prop="`buckets.${index}`"
-          :key="index"
-          :rules="{ validator: validateBucket, trigger: 'blur' }"
-          v-for="(bucket, index) in experimentForm.buckets"
-        >
+        <el-form-item style="width: 100%" :key="index" v-for="(bucket, index) in experimentForm.buckets">
           <div class="bucket-item">
             <p class="bucket-label" style="margin: 0">
               分组
@@ -37,20 +43,85 @@
                 <Delete />
               </el-icon>
             </p>
-            <el-input v-model="bucket.key" maxlength="10" placeholder="请输入分组键" show-word-limit type="text" />
-            <el-input v-model="bucket.name" maxlength="10" placeholder="请输入分组名称" show-word-limit type="text" />
-            <el-input
-              v-model="bucket.description"
-              maxlength="10"
-              placeholder="请输入分组描述"
-              show-word-limit
-              type="text"
-            />
-            <el-input-number v-model.number="bucket.percentage" style="width: 100%" :min="1" :max="100" :step="10" />
+            <el-form-item
+              label="分组键"
+              :prop="`buckets.${index}.key`"
+              :rules="[{ required: true, message: '请输入分组键', trigger: 'blur' }]"
+              class="level-2-form-item"
+            >
+              <el-input v-model="bucket.key" maxlength="10" placeholder="请输入分组键" show-word-limit type="text" />
+            </el-form-item>
+            <el-form-item
+              label="分组名称"
+              :prop="`buckets.${index}.name`"
+              class="level-2-form-item"
+              :validate-status="'success'"
+            >
+              <el-input v-model="bucket.name" maxlength="10" placeholder="请输入分组名称" show-word-limit type="text" />
+            </el-form-item>
+            <el-form-item
+              label="分组描述"
+              :prop="`buckets.${index}.description`"
+              class="level-2-form-item"
+              :validate-status="'success'"
+            >
+              <el-input
+                v-model="bucket.description"
+                maxlength="10"
+                placeholder="请输入分组描述"
+                show-word-limit
+                type="text"
+              />
+            </el-form-item>
+            <el-form-item
+              label="分组比例"
+              required
+              class="level-2-form-item"
+              style="width: 300px"
+              :prop="`buckets.${index}.percentage`"
+              :rules="[{ required: true, message: '请输入分组比例', trigger: 'blur' }]"
+            >
+              <el-input-number v-model.number="bucket.percentage" style="width: 100%" :min="0" :max="100" :step="10" />
+            </el-form-item>
+
+            <el-form-item class="level-2-form-item" label="分组配置" prop="template" v-if="!_.isEmpty(selectedFeature)">
+              <FeatureTemplateConfig :isViewModel="false" :dataSource="bucket.config" />
+            </el-form-item>
           </div>
         </el-form-item>
         <el-button class="add-bucket-button" @click="addBucket" plain icon="Plus" />
       </el-form-item>
+
+      <el-form-item
+        label="实验进行时间段"
+        :rules="[{ required: true, message: '请选择实验进行的时间段', trigger: 'blur' }]"
+        prop="startWithEndTime"
+      >
+        <el-date-picker
+          v-model="experimentForm.startWithEndTime"
+          type="datetimerange"
+          range-separator="-"
+          start-placeholder="开始时间"
+          end-placeholder="结束时间"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          :disabled-date="validateSelectDateLowerThanNow"
+        />
+      </el-form-item>
+
+      <el-form-item
+        label="停止收集数据时间"
+        :rules="[{ required: true, message: '请选择选择停止收集数据的时间', trigger: 'blur' }]"
+        prop="endCollectTime"
+      >
+        <el-date-picker
+          v-model="experimentForm.endCollectTime"
+          type="datetime"
+          placeholder="选择停止收集数据时间"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          :disabled-date="validateSelectDateLowerThanNow"
+        />
+      </el-form-item>
+
       <FilterConditionComponent ref="filterConditionRef" v-model="experimentForm.filterCondition" />
       <el-form-item>
         <el-button type="default" @click="resetExperimentForm(experimentFormRef, filterConditionRef)">重置</el-button>
@@ -68,12 +139,53 @@ import { reactive, ref } from "vue"
 import { Delete } from "@element-plus/icons-vue"
 import { ExperimentBucket } from "@/model/ExperimentBucket"
 import _ from "lodash"
+import { transTempToTreeDataSource, validateSelectDateLowerThanNow } from "@/utils"
+import { Feature, Features, FeatureTemplate, PageResponse } from "@/domain/Features"
+import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
 
 interface AddExperiment {
   name: string
   description: string
+  featureKey: string
   buckets: ExperimentBucket[]
   filterCondition: FilterCondition
+  startWithEndTime: string[]
+  startTime: string
+  endTime: string
+  endCollectTime: string
+}
+
+const allFeatures = reactive<Feature[]>([])
+const selectedFeature = reactive<Feature>({} as Feature)
+const features = new Features()
+
+const setup = () => {
+  features
+    .fetchAll(0, 999, undefined, true)
+    .then((res: PageResponse<Feature>) => {
+      allFeatures.push(...res.content)
+    })
+    .catch((err) => {
+      console.log(err)
+      ElMessage.error("获取数据失败，请重试")
+    })
+}
+setup()
+
+const selectFeature = (featureKey: string) => {
+  console.log(featureKey)
+  const currentSelectedFeature = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
+  _.assign(selectedFeature, currentSelectedFeature, {
+    dataSource: [transTempToTreeDataSource(currentSelectedFeature.template)]
+  })
+  // 设置bucket的config为datasource
+  setBucketsConfig(selectedFeature.dataSource)
+  console.log(selectedFeature)
+}
+const setBucketsConfig = (dataSource: FeatureTemplate[]) => {
+  _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
+    bucket.config = _.cloneDeep(dataSource)
+  })
 }
 
 const experimentFormRef = ref<FormInstance>()
@@ -84,29 +196,24 @@ const experimentForm = reactive<AddExperiment>({
       key: "",
       name: "",
       description: "",
-      percentage: 1,
-      config: {}
+      percentage: 100,
+      config: []
     }
   ]
 } as AddExperiment)
 const addBucket = () => {
+  const currentRemainingPercentage = 100 - _.sumBy(experimentForm.buckets, (bucket) => bucket.percentage)
   experimentForm.buckets.push({
     key: "",
     name: "",
     description: "",
-    percentage: 1,
+    percentage: currentRemainingPercentage,
     config: {}
   })
+  setBucketsConfig(selectedFeature.dataSource)
 }
 const experimentRules: FormRules = {
   name: [
-    {
-      required: true,
-      message: "请输入实验名称",
-      trigger: "blur"
-    }
-  ],
-  description: [
     {
       required: true,
       message: "请输入实验名称",
@@ -153,6 +260,8 @@ const submitExperimentForm = async (
   if (!experimentFormEl || !filterConditionRef) return
   try {
     await Promise.all([experimentFormEl.validate(), filterConditionRef.$refs.filterConditionFormRef.validate()])
+    experimentForm.startTime = experimentForm.startWithEndTime[0]
+    experimentForm.endTime = experimentForm.startWithEndTime[1]
     console.log(experimentForm)
   } catch (e: Error) {
     ElMessage.error("请检查表单项是否填写符合规范～")
@@ -162,10 +271,10 @@ const submitExperimentForm = async (
 
 <style scoped lang="scss">
 .bucket-item {
-  width: 300px;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
   padding: 20px;
 
   &:hover {
@@ -194,8 +303,15 @@ const submitExperimentForm = async (
 }
 
 .add-bucket-button {
-  margin-left: 20px;
-  margin-top: 10px;
+  margin-top: 20px;
   border-style: dashed;
+  width: 100%;
+}
+
+.level-2-form-item {
+  :deep(.el-form-item__label) {
+    justify-content: center !important;
+    width: 120px !important;
+  }
 }
 </style>

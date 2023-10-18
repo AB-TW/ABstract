@@ -1,5 +1,5 @@
 {
-  "name": "ABStract",
+  "name": "ABstract",
   "version": "1.0.0",
   "description": "一个免费开源的中后台管理系统基础解决方案，基于 Vue3、TypeScript、Element Plus、Pinia 和 Vite 等主流技术.",
   "author": {},
@@ -21,6 +21,7 @@
     "element-plus": "^2.3.6",
     "js-cookie": "^3.0.5",
     "lodash-es": "^4.17.21",
+    "moment": "^2.29.4",
     "normalize.css": "^8.0.1",
     "nprogress": "^0.2.0",
     "path-browserify": "^1.0.1",

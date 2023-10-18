@@ -18,7 +18,17 @@
       />
     </el-form-item>
 
-    <el-form-item label="自定义字段过滤">
+    <el-form-item>
+      <template #label>
+        <div style="display: flex; align-items: center; gap: 1px">
+          自定义字段过滤
+          <el-tooltip effect="dark" content="点击条件名可更改哦" placement="right">
+            <el-icon style="cursor: pointer; font-size: 18px">
+              <QuestionFilled />
+            </el-icon>
+          </el-tooltip>
+        </div>
+      </template>
       <el-form-item
         :prop="`customAttributeConditions.${index}`"
         :key="index"
@@ -102,7 +112,7 @@
 import _ from "lodash"
 import { reactive, ref, watch } from "vue"
 import { CompareOperator, CustomAttributeCondition, FilterCondition } from "@/model/FilterCondition"
-import { Delete } from "@element-plus/icons-vue"
+import { Delete, QuestionFilled } from "@element-plus/icons-vue"
 import { ElForm, ElFormItem, ElInput, FormRules } from "element-plus"
 
 defineOptions({

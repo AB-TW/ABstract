@@ -9,48 +9,48 @@
       </template>
       <el-form :model="featureConfig" :rules="formRules" ref="form" label-width="140px">
         <el-form-item label="标题" prop="title">
-          <el-input v-model="featureConfig.title" autocomplete="off" :disabled="formType == 'view'"/>
+          <el-input v-model="featureConfig.title" autocomplete="off" :disabled="formType == 'view'" />
         </el-form-item>
         <el-form-item label="描述" prop="description">
-          <el-input v-model="featureConfig.description" autocomplete="off" :disabled="formType == 'view'"/>
+          <el-input v-model="featureConfig.description" autocomplete="off" :disabled="formType == 'view'" />
         </el-form-item>
         <el-form-item label="配置内容" prop="data">
           <FeatureTemplateConfig
-              :key="feature?.dataSource?.toString()"
-              :isViewModel="true"
-              :dataSource="feature?.dataSource || []"
+            :key="feature?.dataSource?.toString()"
+            :isViewModel="true"
+            :dataSource="feature?.dataSource || []"
           />
         </el-form-item>
         <el-form-item label="生效时间" prop="startTime">
           <el-date-picker
-              v-model="featureConfig.startTime"
-              type="datetime"
-              placeholder="生效时间"
-              :disabled="formType == 'view'"
+            v-model="featureConfig.startTime"
+            type="datetime"
+            placeholder="生效时间"
+            :disabled="formType == 'view'"
           />
         </el-form-item>
         <el-form-item label="截止时间" prop="endTime">
           <el-date-picker
-              v-model="featureConfig.endTime"
-              type="datetime"
-              placeholder="截止时间"
-              :disabled="formType == 'view'"
+            v-model="featureConfig.endTime"
+            type="datetime"
+            placeholder="截止时间"
+            :disabled="formType == 'view'"
           />
         </el-form-item>
         <el-form-item label="埋点数据" prop="trackingData">
           <div class="track-cls">
             <tracking-data-item
-                v-for="(item, index) in saData"
-                :key="item.index"
-                :item="item"
-                :index="index"
-                :disable="formType == 'view'"
-                @deleteItem="deleteTrackingData(index)"
+              v-for="(item, index) in saData"
+              :key="item.index"
+              :item="item"
+              :index="index"
+              :disable="formType == 'view'"
+              @deleteItem="deleteTrackingData(index)"
             />
             <div>
               <el-button type="primary" @click="addTrackingData" v-if="formType !== 'view'">
                 <el-icon>
-                  <Plus/>
+                  <Plus />
                 </el-icon>
               </el-button>
             </div>
@@ -66,24 +66,17 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onBeforeMount, ref, nextTick} from "vue"
-import {useRoute, useRouter} from "vue-router"
-import {DateModelType, ElButton, ElForm, ElFormItem, ElInput, ElMessage} from "element-plus"
-import {FeatureConfig, FeatureConfigs} from "../../../domain/FeatureConfigs"
-import {
-  Feature,
-  Features,
-  FeatureTemplate,
-  getDefaultValue,
-  TemplateDataType
-} from "../../../domain/Features"
+import { onBeforeMount, ref, nextTick } from "vue"
+import { useRoute, useRouter } from "vue-router"
+import { ElButton, ElForm, ElFormItem, ElInput, ElMessage } from "element-plus"
+import { FeatureConfig, FeatureConfigs } from "../../../domain/FeatureConfigs"
+import { Feature, Features, FeatureTemplate, getDefaultValue } from "../../../domain/Features"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
 // import FeatureTemplateConfig from "@/components/FeatureTemplateItemNew.vue"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
-import {convertConfigObject, mapDataToTemplate, transTempToTreeDataSource} from "@/utils"
-import {StaticStatus} from "@/constants/common"
+import { convertConfigObject, mapDataToTemplate, transTempToTreeDataSource } from "@/utils"
+import { StaticStatus } from "@/constants/common"
 import _ from "lodash"
-import {an} from "vitest/dist/types-dea83b3d";
 
 const route = useRoute()
 const router = useRouter()
@@ -100,7 +93,9 @@ const id = ref("")
 const saData = ref([] as any[])
 let trackingDataIndex = 0
 onBeforeMount(async () => {
-  title.value = (route.query.type == "edit" ? "编辑" : route.query.type == "view" ? "查看" : "新增") + (route.query.featureName || "Feature Config")
+  title.value =
+    (route.query.type == "edit" ? "编辑" : route.query.type == "view" ? "查看" : "新增") +
+    (route.query.featureName || "Feature Config")
   formType.value = route.query.type == "edit" ? "edit" : route.query.type == "view" ? "view" : "add"
   featureKey.value = "" + route.query.featureKey
   // featureKey 是点击feature 模块跳转过来的
@@ -115,7 +110,7 @@ onBeforeMount(async () => {
     featureConfig.value = await featureConfigs.fetchById(featureKey.value, route.query.id as string)
 
     if (!_.isNil(featureConfig.value.data)) {
-      let templateInfo;
+      let templateInfo
       // 如果返回的数据是一个对象：
       debugger
 
@@ -131,48 +126,49 @@ onBeforeMount(async () => {
     } as FeatureConfig
   }
 
-
   saData.value = featureConfig.value.saData
-      ? Object.keys(featureConfig.value.saData).map((key) => {
+    ? Object.keys(featureConfig.value.saData).map((key) => {
         return {
           index: trackingDataIndex++,
           key: key,
           value: featureConfig.value.saData[key]
         }
       })
-      : []
+    : []
 })
 // 防止只有一个Boolean 值为false 或者NUMBER，并且数字为 0
 const isSimpleBooleanOrNumber = () => {
   return ["NUMBER", "BOOLEAN"].includes(_.get(feature.value, "template.dataType", null))
 }
 nextTick(() => {
-  if (!!form.value) {
+  if (form.value) {
     form.value.clearValidate()
   }
 })
 const formRules = {
-  title: [{required: true, message: "Please enter title", trigger: "submit"}],
-  data: [{required: isSimpleBooleanOrNumber(), message: "Please enter data", trigger: "submit"}],
-  endTime: [{
-    trigger: "blur",
-    validator: (rule: any, value: any, callback: Function) => {
-      if (!featureConfig.value.startTime) {
-        callback();
-      } else  {
-        if(!value) {
-          callback();
-          return;
-        }
-
-        if(new Date(value).getTime() > new Date(featureConfig.value.startTime).getTime()) {
-          callback();
+  title: [{ required: true, message: "Please enter title", trigger: "submit" }],
+  data: [{ required: isSimpleBooleanOrNumber(), message: "Please enter data", trigger: "submit" }],
+  endTime: [
+    {
+      trigger: "blur",
+      validator: (rule: any, value: any, callback: Function) => {
+        if (!featureConfig.value.startTime) {
+          callback()
         } else {
-          callback(new Error("结束日期不能在起始日期前，请重新选择"));
+          if (!value) {
+            callback()
+            return
+          }
+
+          if (new Date(value).getTime() > new Date(featureConfig.value.startTime).getTime()) {
+            callback()
+          } else {
+            callback(new Error("结束日期不能在起始日期前，请重新选择"))
+          }
         }
       }
     }
-  }]
+  ]
 }
 const form = ref<ElForm>(null)
 
@@ -222,7 +218,7 @@ const submitForm = async () => {
         setTimeout(() => {
           router.push({
             path: "/feature/config/list",
-            query: {featureKey: featureKey.value}
+            query: { featureKey: featureKey.value }
           })
         }, 1000)
       } catch (error: any) {
