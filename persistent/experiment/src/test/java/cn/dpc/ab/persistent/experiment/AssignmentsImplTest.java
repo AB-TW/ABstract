@@ -36,16 +36,11 @@ public class AssignmentsImplTest {
     @Test
     void should_add_success() {
         when(repository.save(any(AssignmentDb.class))).thenReturn(Mono.just(AssignmentTestUtil.createAssignmentDb(
-                "123123", "234234", 111111
+                "123123", "234234", 111111, "bucketKey"
                 )));
 
-        assignments.add(Assignment.builder()
-                        .id(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"),
-                                "123123"))
-                        .build())
+        assignments.update("123123", "234234", "bucketKey")
                 .as(StepVerifier::create)
-                .expectNextMatches(assignment -> assignment.getId().clientId().equals("123123")
-                && assignment.getId().experimentId().id().equals("234234"))
                 .verifyComplete();
     }
 
@@ -54,10 +49,7 @@ public class AssignmentsImplTest {
         when(repository.save(any(AssignmentDb.class)))
                 .thenReturn(Mono.error(new DuplicateKeyException("save error")));
 
-        assignments.add(Assignment.builder()
-                        .id(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"),
-                                "123123"))
-                        .build())
+        assignments.update("123123", "234234", "bucketKey")
                 .as(StepVerifier::create)
                 .expectError()
                 .verify();
@@ -66,7 +58,7 @@ public class AssignmentsImplTest {
     @Test
     void should_get_success() {
         when(repository.findById(anyString())).thenReturn(Mono.just(AssignmentTestUtil.createAssignmentDb(
-                "123123", "234234", 111111
+                "123123", "234234", 111111, "bucketKey"
                 )));
 
         assignments.getAssignmentById(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"), "123123"))

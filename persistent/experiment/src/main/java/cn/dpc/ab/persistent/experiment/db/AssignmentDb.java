@@ -108,4 +108,11 @@ public class AssignmentDb {
                 .extraInfo(this.extraInfo)
                 .build();
     }
+
+    /**
+     * updateBucketKey modify bucketKey.
+     */
+    public void updateBucketKey(String bucketKey) {
+        this.setBucketKey(bucketKey);
+    }
 }

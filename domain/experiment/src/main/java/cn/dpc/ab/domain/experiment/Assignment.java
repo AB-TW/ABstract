@@ -1,10 +1,7 @@
 package cn.dpc.ab.domain.experiment;
 
 import cn.dpc.ab.domain.core.CustomerId;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
@@ -16,6 +13,7 @@ import java.util.Set;
  * Assignment represents an assignment.
  */
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
