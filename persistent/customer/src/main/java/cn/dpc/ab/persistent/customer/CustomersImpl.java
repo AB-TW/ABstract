@@ -3,10 +3,10 @@ package cn.dpc.ab.persistent.customer;
 import cn.dpc.ab.domain.core.CustomerId;
 import cn.dpc.ab.domain.customer.Customer;
 import cn.dpc.ab.domain.customer.Customers;
+import cn.dpc.ab.domain.feature.Features;
 import cn.dpc.ab.persistent.cache.LocalCacheManager;
 import cn.dpc.ab.domain.experiment.Assignments;
 import cn.dpc.ab.domain.experiment.Experiments;
-import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class CustomersImpl implements Customers {
-    private final FeatureConfigDbRepository featureConfigDbRepository;
+    private final Features features;
     private final LocalCacheManager localCacheManager;
     private final Experiments experiments;
     private final Assignments assignments;
@@ -25,7 +25,7 @@ public class CustomersImpl implements Customers {
     @Override
     public Mono<Customer> getById(CustomerId customerId) {
         Customer customer = new Customer(customerId);
-        customer.setFeatureConfigs(new CustomerFeatureConfigs(featureConfigDbRepository,
+        customer.setFeatureConfigs(new CustomerFeatureConfigs(features,
                 customerId, localCacheManager));
         customer.setAssignments(new CustomerAssignments(experiments, assignments, customerId));
         return Mono.just(customer);

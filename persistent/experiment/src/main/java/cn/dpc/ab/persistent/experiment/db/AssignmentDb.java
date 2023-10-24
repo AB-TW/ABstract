@@ -1,18 +1,21 @@
 package cn.dpc.ab.persistent.experiment.db;
 
-import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Assignment;
-import lombok.AllArgsConstructor;
+import cn.dpc.ab.domain.experiment.Experiment;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
-import org.springframework.data.couchbase.core.index.QueryIndexed;
 import org.springframework.data.couchbase.core.mapping.Document;
+import org.springframework.data.couchbase.core.mapping.id.GeneratedValue;
+import org.springframework.data.couchbase.core.mapping.id.IdAttribute;
+import org.springframework.data.couchbase.core.mapping.id.IdPrefix;
 
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
+
+import static org.springframework.data.couchbase.core.mapping.id.GenerationStrategy.USE_ATTRIBUTES;
 
 /**
  * AssignmentDb provides for save assignments.
@@ -20,27 +23,26 @@ import java.util.Set;
 @Document
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class AssignmentDb {
-
-    private String id;
-
-    @QueryIndexed
-    private String featureKey;
+    @IdPrefix
+    private static final String ASSIGNMENT_PREFIX = "assignment";
 
     @Version
     private long version;
 
-    private long experimentConfigVersion;
+    @Id
+    @GeneratedValue(strategy = USE_ATTRIBUTES)
+    private String id;
+
+    @IdAttribute(order = 0)
+    private String experimentId;
+
+    @IdAttribute(order = 1)
+    private String clientId;
 
     private String bucketKey;
 
-    private String experimentId;
-
-    private String clientId;
-
-    private Set<String> customerIds;
+    private long experimentConfigVersion;
 
     private Map<String, Object> extraInfo;
 
@@ -49,36 +51,61 @@ public class AssignmentDb {
     private LocalDateTime updatedAt;
 
     /**
+     * Generate id of db from assignmentId.
+     *
+     * @param assignmentId the assignmentId of the assignment
+     */
+    public static String idFrom(Assignment.AssignmentId assignmentId) {
+        return ASSIGNMENT_PREFIX + "." + assignmentId.experimentId() + "." + assignmentId.clientId();
+    }
+
+    /**
+     * Generate AssignmentDb from assignment.
+     *
+     * @param assignment the assignment
+     */
+    public static AssignmentDb from(Assignment assignment) {
+        return AssignmentDb.builder()
+                .bucketKey(assignment.getBucket().key())
+                .clientId(assignment.getId().clientId())
+                .experimentId(assignment.getId().experimentId().id())
+                .experimentConfigVersion(assignment.getExperimentConfigVersion())
+                .extraInfo(assignment.getExtraInfo())
+                .build();
+    }
+
+    /**
+     * Generate assignment from AssignmentDb.
+     *
+     * @param experiment the experiment
+     */
+    public Assignment to(Experiment experiment) {
+        return Assignment.builder()
+                .id(new Assignment.AssignmentId(new Experiment.ExperimentId(experimentId), clientId))
+                .extraInfo(extraInfo)
+                .experimentConfigVersion(experimentConfigVersion)
+                .bucket(Optional.ofNullable(bucketKey)
+                        .flatMap(key -> experiment.getDescription().buckets().stream()
+                                .filter(bucket -> bucket.key().equals(key))
+                                .findFirst())
+                        .orElse(null))
+                .build();
+    }
+
+    /**
      * toAssignment converts AssignmentDb to Assignment.
      *
      * @return the assignment
      */
     public Assignment toAssignment() {
-        return new Assignment(
-                new Assignment.AssignmentId(new Experiment.ExperimentId(this.experimentId),
-                        this.clientId),
-                this.experimentConfigVersion,
-                Experiment.Bucket.builder().key(this.bucketKey).build(),
-                this.customerIds,
-                this.extraInfo
-        );
-    }
-
-    /**
-     * from converts Experiment to ExperimentDb.
-     *
-     * @param assignment the assignment
-     * @return the assignment db
-     */
-    public static AssignmentDb from(Assignment assignment) {
-        return AssignmentDb.builder()
-                .id("ci:" + assignment.getId().clientId() + "-" + "ei:" + assignment.getId().experimentId().id())
-                .experimentConfigVersion(assignment.getExperimentConfigVersion())
-                .experimentId(assignment.getId().experimentId().id())
-                .clientId(assignment.getId().clientId())
-                .customerIds(assignment.getCustomerIds())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+        return Assignment.builder()
+                .id(new Assignment.AssignmentId(new Experiment.ExperimentId(this.experimentId),
+                        this.clientId))
+                .bucket(Experiment.Bucket.builder().key(
+                        Optional.ofNullable(this.bucketKey).orElse(null)
+                ).build())
+                .experimentConfigVersion(this.experimentConfigVersion)
+                .extraInfo(this.extraInfo)
                 .build();
     }
 }
