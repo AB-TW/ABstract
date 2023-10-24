@@ -2,7 +2,6 @@ package cn.dpc.ab.api.experiment;
 
 import cn.dpc.ab.api.TestConfiguration;
 import cn.dpc.ab.api.experiment.dto.AssignmentResult;
-import cn.dpc.ab.domain.experiment.Assignment;
 import cn.dpc.ab.domain.experiment.Assignments;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,14 +71,15 @@ public class AssignmentApiTest {
         String clientId = "clientId";
         String bucketKey = "bucketKey";
         long experimentConfigVersion = 123456;
-        when(assignments.add(any(Assignment.class))).thenReturn(Mono.just(AssignmentTestUtil.createAssignment(
-                clientId, experimentId, bucketKey, experimentConfigVersion)));
+        when(assignments.update(any(String.class), any(String.class), any(String.class)))
+                .thenReturn(Mono.empty());
         webClient.put()
                 .uri((builder) -> builder.path("/assignments/" + experimentId
                         + "/assignment/" + clientId).build())
+                .body(Mono.just(bucketKey), String.class)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(AssignmentResult.class)
-                .hasSize(1);
+                .hasSize(0);
     }
 }

@@ -27,7 +27,7 @@ public class AssignmentDbRepositoryTest extends RepositoryTestBase {
 
     @Test
     public void should_add_new_assignment_success() {
-        AssignmentDb assignmentDb = AssignmentTestUtil.createAssignmentDb("123123", "234234", 111111);
+        AssignmentDb assignmentDb = AssignmentTestUtil.createAssignmentDb("123123", "234234", 111111, "bucketKey");
 
         repository.save(assignmentDb)
                 .as(StepVerifier::create)
