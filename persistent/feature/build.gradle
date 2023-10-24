@@ -1,10 +1,10 @@
 plugins {
-    id 'persistent'
+    id 'persistent-couchbase'
 }
 
 dependencies {
     implementation project(':domain:core')
     implementation project(':domain:feature')
-    implementation project(':persistent:persistent-core')
-    testImplementation  project(':persistent:persistent-core').sourceSets.test.output
+    implementation project(':persistent:persistent-core-couchbase')
+    testImplementation  project(':persistent:persistent-core-couchbase').sourceSets.test.output
 }

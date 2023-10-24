@@ -25,7 +25,6 @@ public class AssignmentTestUtil {
                 .id("ci:" + clientId + "-" + "ei:" + experimentId)
                 .clientId(clientId)
                 .experimentId(experimentId)
-                .customerIds(customers)
                 .bucketKey("bucketKey")
                 .experimentConfigVersion(experimentConfigVersion)
                 .createdAt(LocalDateTime.now())

@@ -4,9 +4,8 @@ import cn.dpc.ab.domain.core.CustomerId;
 import cn.dpc.ab.domain.customer.Customer;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
+import cn.dpc.ab.domain.feature.Features;
 import cn.dpc.ab.persistent.cache.LocalCacheManager;
-import cn.dpc.ab.persistent.feature.db.FeatureConfigDb;
-import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 
@@ -19,7 +18,7 @@ import java.util.Optional;
  */
 @RequiredArgsConstructor
 public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
-    private final FeatureConfigDbRepository featureConfigRepository;
+    private final Features features;
     private final CustomerId customerId;
     private final LocalCacheManager localCacheManager;
 
@@ -39,12 +38,13 @@ public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
     }
 
     private Flux<FeatureConfig> getByFeatureKeyFromCache(Feature.FeatureId featureKey) {
-        FeatureConfigDbRepository.FilterParams params = FeatureConfigDbRepository.FilterParams.from(Feature.Configs.FilterParams.builder()
+        Feature.Configs.FilterParams params = Feature.Configs.FilterParams.builder()
                 .status(FeatureConfig.Status.DynamicStatus.RUNNING)
-                .build());
+                .build();
+
         return (Flux<FeatureConfig>) localCacheManager.cacheFlux(featureKey.featureKey(),
-                () -> featureConfigRepository.findByFilterParams(featureKey.featureKey(), params)
-                        .map(FeatureConfigDb::toFeatureConfig));
+                () -> features.get(featureKey)
+                        .flatMapMany(feature -> feature.getConfigs().all(params)));
     }
 
     private static class FeatureConfigComparator implements Comparator<FeatureConfig> {
