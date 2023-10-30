@@ -1,8 +1,11 @@
-package cn.dpc.ab.persistent.experiment.db;
+package cn.dpc.ab.persistent.experiment;
 
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Experiments;
+import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
+import cn.dpc.ab.persistent.experiment.db.ExperimentDbRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -23,18 +26,25 @@ public class ExperimentsImpl implements Experiments {
     }
 
     @Override
-    public Flux<Experiment> subCollection(FilterParams params, int from, int to) {
-        return null;
+    public Flux<Experiment> subCollection(FilterParams params, long from, long to) {
+        int pageSize = (int) (to - from);
+        pageSize = pageSize < 0 ? 10 : pageSize;
+        int page = (int) (from / pageSize);
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("updatedAt").descending());
+
+        return experimentDbRepository.findByFilterParams(params, pageRequest)
+                .map(ExperimentDb::toExperiment);
     }
 
     @Override
     public Mono<Long> size(FilterParams params) {
-        return null;
+        return experimentDbRepository.countByFilterParams(params);
     }
 
     @Override
     public Mono<Experiment> add(Experiment experiment) {
-        return null;
+        return experimentDbRepository.save(ExperimentDb.from(experiment))
+                .map(ExperimentDb::toExperiment);
     }
 
     @Override
