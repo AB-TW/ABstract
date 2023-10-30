@@ -59,7 +59,7 @@
         <FilterConditionComponent
           ref="filterConditionRef"
           :key="featureConfig.filterCondition"
-          :filterCondition="featureConfig.filterCondition"
+          v-model="featureConfig.filterCondition"
           :disabled="formType == 'view'"
           @update:filterCondition="updateFilterCondition"
         />

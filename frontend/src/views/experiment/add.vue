@@ -133,7 +133,6 @@
 
 <script setup lang="ts">
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance, FormRules } from "element-plus"
-import { FilterCondition } from "@/model/FilterCondition"
 import FilterConditionComponent from "@/components/FilterCondition.vue"
 import { reactive, ref } from "vue"
 import { Delete } from "@element-plus/icons-vue"
@@ -142,6 +141,7 @@ import _ from "lodash"
 import { transTempToTreeDataSource, validateSelectDateLowerThanNow } from "@/utils"
 import { Feature, Features, FeatureTemplate, PageResponse } from "@/domain/Features"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
+import { FilterCondition } from "@/domain/FilterConditions"
 
 interface AddExperiment {
   name: string
