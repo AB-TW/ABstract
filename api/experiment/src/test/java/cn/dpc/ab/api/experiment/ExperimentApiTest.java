@@ -1,0 +1,55 @@
+package cn.dpc.ab.api.experiment;
+
+import cn.dpc.ab.api.TestConfiguration;
+import cn.dpc.ab.api.experiment.dto.ExperimentRequest;
+import cn.dpc.ab.api.experiment.dto.ExperimentResponse;
+import cn.dpc.ab.domain.experiment.Experiment;
+import cn.dpc.ab.domain.experiment.Experiments;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+import static org.mockito.Mockito.when;
+
+@ExtendWith(SpringExtension.class)
+@WebFluxTest(value = ExperimentApi.class, properties = "spring.main.lazy-initialization=true")
+@ContextConfiguration(classes = TestConfiguration.class)
+class ExperimentApiTest {
+
+    @Autowired
+    WebTestClient webClient;
+
+    @MockBean
+    Experiments experiments;
+
+    @Test
+    void add() {
+        when(experiments.add(Mockito.any())).thenReturn(Mono.empty());
+
+        ExperimentRequest experimentRequest = ExperimentRequest.builder()
+                .filterCondition(null)
+                .name("test")
+                .featureKey("test")
+                .buckets(List.of(Experiment.Bucket.builder().key("test").percentage(100).description("").build()))
+                .description("")
+                .status(Experiment.Status.builder().staticStatus(Experiment.Status.StaticStatus.PUBLISHED).build())
+                .build();
+
+        webClient.post()
+                .uri("/experiments/add")
+                .body(Mono.just(experimentRequest), ExperimentRequest.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ExperimentResponse.class)
+                .hasSize(0);
+    }
+}
