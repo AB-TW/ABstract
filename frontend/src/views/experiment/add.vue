@@ -2,13 +2,16 @@
   <el-card>
     <el-form
       :model="experimentForm"
-      :rules="experimentRules"
       ref="experimentFormRef"
       label-width="140px"
       :disabled="false"
       :scroll-to-error="true"
     >
-      <el-form-item label="实验名称" prop="name">
+      <el-form-item
+        label="实验名称"
+        :rules="[{ required: true, message: '请输入实验名称', trigger: 'blur' }]"
+        prop="name"
+      >
         <el-input
           v-model="experimentForm.name"
           maxlength="20"
@@ -93,24 +96,28 @@
       </el-form-item>
 
       <el-form-item
-        label="实验进行时间段"
-        :rules="[{ required: true, message: '请选择实验进行的时间段', trigger: 'blur' }]"
-        prop="startWithEndTime"
+        label="实验开始时间"
+        :rules="[
+          { required: true, message: '请选择选择实验开始的时间', trigger: 'blur' },
+          { validator: validStartTime, message: '开始时间需早于结束/收集时间', trigger: 'blur' }
+        ]"
+        prop="startTime"
       >
         <el-date-picker
-          v-model="experimentForm.startWithEndTime"
-          type="datetimerange"
-          range-separator="-"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
+          v-model="experimentForm.startTime"
+          type="datetime"
+          placeholder="请选择选择实验开始的时间"
           value-format="YYYY-MM-DD HH:mm:ss"
-          :disabled-date="validateSelectDateLowerThanNow"
+          :disabled-date="validateSelectDateLowerThanToday"
         />
       </el-form-item>
 
       <el-form-item
         label="停止收集数据时间"
-        :rules="[{ required: true, message: '请选择选择停止收集数据的时间', trigger: 'blur' }]"
+        :rules="[
+          { required: true, message: '请选择选择停止收集数据的时间', trigger: 'blur' },
+          { validator: validEndCollectTime, message: '收集时间需晚于开始/收集时间', trigger: 'blur' }
+        ]"
         prop="endCollectTime"
       >
         <el-date-picker
@@ -118,7 +125,24 @@
           type="datetime"
           placeholder="选择停止收集数据时间"
           value-format="YYYY-MM-DD HH:mm:ss"
-          :disabled-date="validateSelectDateLowerThanNow"
+          :disabled-date="validateSelectDateLowerThanToday"
+        />
+      </el-form-item>
+
+      <el-form-item
+        label="实验结束时间"
+        :rules="[
+          { required: true, message: '请选择选择实验结束的时间', trigger: 'blur' },
+          { validator: validEndTime, message: '结束时间需晚于开始/停止收据时间且早于结束时间', trigger: 'blur' }
+        ]"
+        prop="endTime"
+      >
+        <el-date-picker
+          v-model="experimentForm.endTime"
+          type="datetime"
+          placeholder="请选择选择实验结束的时间"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          :disabled-date="validateSelectDateLowerThanToday"
         />
       </el-form-item>
 
@@ -138,10 +162,11 @@ import { reactive, ref } from "vue"
 import { Delete } from "@element-plus/icons-vue"
 import { ExperimentBucket } from "@/model/ExperimentBucket"
 import _ from "lodash"
-import { transTempToTreeDataSource, validateSelectDateLowerThanNow } from "@/utils"
+import { transTempToTreeDataSource, validateSelectDateLowerThanToday } from "@/utils"
 import { Feature, Features, FeatureTemplate, PageResponse } from "@/domain/Features"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
 import { FilterCondition } from "@/domain/FilterConditions"
+import moment from "moment/moment"
 
 interface AddExperiment {
   name: string
@@ -149,7 +174,6 @@ interface AddExperiment {
   featureKey: string
   buckets: ExperimentBucket[]
   filterCondition: FilterCondition
-  startWithEndTime: string[]
   startTime: string
   endTime: string
   endCollectTime: string
@@ -212,15 +236,7 @@ const addBucket = () => {
   })
   setBucketsConfig(selectedFeature.dataSource)
 }
-const experimentRules: FormRules = {
-  name: [
-    {
-      required: true,
-      message: "请输入实验名称",
-      trigger: "blur"
-    }
-  ]
-}
+
 const validateBucket = (rule: any, bucket: ExperimentBucket, callback: any) => {
   if (
     _.isEmpty(bucket.key) ||
@@ -243,6 +259,32 @@ const validateBucket = (rule: any, bucket: ExperimentBucket, callback: any) => {
     callback()
   }
 }
+const validStartTime = () => {
+  const startTime = moment(experimentForm.startTime)
+  const nextDay = moment(experimentForm.startTime).add(1, "day")
+  return (
+    startTime.isBefore(experimentForm.endCollectTime ?? nextDay) &&
+    startTime.isBefore(experimentForm.endTime ?? nextDay)
+  )
+}
+const validEndCollectTime = () => {
+  const endCollectTime = moment(experimentForm.endCollectTime)
+  const prevDay = moment(experimentForm.endCollectTime).subtract(1, "day")
+  const nextDay = moment(experimentForm.endCollectTime).add(1, "day")
+  return endCollectTime.isBetween(
+    experimentForm.startTime ?? prevDay,
+    experimentForm.endTime ?? nextDay,
+    "second",
+    "[]"
+  )
+}
+const validEndTime = () => {
+  const endTime = moment(experimentForm.endTime)
+  const prevDay = moment(experimentForm.endTime)
+  return (
+    endTime.isAfter(experimentForm.startTime ?? prevDay) && endTime.isAfter(experimentForm.endCollectTime ?? prevDay)
+  )
+}
 
 const resetExperimentForm = (
   experimentFormEl: FormInstance | undefined,
@@ -260,8 +302,6 @@ const submitExperimentForm = async (
   if (!experimentFormEl || !filterConditionRef) return
   try {
     await Promise.all([experimentFormEl.validate(), filterConditionRef.$refs.filterConditionFormRef.validate()])
-    experimentForm.startTime = experimentForm.startWithEndTime[0]
-    experimentForm.endTime = experimentForm.startWithEndTime[1]
     console.log(experimentForm)
   } catch (e: Error) {
     ElMessage.error("请检查表单项是否填写符合规范～")

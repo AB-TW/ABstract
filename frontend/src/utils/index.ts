@@ -191,6 +191,6 @@ export function mapDataToTemplate(name, obj, model) {
   throw new Error(name + obj)
 }
 
-export function validateSelectDateLowerThanNow(date: string) {
-  return moment(date).isBefore(moment())
+export function validateSelectDateLowerThanToday(date: string) {
+  return moment(date).isBefore(moment().subtract(1, "day"))
 }
