@@ -24,11 +24,15 @@
       <el-table-column align="center" label="操作">
         <template #default="scope">
           <div style="display: flex">
-            <el-button type="success" text>查看</el-button>
-            <el-button type="primary" text v-if="scope.row?.status === ExperimentStatus.DRAFT">编辑</el-button>
-            <el-button type="primary" text v-if="scope.row?.status === ExperimentStatus.DRAFT">发布</el-button>
-            <el-button type="primary" text v-if="scope.row?.status === ExperimentStatus.RUNNING">暂停</el-button>
-            <el-button type="danger" text :disabled="scope.row?.status === ExperimentStatus.DRAFT">删除</el-button>
+            <el-button type="success" size="small">查看</el-button>
+            <el-button type="primary" size="small" v-if="scope.row?.status === ExperimentStatus.DRAFT">编辑</el-button>
+            <el-button type="primary" size="small" v-if="scope.row?.status === ExperimentStatus.DRAFT">发布</el-button>
+            <el-button type="primary" size="small" v-if="scope.row?.status === ExperimentStatus.RUNNING"
+              >暂停</el-button
+            >
+            <el-button type="danger" size="small" :disabled="scope.row?.status === ExperimentStatus.DRAFT"
+              >删除</el-button
+            >
           </div>
         </template>
       </el-table-column>

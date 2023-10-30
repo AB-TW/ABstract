@@ -10,7 +10,7 @@
   >
     <el-form-item label="灰度发布比例" prop="grayReleaseCondition.releasePercentage">
       <el-input-number
-        v-model="filterCondition.grayReleaseCondition.releasePercentage"
+        v-model.number="filterCondition.grayReleaseCondition.releasePercentage"
         :min="0"
         :max="100"
         :step="10"
@@ -111,21 +111,21 @@
 
 <script lang="ts" setup>
 import _ from "lodash"
-import { ref, watch } from "vue"
+import { reactive, ref, watch } from "vue"
 import {
   CompareOperator,
   CustomAttributeCondition,
-  FilterCondition,
-  defaultFilterCondition
+  defaultFilterCondition,
+  FilterCondition
 } from "@/domain/FilterConditions"
-import { Delete, QuestionFilled } from "@element-plus/icons-vue"
+import { Delete } from "@element-plus/icons-vue"
 import { ElForm, ElFormItem, ElInput, FormRules } from "element-plus"
 
 defineOptions({
   name: "FilterCondition"
 })
 const props = defineProps({
-  filterCondition: {
+  modelValue: {
     type: Object,
     required: true,
     default: () => {
@@ -138,14 +138,14 @@ const props = defineProps({
     default: false
   }
 })
-const emit = defineEmits(["update:filterCondition"])
+const emit = defineEmits(["update:modelValue"])
 
 // code about filter condition
-const filterCondition = ref(props.filterCondition)
-console.log(filterCondition.value)
+const filterCondition = reactive<FilterCondition>(props.modelValue)
+console.log(filterCondition)
 
 // watch reactive object then assign parent bind object
-watch<FilterCondition>(filterCondition, (cur, _) => emit("update:filterCondition", cur))
+watch<FilterCondition>(filterCondition, (cur, _) => emit("update:modelValue", cur))
 const validateCustomAttributeConditions = (rule: any, customAttribute: CustomAttributeCondition, callback: any) => {
   if (_.isEmpty(customAttribute.value) || _.isEmpty(customAttribute.key)) {
     callback(new Error("请检查键或值是否填写～"))
@@ -161,8 +161,8 @@ const supportOperatorList = _.map(CompareOperator, (operator: string) => ({
   value: operator
 }))
 const addCustomAttributeItem = () => {
-  filterCondition.value.attributeConditions = filterCondition.value?.attributeConditions || []
-  filterCondition.value.attributeConditions?.push({
+  filterCondition.attributeConditions = filterCondition?.attributeConditions || []
+  filterCondition.attributeConditions?.push({
     key: "",
     operator: CompareOperator.EQUALS,
     value: ""
