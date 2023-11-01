@@ -45,7 +45,7 @@ class ExperimentApiTest {
                 .build();
 
         webClient.post()
-                .uri("/experiments/add")
+                .uri("/experiments")
                 .body(Mono.just(experimentRequest), ExperimentRequest.class)
                 .exchange()
                 .expectStatus().isOk()
