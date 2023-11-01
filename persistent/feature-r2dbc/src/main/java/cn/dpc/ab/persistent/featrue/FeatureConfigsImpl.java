@@ -59,9 +59,9 @@ public class FeatureConfigsImpl implements Feature.Configs {
     public Mono<Void> update(FeatureConfig.FeatureConfigId id, FeatureConfig.Description description) {
         return repository.findById(id.configId())
                 .switchIfEmpty(Mono.error(new RecordNotFoundException(id.configId())))
-                .map(db -> {
-                    db.updateDescription(description);
-                    return db;
+                .flatMap(db -> {
+                    db.updateDescription(db.to().update(description).getDescription());
+                    return repository.save(db);
                 }).then();
     }
 
