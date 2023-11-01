@@ -1,6 +1,8 @@
 import dayjs from "dayjs"
 import _ from "lodash"
 import lodash from "lodash"
+import moment from "moment"
+
 /** 格式化时间 */
 export const formatDateTime = (time: string | number | Date) => {
   return time ? dayjs(new Date(time)).format("YYYY-MM-DD HH:mm:ss") : "N/A"
@@ -72,16 +74,16 @@ export function replaceChildrenWithItems(data) {
         // 递归处理嵌套的子级对象
         replaceChildrenWithItems(data["items"])
       } else {
-        if(prop == "dataType") {
+        if (prop == "dataType") {
           switch (data[prop]) {
-            case 'NUMBER':
-              data['defaultValue'] = Number(data['defaultValue'])
-              break;
-            case 'BOOLEAN':
-              data['defaultValue'] = Boolean(data['defaultValue'])
-              break;
+            case "NUMBER":
+              data["defaultValue"] = Number(data["defaultValue"])
+              break
+            case "BOOLEAN":
+              data["defaultValue"] = Boolean(data["defaultValue"])
+              break
             default:
-              break;
+              break
           }
         }
         // 递归处理对象的属性
@@ -91,10 +93,12 @@ export function replaceChildrenWithItems(data) {
   }
   return data
 }
+
 export const translateDataToTemplateItems = (value) => {
   value.template = value.dataSource[0]
   return value
 }
+
 export function getValue(info) {
   if (info.dataType == "BOOLEAN") {
     if (_.hasIn(info, "value")) {
@@ -102,12 +106,13 @@ export function getValue(info) {
     } else {
       return Boolean(info.defaultValue)
     }
-  } else if(info.dataType== 'NUMBER') {
+  } else if (info.dataType == "NUMBER") {
     return Number(info.value || info.defaultValue)
-  }  else {
+  } else {
     return info.value || info.defaultValue
   }
 }
+
 // FeatureConfg data数据处理函数
 export function convertConfigObject(data) {
   if (data.dataType === "OBJECT") {
@@ -184,4 +189,8 @@ export function mapDataToTemplate(name, obj, model) {
     }
   }
   throw new Error(name + obj)
+}
+
+export function validateSelectDateLowerThanToday(date: string) {
+  return moment(date).isBefore(moment().subtract(1, "day"))
 }
