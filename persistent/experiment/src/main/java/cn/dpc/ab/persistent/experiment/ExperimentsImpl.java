@@ -54,22 +54,42 @@ public class ExperimentsImpl implements Experiments {
 
     @Override
     public Mono<Void> update(Experiment.ExperimentId id, Experiment.Description description) {
-        return null;
+        return experimentDbRepository.findById(id.id())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
+                .flatMap(experimentDb -> experimentDbRepository.save(experimentDb
+                        .updateDescription(experimentDb.toExperiment().update(description).getDescription())))
+                .then();
     }
 
     @Override
     public Mono<Void> publish(Experiment.ExperimentId id) {
-        return null;
+        return experimentDbRepository.findById(id.id())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
+                .flatMap(experimentDb -> {
+                    experimentDb.getStatus().updateStatus(Experiment.Status.StaticStatus.PUBLISHED);
+                    return experimentDbRepository.save(experimentDb);
+                }).then();
     }
 
     @Override
     public Mono<Void> pause(Experiment.ExperimentId id) {
-        return null;
+        return experimentDbRepository.findById(id.id())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
+                .flatMap(experimentDb -> {
+                    experimentDb.getStatus().updateStatus(Experiment.Status.StaticStatus.PAUSED);
+                    return experimentDbRepository.save(experimentDb);
+                }).then();
+
     }
 
     @Override
     public Mono<Void> stop(Experiment.ExperimentId id) {
-        return null;
+        return experimentDbRepository.findById(id.id())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
+                .flatMap(experimentDb -> {
+                    experimentDb.getStatus().updateStatus(Experiment.Status.StaticStatus.STOPPED);
+                    return experimentDbRepository.save(experimentDb);
+                }).then();
     }
 
     @Override
