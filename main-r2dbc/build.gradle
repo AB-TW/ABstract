@@ -1,0 +1,14 @@
+plugins {
+    id 'api'
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation project(':api:api-feature')
+//    implementation project(':api:api-customer')
+    implementation project(':persistent:persistent-feature-r2dbc')
+//    implementation project(':persistent:persistent-customer')
+//    implementation project(':persistent:persistent-experiment')
+}
+
