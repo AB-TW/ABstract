@@ -11,7 +11,7 @@
     >
       <template #default="{ node, data }">
         <div class="custom-tree-node">
-          <el-form-item  label-width="auto">
+          <el-form-item label-width="auto">
             <CommonConfig
               :default-value="getDataValue(data)"
               :max-length="data?.validator?.maxLength || Number.MAX_SAFE_INTEGER"
@@ -52,6 +52,7 @@ import { ElNotification } from "element-plus"
 import CommonConfig from "@/components/CommonConfig.vue"
 import _ from "lodash"
 import { getValue } from "@/utils"
+
 const props = defineProps({
   index: {
     type: Number,
@@ -96,6 +97,7 @@ const showAddNextBtn = (node, child) => {
   // const parentType = node?.parent?.data.dataType || null
   return ["ARRAY"].includes(child.dataType)
 }
+
 interface Tree {
   id: number
   children?: Tree[]
@@ -147,6 +149,7 @@ const remove = (node: Node, data: Tree) => {
 
   .validator-container {
     width: 100% !important;
+
     .el-form-item__label {
       justify-content: flex-start !important;
       min-width: 80px !important;

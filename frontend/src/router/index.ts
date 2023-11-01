@@ -89,21 +89,20 @@ export const constantRoutes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: "/experiment",
+    path: "/experiment/list",
     component: Layout,
     name: "Experiment",
     meta: {
-      title: "Experiment管理",
-      elIcon: "ScaleToOriginal"
+      keepAlive: true
     },
-    redirect: "/experiment/list",
     children: [
       {
         path: "/experiment/list",
-        component: () => import("@/views/experiment/list.vue"),
+        component: () => import("@/views/experiment/index.vue"),
         name: "Experiment-List",
         meta: {
-          title: "实验列表",
+          title: "Experiment管理",
+          elIcon: "ScaleToOriginal",
           keepAlive: true
         }
       },
@@ -113,7 +112,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "Add-Experiment",
         meta: {
           title: "新增实验",
-          keepAlive: true
+          hidden: true
         }
       }
     ]
@@ -140,7 +139,6 @@ export function resetRouter() {
   // 注意：所有动态路由路由必须带有 Name 属性，否则可能会不能完全重置干净
   try {
     router.getRoutes().forEach((route) => {
-
       const { name, meta } = route
       if (name && meta.roles?.length) {
         router.hasRoute(name) && router.removeRoute(name)
