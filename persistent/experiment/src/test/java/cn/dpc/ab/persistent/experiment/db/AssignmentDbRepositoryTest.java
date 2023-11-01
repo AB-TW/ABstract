@@ -36,7 +36,7 @@ public class AssignmentDbRepositoryTest extends RepositoryTestBase {
                         && assignment.getExperimentConfigVersion() == 111111)
                 .verifyComplete();
 
-        repository.findById("ci:123123-ei:234234")
+        repository.findById("assignment.234234.123123")
                 .as(StepVerifier::create)
                 .expectNextMatches(assignment -> assignment.getClientId().equals("123123")
                         && assignment.getExperimentId().equals("234234")
