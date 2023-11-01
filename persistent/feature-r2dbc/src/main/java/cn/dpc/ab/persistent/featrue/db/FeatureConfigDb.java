@@ -6,6 +6,7 @@ import cn.dpc.ab.domain.feature.FeatureConfig;
 import cn.dpc.ab.persistent.r2dbc.ObjectAdapter;
 import cn.dpc.ab.persistent.utils.JsonUtil;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
@@ -20,7 +21,8 @@ import java.util.Optional;
 @Data
 @Table("feature_config")
 public class FeatureConfigDb {
-    private String id;
+    @Id
+    private Long id;
     private String featureKey;
     private String description;
     private String dataAdapter;
@@ -66,7 +68,9 @@ public class FeatureConfigDb {
     public static FeatureConfigDb from(FeatureConfig featureConfig) {
         FeatureConfigDb featureConfigDb = new FeatureConfigDb();
         featureConfigDb.setId(Optional.ofNullable(featureConfig.getId())
-                .map(FeatureConfig.FeatureConfigId::configId).orElse(null));
+                .map(FeatureConfig.FeatureConfigId::configId)
+                .map(Long::valueOf)
+                .orElse(null));
         featureConfigDb.setFeatureKey(featureConfig.getFeatureKey().featureKey());
         featureConfigDb.setTitle(featureConfig.getDescription().title());
         featureConfigDb.setKey(featureConfig.getDescription().key());
@@ -90,13 +94,13 @@ public class FeatureConfigDb {
      */
     public FeatureConfig to() {
         return FeatureConfig.builder()
-                .id(new FeatureConfig.FeatureConfigId(this.id))
+                .id(new FeatureConfig.FeatureConfigId(String.valueOf(this.id)))
                 .featureKey(new Feature.FeatureId(this.featureKey))
                 .description(new FeatureConfig.Description(
                         this.key,
                         this.title,
                         this.description,
-                        JsonUtil.fromJson(this.dataAdapter, Object.class),
+                        this.getData(),
                         JsonUtil.fromJson(this.saData, Map.class),
                         new FeatureConfig.Status(this.staticStatus, this.startTime, this.endTime),
                         this.priority,
