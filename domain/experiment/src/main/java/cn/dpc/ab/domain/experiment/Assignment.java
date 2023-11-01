@@ -101,4 +101,18 @@ public class Assignment {
         Set<String> customerIds = (Set<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new HashSet<String>());
         return customerIds.contains(customerId.customerId());
     }
+
+    /**
+     * updateBucketKey modify bucketKey.
+     *
+     * @param bucketKey the bucket key
+     * @return assignment
+     */
+    public Assignment updateBucketKey(Experiment experiment, String bucketKey) {
+        this.setBucket(Optional.ofNullable(bucketKey)
+                .flatMap(key -> experiment.getDescription().buckets().stream()
+                        .filter(bucket -> bucket.key().equals(key))
+                        .findFirst()).orElse(this.getBucket()));
+        return this;
+    }
 }

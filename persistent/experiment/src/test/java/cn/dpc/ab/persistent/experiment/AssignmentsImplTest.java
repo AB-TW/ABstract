@@ -5,6 +5,8 @@ import cn.dpc.ab.domain.experiment.Assignments;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDb;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDbRepository;
+import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
+import cn.dpc.ab.persistent.experiment.db.ExperimentDbRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,30 +30,62 @@ public class AssignmentsImplTest {
     @Mock
     AssignmentDbRepository repository;
 
+    @Mock
+    ExperimentDbRepository experimentDbRepository;
+
     Assignments assignments;
 
     @BeforeEach
     void setUp() {
-        assignments = new AssignmentsImpl(repository);
+        assignments = new AssignmentsImpl(repository, experimentDbRepository);
     }
 
     @Test
-    void should_add_success() {
-        when(repository.save(any(AssignmentDb.class))).thenReturn(Mono.just(AssignmentTestUtil.createAssignmentDb(
-                "123123", "234234", 111111, "bucketKey"
-                )));
+    void should_update_success() {
+        AssignmentDb assignmentDb = AssignmentTestUtil.createAssignmentDb(
+                "123123", "234234", 111111, "oldKey");
+        ExperimentDb experimentDb = ExperimentTestUtil.createExperimentDb(
+                "234234", "experiment1");
+        experimentDb.setBuckets(List.of(ExperimentDb.BucketDb.builder()
+                .key("bucketKey").percentage(100).build()));
+        when(repository.save(any(AssignmentDb.class))).thenReturn(Mono.empty());
+        when(repository.findById(any(String.class))).thenReturn(Mono.just(assignmentDb));
+        when(experimentDbRepository.findById(any(String.class))).thenReturn(Mono.just(experimentDb));
 
-        assignments.update("123123", "234234", "bucketKey")
+        assignments.update(new Assignment.AssignmentId(
+                new Experiment.ExperimentId("234234"), "123123"),
+                        "bucketKey")
                 .as(StepVerifier::create)
                 .verifyComplete();
     }
 
     @Test
-    void should_add_return_error_when_repository_save_error() {
-        when(repository.save(any(AssignmentDb.class)))
-                .thenReturn(Mono.error(new DuplicateKeyException("save error")));
+    void should_update_return_error_when_find_experiment_is_empty() {
+        ExperimentDb experimentDb = ExperimentTestUtil.createExperimentDb(
+                "234234", "experiment1");
+        experimentDb.setBuckets(List.of(ExperimentDb.BucketDb.builder()
+                .key("bucketKey").build()));
+        when(experimentDbRepository.findById(any(String.class))).thenReturn(Mono.empty());
 
-        assignments.update("123123", "234234", "bucketKey")
+        assignments.update(new Assignment.AssignmentId(
+                                new Experiment.ExperimentId("234234"), "123123"),
+                        "bucketKey")
+                .as(StepVerifier::create)
+                .expectError()
+                .verify();
+    }
+
+    @Test
+    void should_update_return_error_when_find_assignment_is_empty() {
+        ExperimentDb experimentDb = ExperimentTestUtil.createExperimentDb(
+                "234234", "experiment1");
+        experimentDb.setBuckets(List.of(ExperimentDb.BucketDb.builder()
+                .key("bucketKey").build()));
+        when(experimentDbRepository.findById(any(String.class))).thenReturn(Mono.just(experimentDb));
+
+        assignments.update(new Assignment.AssignmentId(
+                                new Experiment.ExperimentId("234234"), "123123"),
+                        "bucketKey")
                 .as(StepVerifier::create)
                 .expectError()
                 .verify();

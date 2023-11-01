@@ -5,6 +5,7 @@ import cn.dpc.ab.domain.experiment.Assignments;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDb;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDbRepository;
+import cn.dpc.ab.persistent.experiment.db.ExperimentDbRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -19,20 +20,22 @@ public class AssignmentsImpl implements Assignments {
 
     private final AssignmentDbRepository repository;
 
+    private final ExperimentDbRepository experimentDbRepository;
+
     @Override
     public Flux<Assignment> getAssignmentByExperimentId(String experimentId) {
         return null;
     }
 
     @Override
-    public Mono<Void> update(String experimentId, String clientId, String bucketKey) {
-        Assignment.AssignmentId assignmentId = new Assignment.AssignmentId(
-                new Experiment.ExperimentId(experimentId), clientId);
-        return this.getAssignmentById(assignmentId)
+    public Mono<Void> update(Assignment.AssignmentId assignmentId, String bucketKey) {
+        String experimentId = assignmentId.experimentId().id();
+        return experimentDbRepository.findById(experimentId)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException(
-                        "Assignment not found: " + AssignmentDb.idFrom(assignmentId)
+                        "Experiment not found: " + experimentId
                 )))
-                .flatMap(assignment -> updateToDb(assignment, bucketKey));
+                .flatMap(experimentDb ->
+                        updateBucketKey(experimentDb.toExperiment(), assignmentId, bucketKey));
     }
 
     @Override
@@ -53,17 +56,23 @@ public class AssignmentsImpl implements Assignments {
     }
 
     /**
-     * updateToDb updates a assignment in the database.
+     * updateBucketKey updates a bucket for assignment.
      *
-     * @param assignment  the assignment
+     * @param assignmentId  the assignment id
      * @param bucketKey the bucket key
      * @return a Mono of Void
      */
-    private Mono<Void> updateToDb(Assignment assignment, String bucketKey) {
-        return repository.findById(AssignmentDb.idFrom(assignment.getId()))
-                .flatMap(db -> {
-                    db.updateBucketKey(bucketKey);
-                    return repository.save(db);
-                }).then();
+    private Mono<Void> updateBucketKey(Experiment experiment,
+                                       Assignment.AssignmentId assignmentId,
+                                       String bucketKey) {
+        String id = AssignmentDb.idFrom(assignmentId);
+        return repository.findById(id)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException(
+                        "Assignment not found: " + id
+                )))
+                .flatMap(db -> repository.save(AssignmentDb.from(
+                                db.to(experiment)
+                                        .updateBucketKey(experiment, bucketKey)
+                ))).then();
     }
 }
