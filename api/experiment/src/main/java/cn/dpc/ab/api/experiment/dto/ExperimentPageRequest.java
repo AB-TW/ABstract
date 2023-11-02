@@ -15,7 +15,7 @@ public class ExperimentPageRequest extends PageRequest {
 
 
     private String key;
-    private Experiment.Status.StaticStatus status;
+    private Experiment.Status.DynamicStatus status;
 
     /**
      * Creates a FilterParams from a FeaturePageRequest.
