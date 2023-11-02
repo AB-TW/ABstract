@@ -32,13 +32,13 @@ public class ExperimentsImpl implements Experiments {
         int page = (int) (from / pageSize);
         PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("updatedAt").descending());
 
-        return experimentDbRepository.findByFilterParams(params, pageRequest)
+        return experimentDbRepository.findByFilterParams(ExperimentDbRepository.FilterParams.from(params), pageRequest)
                 .map(ExperimentDb::toExperiment);
     }
 
     @Override
     public Mono<Long> size(FilterParams params) {
-        return experimentDbRepository.countByFilterParams(params);
+        return experimentDbRepository.countByFilterParams(ExperimentDbRepository.FilterParams.from(params));
     }
 
     @Override
