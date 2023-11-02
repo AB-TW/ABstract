@@ -25,14 +25,10 @@
         <template #default="scope">
           <div style="display: flex">
             <el-button type="success" size="small">查看</el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status === ExperimentStatus.DRAFT">编辑</el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status === ExperimentStatus.DRAFT">发布</el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status === ExperimentStatus.RUNNING"
-              >暂停</el-button
-            >
-            <el-button type="danger" size="small" :disabled="scope.row?.status === ExperimentStatus.DRAFT"
-              >删除</el-button
-            >
+            <el-button type="primary" size="small" v-if="scope.row?.status === Status.DRAFT">编辑</el-button>
+            <el-button type="primary" size="small" v-if="scope.row?.status === Status.DRAFT">发布</el-button>
+            <el-button type="primary" size="small" v-if="scope.row?.status === Status.RUNNING">暂停</el-button>
+            <el-button type="danger" size="small" :disabled="scope.row?.status === Status.DRAFT">删除</el-button>
           </div>
         </template>
       </el-table-column>
@@ -54,10 +50,9 @@
 <script setup lang="ts">
 import router from "@/router"
 import { reactive, ref } from "vue"
-import { Experiment } from "@/api/experiment/types/experiment"
 import { EXPERIMENT_STATUS_MAPPING } from "@/constants/constants"
 import _ from "lodash"
-import { ExperimentStatus } from "@/model/ExperimentStatus"
+import { Status } from "@/model/Status"
 
 const totalExperiment = ref<number>(0)
 const pageSearchParams = reactive<{
@@ -70,7 +65,7 @@ const pageSearchParams = reactive<{
   size: 10,
   keyword: ""
 })
-const experiments = reactive<Experiment[]>([
+const experiments = reactive<any[]>([
   {
     id: "afe2566a-5998-492b-9eea-8a5a1e5ee4ee",
     name: "早餐换购弹窗排序推荐",
@@ -78,8 +73,7 @@ const experiments = reactive<Experiment[]>([
     featureKey: "feature-key",
     samplePercentage: 100,
     buckets: [],
-    status: ExperimentStatus.PUBLISHED,
-    createdUsername: "Zhouzhou Wang(PSP)",
+    status: Status.PUBLISHED,
     createdAt: "2023-07-23 17:26:00"
   },
   {
@@ -89,8 +83,7 @@ const experiments = reactive<Experiment[]>([
     featureKey: "feature-key",
     samplePercentage: 100,
     buckets: [],
-    status: ExperimentStatus.DRAFT,
-    createdUsername: "Zhouzhou Wang(PSP)",
+    status: Status.DRAFT,
     createdAt: "2023-07-23 17:26:00"
   },
   {
@@ -100,8 +93,7 @@ const experiments = reactive<Experiment[]>([
     featureKey: "feature-key",
     samplePercentage: 100,
     buckets: [],
-    status: ExperimentStatus.RUNNING,
-    createdUsername: "Zhouzhou Wang(PSP)",
+    status: Status.RUNNING,
     createdAt: "2023-07-23 17:26:00"
   }
 ])

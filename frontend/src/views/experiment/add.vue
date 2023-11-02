@@ -174,8 +174,10 @@ import _ from "lodash"
 import { convertConfigObject, transTempToTreeDataSource, validateSelectDateLowerThanToday } from "@/utils"
 import { Feature, Features, FeatureTemplate, PageResponse } from "@/domain/Features"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
-import { FilterCondition } from "@/domain/FilterConditions"
 import moment from "moment/moment"
+import { Experiment, Experiments } from "@/domain/Experiments"
+import { Status } from "@/model/Status"
+import { FilterCondition } from "@/domain/FilterConditions"
 
 interface AddExperiment {
   name: string
@@ -191,6 +193,7 @@ interface AddExperiment {
 const allFeatures = reactive<Feature[]>([])
 const selectedFeature = reactive<Feature>({} as Feature)
 const features = new Features()
+const experiments = new Experiments()
 
 const setup = () => {
   features
@@ -309,11 +312,21 @@ const submitExperimentForm = async (
   if (!experimentFormEl || !filterConditionRef) return
   try {
     await Promise.all([experimentFormEl.validate(), filterConditionRef.$refs.filterConditionFormRef.validate()])
-    experimentForm.buckets = _.map(experimentForm.buckets, (bucket: ExperimentBucket) => ({
-      ...bucket,
-      config: convertConfigObject(bucket.datasource[0])
-    }))
-    console.log(experimentForm)
+    const requestBody = {
+      ..._.omit(experimentForm, ["startTime", "endCollectTime", "endTime"]),
+      buckets: _.map(experimentForm.buckets, (bucket: ExperimentBucket) => ({
+        ..._.omit(bucket, ["datasource"]),
+        config: convertConfigObject(bucket.datasource[0])
+      })),
+      status: {
+        staticStatus: Status.DRAFT,
+        startTime: experimentForm.startTime,
+        endCollectTime: experimentForm.endCollectTime,
+        endTime: experimentForm.endTime
+      }
+    }
+    console.log(requestBody)
+    await experiments.create(requestBody as Experiment)
   } catch (e: Error) {
     ElMessage.error("请检查表单项是否填写符合规范～")
   }
