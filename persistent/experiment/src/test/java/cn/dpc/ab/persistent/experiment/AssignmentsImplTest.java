@@ -51,7 +51,7 @@ public class AssignmentsImplTest {
         when(repository.findById(any(String.class))).thenReturn(Mono.just(assignmentDb));
         when(experimentDbRepository.findById(any(String.class))).thenReturn(Mono.just(experimentDb));
 
-        assignments.update(new Assignment.AssignmentId(
+        assignments.updateBucketKey(new Assignment.AssignmentId(
                 new Experiment.ExperimentId("234234"), "123123"),
                         "bucketKey")
                 .as(StepVerifier::create)
@@ -66,7 +66,7 @@ public class AssignmentsImplTest {
                 .key("bucketKey").build()));
         when(experimentDbRepository.findById(any(String.class))).thenReturn(Mono.empty());
 
-        assignments.update(new Assignment.AssignmentId(
+        assignments.updateBucketKey(new Assignment.AssignmentId(
                                 new Experiment.ExperimentId("234234"), "123123"),
                         "bucketKey")
                 .as(StepVerifier::create)
@@ -82,7 +82,7 @@ public class AssignmentsImplTest {
                 .key("bucketKey").build()));
         when(experimentDbRepository.findById(any(String.class))).thenReturn(Mono.just(experimentDb));
 
-        assignments.update(new Assignment.AssignmentId(
+        assignments.updateBucketKey(new Assignment.AssignmentId(
                                 new Experiment.ExperimentId("234234"), "123123"),
                         "bucketKey")
                 .as(StepVerifier::create)

@@ -81,11 +81,9 @@ public class Assignment {
      * @param customerId the customerId to add
      */
     public void addCustomerId(String customerId) {
-        Map<String, Object> extraInfo = Optional.ofNullable(description).orElse(
-                Description.builder()
-                        .extraInfo(new HashMap<>())
-                        .build()
-        ).extraInfo;
+        Map<String, Object> extraInfo = Optional.ofNullable(this.description)
+                .flatMap(d -> Optional.ofNullable(d.extraInfo))
+                .orElse(new HashMap<>());
         Set<String> customerIds = (Set<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new HashSet<String>());
 
         if (Optional.ofNullable(customerId).filter(s -> !s.isEmpty()).isEmpty()) {
@@ -94,6 +92,11 @@ public class Assignment {
 
         customerIds.add(customerId);
         extraInfo.put(CUSTOMER_ID_KEY, customerIds);
+        this.description = Description.builder()
+                .extraInfo(extraInfo)
+                .bucket(this.description.bucket)
+                .experimentConfigVersion(this.description.experimentConfigVersion)
+                .build();
     }
 
     /**
@@ -107,11 +110,9 @@ public class Assignment {
             return false;
         }
 
-        Map<String, Object> extraInfo = Optional.ofNullable(description).orElse(
-                Description.builder()
-                        .extraInfo(new HashMap<>())
-                        .build()
-        ).extraInfo;
+        Map<String, Object> extraInfo = Optional.ofNullable(description)
+                .flatMap(d -> Optional.ofNullable(d.extraInfo))
+                .orElse(new HashMap<>());
 
         Set<String> customerIds = (Set<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new HashSet<String>());
         return customerIds.contains(customerId.customerId());
@@ -124,14 +125,12 @@ public class Assignment {
      * @return assignment
      */
     public Assignment updateBucketKey(Experiment experiment, String bucketKey) {
-        //todo: 抛异常和校验experiment中是否存在对应bucketKey的写法感觉写的很怪
-        if (!bucketKey.isEmpty()) {
-            if (experiment.getDescription().buckets().stream()
-                    .noneMatch(bucket -> bucket.key().equals(bucketKey))) {
-                throw new IllegalArgumentException(
-                        "Assignment not found: " + id
-                );
-            }
+        if (Optional.ofNullable(bucketKey).map(k -> !k.isEmpty()).orElse(false)
+                && experiment.getDescription().buckets().stream()
+                .noneMatch(bucket -> bucket.key().equals(bucketKey))) {
+            throw new IllegalArgumentException(
+                    "Bucket Key not found: " + bucketKey
+            );
         }
         this.setDescription(Description.builder()
                         .bucket(Experiment.Bucket.builder()

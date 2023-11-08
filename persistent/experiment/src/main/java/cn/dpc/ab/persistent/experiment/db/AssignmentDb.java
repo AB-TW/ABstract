@@ -78,17 +78,14 @@ public class AssignmentDb {
     /**
      * Update AssignmentDb from assignment.
      *
-     * @param assignment the assignment
+     * @param description the description
      */
-    public static AssignmentDb update(Assignment assignment) {
-        return AssignmentDb.builder()
-                .bucketKey(assignment.getDescription().bucket().key())
-                .clientId(assignment.getId().clientId())
-                .experimentId(assignment.getId().experimentId().id())
-                .experimentConfigVersion(assignment.getDescription().experimentConfigVersion())
-                .extraInfo(assignment.getDescription().extraInfo())
-                .updatedAt(LocalDateTime.now())
-                .build();
+    public AssignmentDb update(Assignment.Description description) {
+        this.bucketKey = Optional.ofNullable(description.bucket())
+                .map(Experiment.Bucket::key).orElse(null);
+        this.experimentConfigVersion = description.experimentConfigVersion();
+        this.extraInfo = description.extraInfo();
+        return this;
     }
 
     /**
