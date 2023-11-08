@@ -28,14 +28,14 @@ public class AssignmentsImpl implements Assignments {
     }
 
     @Override
-    public Mono<Void> update(Assignment.AssignmentId assignmentId, String bucketKey) {
+    public Mono<Void> updateBucketKey(Assignment.AssignmentId assignmentId, String bucketKey) {
         String experimentId = assignmentId.experimentId().id();
         return experimentDbRepository.findById(experimentId)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException(
                         "Experiment not found: " + experimentId
                 )))
                 .flatMap(experimentDb ->
-                        updateBucketKey(experimentDb.toExperiment(), assignmentId, bucketKey));
+                        saveBucketKey(experimentDb.toExperiment(), assignmentId, bucketKey));
     }
 
     @Override
@@ -62,17 +62,17 @@ public class AssignmentsImpl implements Assignments {
      * @param bucketKey the bucket key
      * @return a Mono of Void
      */
-    private Mono<Void> updateBucketKey(Experiment experiment,
-                                       Assignment.AssignmentId assignmentId,
-                                       String bucketKey) {
+    private Mono<Void> saveBucketKey(Experiment experiment,
+                                     Assignment.AssignmentId assignmentId,
+                                     String bucketKey) {
         String id = AssignmentDb.idFrom(assignmentId);
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException(
                         "Assignment not found: " + id
                 )))
-                .flatMap(db -> repository.save(AssignmentDb.update(
+                .flatMap(db -> repository.save(db.update(
                                 db.to(experiment)
-                                        .updateBucketKey(experiment, bucketKey)
+                                        .updateBucketKey(experiment, bucketKey).getDescription()
                 ))).then();
     }
 }

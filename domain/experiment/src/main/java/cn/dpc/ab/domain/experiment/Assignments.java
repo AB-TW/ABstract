@@ -10,7 +10,7 @@ public interface Assignments {
 
     Flux<Assignment> getAssignmentByExperimentId(String experimentId);
 
-    Mono<Void> update(Assignment.AssignmentId assignmentId, String bucketKey);
+    Mono<Void> updateBucketKey(Assignment.AssignmentId assignmentId, String bucketKey);
 
     Mono<Assignment> add(Assignment assignment);
 

@@ -71,7 +71,7 @@ public class AssignmentApiTest {
         String experimentId = "experimentId";
         String clientId = "clientId";
         String bucketKey = "bucketKey";
-        when(assignments.update(any(Assignment.AssignmentId.class), any(String.class)))
+        when(assignments.updateBucketKey(any(Assignment.AssignmentId.class), any(String.class)))
                 .thenReturn(Mono.empty());
         webClient.put()
                 .uri((builder) -> builder.path("/assignments/" + experimentId

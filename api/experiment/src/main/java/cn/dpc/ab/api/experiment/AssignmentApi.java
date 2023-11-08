@@ -37,7 +37,7 @@ public class AssignmentApi {
     public Mono<Void> updateAssignment(@PathVariable("experimentId") String experimentId,
                                                    @PathVariable("clientId") String clientId,
                                                    @RequestBody String bucketKey) {
-        return assignments.update(new Assignment.AssignmentId(
+        return assignments.updateBucketKey(new Assignment.AssignmentId(
                 new Experiment.ExperimentId(experimentId), clientId), bucketKey);
     }
 }
