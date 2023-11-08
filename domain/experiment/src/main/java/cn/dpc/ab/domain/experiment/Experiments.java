@@ -31,7 +31,7 @@ public interface Experiments {
      * @param to     the end index of the sub-collection
      * @return a Flux that emits a sub-collection of experiments
      */
-    Flux<Experiment> subCollection(FilterParams params, int from, int to);
+    Flux<Experiment> subCollection(FilterParams params, long from, long to);
 
     /**
      * Get the size of a sub-collection of experiments.

@@ -15,6 +15,8 @@ import java.util.Map;
 @Getter
 @Setter
 public class FeatureConfigResponse {
+    public static final FeatureConfigResponse EMPTY = new FeatureConfigResponse();
+
     private String id;
 
     private String featureKey;
