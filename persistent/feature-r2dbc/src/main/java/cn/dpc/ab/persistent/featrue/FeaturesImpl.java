@@ -92,7 +92,7 @@ public class FeaturesImpl extends AbstractFeatures {
         int pageSize = (int) (to - from);
         pageSize = pageSize < 0 ? 10 : pageSize;
         int page = (int) (from / pageSize);
-        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("description.updatedAt").descending());
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("updatedAt").descending());
 
         return customerFeatureRepository.findAll(params, pageRequest)
                 .map(FeatureDb::to);
