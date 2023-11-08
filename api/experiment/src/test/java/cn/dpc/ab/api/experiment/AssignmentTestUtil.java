@@ -23,8 +23,10 @@ public class AssignmentTestUtil {
                 .id(new Assignment.AssignmentId(
                         new Experiment.ExperimentId(experimentId), clientId
                 ))
-                .bucket(Experiment.Bucket.builder().key(bucketKey).build())
-                .experimentConfigVersion(experimentConfigVersion)
+                .description(Assignment.Description.builder()
+                        .bucket(Experiment.Bucket.builder().key(bucketKey).build())
+                        .experimentConfigVersion(experimentConfigVersion)
+                        .build())
                 .build();
     }
 }
