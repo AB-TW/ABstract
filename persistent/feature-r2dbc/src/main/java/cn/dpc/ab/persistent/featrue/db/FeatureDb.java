@@ -18,7 +18,7 @@ import java.util.Optional;
 public class FeatureDb {
 
     @Id
-    private String id;
+    private Long id;
 
     private String featureKey;
 

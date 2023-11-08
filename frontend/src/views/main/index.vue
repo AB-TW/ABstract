@@ -1,7 +1,7 @@
 <script lang="ts" setup></script>
 
 <template>
-  <div class="main-container">ABStract</div>
+  <div class="main-container">ABstract</div>
 </template>
 <style scoped>
 .main-container {

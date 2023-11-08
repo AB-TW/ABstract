@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  r2dbc:
+    url:
+
+---
+spring:
+  config:
+    activate:
+      on-profile: default
+  r2dbc:
+    url: r2dbc:h2:file:///./tmp/test-database
+  flyway:
+    url: jdbc:h2:file:./tmp/test-database
+    locations: classpath:db/migration
+    enabled: true
+#  rsocket:
+#    server:
+#      port: 7001
+
+logging:
+  level:
+    root: debug

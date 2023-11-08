@@ -59,7 +59,7 @@
         <FilterConditionComponent
           ref="filterConditionRef"
           :key="featureConfig.filterCondition"
-          :filterCondition="featureConfig.filterCondition"
+          v-model="featureConfig.filterCondition"
           :disabled="formType == 'view'"
           @update:filterCondition="updateFilterCondition"
         />
@@ -151,7 +151,7 @@ const isSimpleBooleanOrNumber = () => {
   return ["NUMBER", "BOOLEAN"].includes(_.get(feature.value, "template.dataType", null))
 }
 nextTick(() => {
-  if (!!form.value) {
+  if (form.value) {
     form.value.clearValidate()
   }
 })
