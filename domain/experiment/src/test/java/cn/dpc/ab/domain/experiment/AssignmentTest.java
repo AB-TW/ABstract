@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * AssignmentTest represents a test of assignment.
@@ -17,15 +18,15 @@ public class AssignmentTest {
         Experiment experiment = generateExperiment("123");
         Assignment assignment = generateAssignment("111", "222");
         assignment.updateBucketKey(experiment, "key1");
-        assertEquals("key1", assignment.getBucket().key());
+        assertEquals("key1", assignment.getDescription().bucket().key());
     }
 
     @Test
     public void should_not_update_bucket_key_when_key_is_not_in_experiment_list() {
         Experiment experiment = generateExperiment("123");
         Assignment assignment = generateAssignment("111", "222");
-        assignment.updateBucketKey(experiment, "key10");
-        assertEquals("oldKey", assignment.getBucket().key());
+        assertThrows(IllegalArgumentException.class,
+                () -> assignment.updateBucketKey(experiment, "key10"));
     }
 
     private Assignment generateAssignment(String experimentId, String clientId) {
@@ -33,8 +34,10 @@ public class AssignmentTest {
                 .id(new Assignment.AssignmentId(
                         new Experiment.ExperimentId(experimentId), clientId
                 ))
-                .bucket(Experiment.Bucket.builder()
-                        .key("oldKey")
+                .description(Assignment.Description.builder()
+                        .bucket(Experiment.Bucket.builder()
+                                .key("oldKey")
+                                .build())
                         .build())
                 .build();
     }

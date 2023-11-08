@@ -70,7 +70,7 @@ public class AssignmentsImpl implements Assignments {
                 .switchIfEmpty(Mono.error(new IllegalArgumentException(
                         "Assignment not found: " + id
                 )))
-                .flatMap(db -> repository.save(AssignmentDb.from(
+                .flatMap(db -> repository.save(AssignmentDb.update(
                                 db.to(experiment)
                                         .updateBucketKey(experiment, bucketKey)
                 ))).then();

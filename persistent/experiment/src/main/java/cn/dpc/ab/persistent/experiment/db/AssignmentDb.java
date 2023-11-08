@@ -66,11 +66,28 @@ public class AssignmentDb {
      */
     public static AssignmentDb from(Assignment assignment) {
         return AssignmentDb.builder()
-                .bucketKey(assignment.getBucket().key())
+                .bucketKey(assignment.getDescription().bucket().key())
                 .clientId(assignment.getId().clientId())
                 .experimentId(assignment.getId().experimentId().id())
-                .experimentConfigVersion(assignment.getExperimentConfigVersion())
-                .extraInfo(assignment.getExtraInfo())
+                .experimentConfigVersion(assignment.getDescription().experimentConfigVersion())
+                .extraInfo(assignment.getDescription().extraInfo())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    /**
+     * Update AssignmentDb from assignment.
+     *
+     * @param assignment the assignment
+     */
+    public static AssignmentDb update(Assignment assignment) {
+        return AssignmentDb.builder()
+                .bucketKey(assignment.getDescription().bucket().key())
+                .clientId(assignment.getId().clientId())
+                .experimentId(assignment.getId().experimentId().id())
+                .experimentConfigVersion(assignment.getDescription().experimentConfigVersion())
+                .extraInfo(assignment.getDescription().extraInfo())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 
@@ -82,13 +99,15 @@ public class AssignmentDb {
     public Assignment to(Experiment experiment) {
         return Assignment.builder()
                 .id(new Assignment.AssignmentId(new Experiment.ExperimentId(experimentId), clientId))
-                .extraInfo(extraInfo)
-                .experimentConfigVersion(experimentConfigVersion)
-                .bucket(Optional.ofNullable(bucketKey)
-                        .flatMap(key -> experiment.getDescription().buckets().stream()
-                                .filter(bucket -> bucket.key().equals(key))
-                                .findFirst())
-                        .orElse(null))
+                .description(Assignment.Description.builder()
+                        .extraInfo(extraInfo)
+                        .experimentConfigVersion(experimentConfigVersion)
+                        .bucket(Optional.ofNullable(bucketKey)
+                                .flatMap(key -> experiment.getDescription().buckets().stream()
+                                        .filter(bucket -> bucket.key().equals(key))
+                                        .findFirst())
+                                .orElse(null))
+                        .build())
                 .build();
     }
 
@@ -101,11 +120,13 @@ public class AssignmentDb {
         return Assignment.builder()
                 .id(new Assignment.AssignmentId(new Experiment.ExperimentId(this.experimentId),
                         this.clientId))
-                .bucket(Experiment.Bucket.builder().key(
-                        Optional.ofNullable(this.bucketKey).orElse(null)
-                ).build())
-                .experimentConfigVersion(this.experimentConfigVersion)
-                .extraInfo(this.extraInfo)
+                .description(Assignment.Description.builder()
+                        .bucket(Experiment.Bucket.builder().key(
+                                Optional.ofNullable(this.bucketKey).orElse(null)
+                        ).build())
+                        .experimentConfigVersion(this.experimentConfigVersion)
+                        .extraInfo(this.extraInfo)
+                        .build())
                 .build();
     }
 }
