@@ -97,6 +97,25 @@ public class ExperimentDb {
                 .build();
     }
 
+    /**
+     * Update the description of the experiment.
+     *
+     * @param description the new description of the experiment
+     * @return the experimentDb
+     */
+    public ExperimentDb updateDescription(Experiment.Description description) {
+        this.description = description.description();
+        this.buckets = description.buckets().stream().map(BucketDb::from).collect(Collectors.toList());
+        this.configVersion = description.configVersion();
+        this.status = description.status();
+        this.filterCondition = description.filterCondition();
+        this.featureKey = description.featureKey();
+        this.createdAt = description.createdAt();
+        this.updatedAt = LocalDateTime.now();
+
+        return this;
+    }
+
 
     /**
      * BucketDb represents bucket.
