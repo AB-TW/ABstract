@@ -58,7 +58,7 @@ public interface ExperimentDbRepository extends ReactiveCrudRepository<Experimen
                 case PAUSED -> statusQuery += "AND `status`.`staticStatus` = 'PAUSED'";
                 case STOPPED -> statusQuery += """
                         AND (`status`.`staticStatus` = 'STOPPED' \
-                        OR `status`.`endTime` <= CLOCK_MILLIS())
+                        OR (`status`.`staticStatus` = 'PUBLISHED' AND `status`.`endTime` <= CLOCK_MILLIS()) \
                         """;
                 default -> {
                 }
