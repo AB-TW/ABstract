@@ -25,12 +25,11 @@ public class CustomerApi {
                 .flatMapMany(customer ->
                         Flux.concat(customer.getAssignments()
                                 .getByFeatureKey(Feature.FeatureId.builder().featureKey(featureKey).build())
-                                .map(assignment -> FeatureConfigResponse.from(
-                                        (FeatureConfig) assignment.getDescription().bucket().config())),
+                                .map(assignment -> assignment.getDescription().bucket() == null ? FeatureConfigResponse.EMPTY :
+                                        FeatureConfigResponse.from((FeatureConfig) assignment.getDescription().bucket().config())),
                                         customer.getFeatureConfigs()
                                                 .getByFeatureKey(Feature.FeatureId.builder().featureKey(featureKey).build())
                                                 .map(FeatureConfigResponse::from))
-                );
+                ).filter(featureConfigResponse -> featureConfigResponse != FeatureConfigResponse.EMPTY);
     }
-
 }

@@ -5,6 +5,7 @@ import cn.dpc.ab.domain.experiment.Experiments;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDbRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -25,18 +26,25 @@ public class ExperimentsImpl implements Experiments {
     }
 
     @Override
-    public Flux<Experiment> subCollection(FilterParams params, int from, int to) {
-        return null;
+    public Flux<Experiment> subCollection(FilterParams params, long from, long to) {
+        int pageSize = (int) (to - from);
+        pageSize = pageSize < 0 ? 10 : pageSize;
+        int page = (int) (from / pageSize);
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("updatedAt").descending());
+
+        return experimentDbRepository.findByFilterParams(ExperimentDbRepository.FilterParams.from(params), pageRequest)
+                .map(ExperimentDb::toExperiment);
     }
 
     @Override
     public Mono<Long> size(FilterParams params) {
-        return null;
+        return experimentDbRepository.countByFilterParams(ExperimentDbRepository.FilterParams.from(params));
     }
 
     @Override
     public Mono<Experiment> add(Experiment experiment) {
-        return null;
+        return experimentDbRepository.save(ExperimentDb.from(experiment))
+                .map(ExperimentDb::toExperiment);
     }
 
     @Override
@@ -46,22 +54,42 @@ public class ExperimentsImpl implements Experiments {
 
     @Override
     public Mono<Void> update(Experiment.ExperimentId id, Experiment.Description description) {
-        return null;
+        return experimentDbRepository.findById(id.id())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
+                .flatMap(experimentDb -> experimentDbRepository.save(experimentDb
+                        .updateDescription(experimentDb.toExperiment().update(description).getDescription())))
+                .then();
     }
 
     @Override
     public Mono<Void> publish(Experiment.ExperimentId id) {
-        return null;
+        return experimentDbRepository.findById(id.id())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
+                .flatMap(experimentDb -> {
+                    experimentDb.getStatus().updateStatus(Experiment.Status.StaticStatus.PUBLISHED);
+                    return experimentDbRepository.save(experimentDb);
+                }).then();
     }
 
     @Override
     public Mono<Void> pause(Experiment.ExperimentId id) {
-        return null;
+        return experimentDbRepository.findById(id.id())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
+                .flatMap(experimentDb -> {
+                    experimentDb.getStatus().updateStatus(Experiment.Status.StaticStatus.PAUSED);
+                    return experimentDbRepository.save(experimentDb);
+                }).then();
+
     }
 
     @Override
     public Mono<Void> stop(Experiment.ExperimentId id) {
-        return null;
+        return experimentDbRepository.findById(id.id())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
+                .flatMap(experimentDb -> {
+                    experimentDb.getStatus().updateStatus(Experiment.Status.StaticStatus.STOPPED);
+                    return experimentDbRepository.save(experimentDb);
+                }).then();
     }
 
     @Override
