@@ -1,21 +1,16 @@
 package cn.dpc.ab.domain.experiment;
 
 import cn.dpc.ab.domain.core.CustomerId;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import reactor.core.publisher.Mono;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Assignment represents an assignment.
  */
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -26,17 +21,22 @@ public class Assignment {
 
     private AssignmentId id;
 
-    private Experiment.Bucket bucket;
-
-    private long experimentConfigVersion;
-
-    private Map<String, Object> extraInfo;
+    private Description description;
 
     /**
      * AssignmentId represents the ID of an assignment.
      */
     public record AssignmentId(Experiment.ExperimentId experimentId, String clientId) {
 
+    }
+
+    /**
+     * Description represents the description of an assignment.
+     */
+    @Builder
+    public record Description(Experiment.Bucket bucket,
+                              long experimentConfigVersion,
+                              Map<String, Object> extraInfo) {
     }
 
     /**
@@ -63,7 +63,9 @@ public class Assignment {
     private static Assignment getDefaultAssignment(Experiment experiment, CustomerId customerId) {
         Assignment assignment = Assignment.builder()
                 .id(new AssignmentId(experiment.getId(), customerId.clientId()))
-                .experimentConfigVersion(experiment.getDescription().configVersion())
+                .description(Description.builder()
+                        .experimentConfigVersion(experiment.getDescription().configVersion())
+                        .build())
                 .build();
 
         if (Optional.ofNullable(customerId.customerId()).filter(s -> !s.isEmpty()).isPresent()) {
@@ -79,6 +81,9 @@ public class Assignment {
      * @param customerId the customerId to add
      */
     public void addCustomerId(String customerId) {
+        Map<String, Object> extraInfo = Optional.ofNullable(this.description)
+                .flatMap(d -> Optional.ofNullable(d.extraInfo))
+                .orElse(new HashMap<>());
         Set<String> customerIds = (Set<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new HashSet<String>());
 
         if (Optional.ofNullable(customerId).filter(s -> !s.isEmpty()).isEmpty()) {
@@ -86,7 +91,12 @@ public class Assignment {
         }
 
         customerIds.add(customerId);
-        this.extraInfo.put(CUSTOMER_ID_KEY, customerIds);
+        extraInfo.put(CUSTOMER_ID_KEY, customerIds);
+        this.description = Description.builder()
+                .extraInfo(extraInfo)
+                .bucket(this.description.bucket)
+                .experimentConfigVersion(this.description.experimentConfigVersion)
+                .build();
     }
 
     /**
@@ -100,7 +110,36 @@ public class Assignment {
             return false;
         }
 
+        Map<String, Object> extraInfo = Optional.ofNullable(description)
+                .flatMap(d -> Optional.ofNullable(d.extraInfo))
+                .orElse(new HashMap<>());
+
         Set<String> customerIds = (Set<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new HashSet<String>());
         return customerIds.contains(customerId.customerId());
+    }
+
+    /**
+     * updateBucketKey modify bucketKey.
+     *
+     * @param bucketKey the bucket key
+     * @return assignment
+     */
+    public Assignment updateBucketKey(Experiment experiment, String bucketKey) {
+        if (Optional.ofNullable(bucketKey).map(k -> !k.isEmpty()).orElse(false)
+                && experiment.getDescription().buckets().stream()
+                .noneMatch(bucket -> bucket.key().equals(bucketKey))) {
+            throw new IllegalArgumentException(
+                    "Bucket Key not found: " + bucketKey
+            );
+        }
+        this.setDescription(Description.builder()
+                        .bucket(Experiment.Bucket.builder()
+                                .key(bucketKey)
+                                .build())
+                        .experimentConfigVersion(
+                                experiment.getDescription().configVersion())
+                        .extraInfo(this.description.extraInfo)
+                .build());
+        return this;
     }
 }

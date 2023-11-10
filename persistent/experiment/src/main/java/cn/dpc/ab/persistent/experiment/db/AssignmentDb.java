@@ -11,6 +11,7 @@ import org.springframework.data.couchbase.core.mapping.id.GeneratedValue;
 import org.springframework.data.couchbase.core.mapping.id.IdAttribute;
 import org.springframework.data.couchbase.core.mapping.id.IdPrefix;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,6 +46,10 @@ public class AssignmentDb {
 
     private Map<String, Object> extraInfo;
 
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
     /**
      * Generate id of db from assignmentId.
      *
@@ -61,12 +66,26 @@ public class AssignmentDb {
      */
     public static AssignmentDb from(Assignment assignment) {
         return AssignmentDb.builder()
-                .bucketKey(assignment.getBucket().key())
+                .bucketKey(assignment.getDescription().bucket().key())
                 .clientId(assignment.getId().clientId())
                 .experimentId(assignment.getId().experimentId().id())
-                .experimentConfigVersion(assignment.getExperimentConfigVersion())
-                .extraInfo(assignment.getExtraInfo())
+                .experimentConfigVersion(assignment.getDescription().experimentConfigVersion())
+                .extraInfo(assignment.getDescription().extraInfo())
+                .updatedAt(LocalDateTime.now())
                 .build();
+    }
+
+    /**
+     * Update AssignmentDb from assignment.
+     *
+     * @param description the description
+     */
+    public AssignmentDb update(Assignment.Description description) {
+        this.bucketKey = Optional.ofNullable(description.bucket())
+                .map(Experiment.Bucket::key).orElse(null);
+        this.experimentConfigVersion = description.experimentConfigVersion();
+        this.extraInfo = description.extraInfo();
+        return this;
     }
 
     /**
@@ -77,13 +96,34 @@ public class AssignmentDb {
     public Assignment to(Experiment experiment) {
         return Assignment.builder()
                 .id(new Assignment.AssignmentId(new Experiment.ExperimentId(experimentId), clientId))
-                .extraInfo(extraInfo)
-                .experimentConfigVersion(experimentConfigVersion)
-                .bucket(Optional.ofNullable(bucketKey)
-                        .flatMap(key -> experiment.getDescription().buckets().stream()
-                                .filter(bucket -> bucket.key().equals(key))
-                                .findFirst())
-                        .orElse(null))
+                .description(Assignment.Description.builder()
+                        .extraInfo(extraInfo)
+                        .experimentConfigVersion(experimentConfigVersion)
+                        .bucket(Optional.ofNullable(bucketKey)
+                                .flatMap(key -> experiment.getDescription().buckets().stream()
+                                        .filter(bucket -> bucket.key().equals(key))
+                                        .findFirst())
+                                .orElse(null))
+                        .build())
+                .build();
+    }
+
+    /**
+     * toAssignment converts AssignmentDb to Assignment.
+     *
+     * @return the assignment
+     */
+    public Assignment toAssignment() {
+        return Assignment.builder()
+                .id(new Assignment.AssignmentId(new Experiment.ExperimentId(this.experimentId),
+                        this.clientId))
+                .description(Assignment.Description.builder()
+                        .bucket(Experiment.Bucket.builder().key(
+                                Optional.ofNullable(this.bucketKey).orElse(null)
+                        ).build())
+                        .experimentConfigVersion(this.experimentConfigVersion)
+                        .extraInfo(this.extraInfo)
+                        .build())
                 .build();
     }
 }
