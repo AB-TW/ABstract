@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 @Repository
 @RequiredArgsConstructor
 public class CustomerAssignmentRepository {
+    // TODO: [mayu] 根据AssignmentImpl中的需求来构造方法
     private final R2dbcEntityTemplate template;
 
     /**

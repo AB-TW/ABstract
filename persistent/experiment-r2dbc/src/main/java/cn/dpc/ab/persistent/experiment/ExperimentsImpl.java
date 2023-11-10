@@ -72,8 +72,7 @@ public class ExperimentsImpl implements Experiments {
      */
     @Override
     public Mono<Experiment> add(Experiment experiment) {
-        return repository.save(ExperimentDb.from(experiment))
-                .map(ExperimentDb::to);
+        return repository.save(ExperimentDb.from(experiment)).map(ExperimentDb::to);
     }
 
 
@@ -98,9 +97,9 @@ public class ExperimentsImpl implements Experiments {
     public Mono<Void> update(Experiment.ExperimentId id, Experiment.Description description) {
         return repository.findById(id.id())
                 .switchIfEmpty(Mono.error(new RecordNotFoundException(id.id())))
-                .map(db -> {
-                    db.updateDescription(description);
-                    return db;
+                .flatMap(db -> {
+                    db.updateDescription(db.to().update(description).getDescription());
+                    return repository.save(db);
                 })
                 .then();
     }

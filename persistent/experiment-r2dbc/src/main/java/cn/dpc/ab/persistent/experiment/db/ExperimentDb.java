@@ -22,8 +22,8 @@ public class ExperimentDb {
     private String featureKey;
     private Experiment.Status.StaticStatus staticStatus;
     private LocalDateTime startTime;
-    private LocalDateTime endTime;
     private LocalDateTime endCollectTime;
+    private LocalDateTime endTime;
     private String buckets;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -48,8 +48,8 @@ public class ExperimentDb {
         experimentDb.setFeatureKey(experiment.getDescription().featureKey());
         experimentDb.setStaticStatus(experiment.getDescription().status().staticStatus());
         experimentDb.setStartTime(experiment.getDescription().status().getStartTime());
-        experimentDb.setEndTime(experiment.getDescription().status().getEndTime());
         experimentDb.setEndCollectTime(experiment.getDescription().status().getEndCollectTime());
+        experimentDb.setEndTime(experiment.getDescription().status().getEndTime());
         experimentDb.setBuckets(JsonUtil.toJson(experiment.getDescription().buckets()));
         experimentDb.setCreatedAt(Optional.ofNullable(experiment.getDescription().createdAt()).orElse(LocalDateTime.now()));
         experimentDb.setUpdatedAt(Optional.ofNullable(experiment.getDescription().updatedAt()).orElse(LocalDateTime.now()));
@@ -71,7 +71,12 @@ public class ExperimentDb {
                         this.name,
                         this.description,
                         this.featureKey,
-                        new Experiment.Status(this.staticStatus, this.startTime, this.endCollectTime, this.endTime),
+                        Experiment.Status.builder()
+                                .staticStatus(this.staticStatus)
+                                .startTime(this.startTime)
+                                .endCollectTime(this.endCollectTime)
+                                .endTime(this.endTime)
+                                .build(),
                         JsonUtil.fromJson(buckets, List.class),
                         this.createdAt,
                         this.updatedAt,
