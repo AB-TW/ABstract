@@ -39,11 +39,10 @@ public class ExperimentsImpl implements Experiments {
     /**
      * subCollection returns a sub collection of experiments.
      *
-     * @see Experiments#subCollection(FilterParams, int, int)
+     * @see Experiments#subCollection(FilterParams, long, long)
      */
     @Override
-    // TODO：[mayu] 合代码之后 参数类型改为 long
-    public Flux<Experiment> subCollection(FilterParams params, int from, int to) {
+    public Flux<Experiment> subCollection(FilterParams params, long from, long to) {
         int pageSize = (int) (to - from);
         pageSize = pageSize < 0 ? 10 : pageSize;
         int page = (int) (from / pageSize);
