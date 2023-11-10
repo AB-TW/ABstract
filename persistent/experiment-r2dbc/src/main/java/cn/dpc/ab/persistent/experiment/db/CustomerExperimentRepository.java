@@ -84,7 +84,7 @@ public class CustomerExperimentRepository {
         Criteria criteria = Criteria.empty();
 
         if (StringUtils.hasLength(params.key())) {
-            criteria = criteria.and("experimentKey").like("%" + params.key() + "%");
+            criteria = criteria.and("featureKey").like("%" + params.key() + "%");
         }
 
         if (params.status() != null) {
@@ -93,21 +93,21 @@ public class CustomerExperimentRepository {
                 case NOT_BEGIN -> criteria = criteria.and("staticStatus").is("PUBLISHED")
                         .and("startTime").greaterThan(LocalDateTime.now());
                 case COLLECTING -> criteria = criteria.and("staticStatus").is("PUBLISHED")
-                        .and(Criteria.empty().or("startTime").isNull()
+                        .and(Criteria.where("startTime").isNull()
                                 .or("startTime").lessThanOrEquals(LocalDateTime.now()))
-                        .and(Criteria.empty().or("endCollectTime").isNull()
+                        .and(Criteria.where("endCollectTime").isNull()
                                 .or("endCollectTime").greaterThan(LocalDateTime.now()));
                 case FINISH_COLLECT -> criteria = criteria.and("staticStatus").is("PUBLISHED")
                         .and("endCollectTime").lessThanOrEquals(LocalDateTime.now());
                 case PAUSED -> criteria = criteria.and("staticStatus").is("PAUSED");
                 case STOPPED -> criteria = criteria.and("staticStatus").is("STOPPED")
-                        .and("endTime").lessThanOrEquals(LocalDateTime.now());
+                        .or(Criteria.where("staticStatus").is("PUBLISHED")
+                                .and("endTime").lessThanOrEquals(LocalDateTime.now()));
                 default -> {
                 }
             }
-        } else {
-            criteria = criteria.and("staticStatus").not("STOPPED");
         }
+
         return criteria;
     }
 
