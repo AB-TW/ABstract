@@ -116,7 +116,7 @@
           v-model="experimentForm.startTime"
           type="datetime"
           placeholder="请选择选择实验开始的时间"
-          value-format="YYYY-MM-DD HH:mm:ss"
+          value-format="YYYY-MM-DDTHH:mm:ss"
           :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validStartTime(time)"
         />
       </el-form-item>
@@ -133,7 +133,7 @@
           v-model="experimentForm.endCollectTime"
           type="datetime"
           placeholder="选择停止收集数据时间"
-          value-format="YYYY-MM-DD HH:mm:ss"
+          value-format="YYYY-MM-DDTHH:mm:ss"
           :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validEndCollectTime(time)"
         />
       </el-form-item>
@@ -150,7 +150,7 @@
           v-model="experimentForm.endTime"
           type="datetime"
           placeholder="请选择选择实验结束的时间"
-          value-format="YYYY-MM-DD HH:mm:ss"
+          value-format="YYYY-MM-DDTHH:mm:ss"
           :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validEndTime(time)"
         />
       </el-form-item>
@@ -178,6 +178,7 @@ import moment from "moment/moment"
 import { Experiment, Experiments } from "@/domain/Experiments"
 import { Status } from "@/model/Status"
 import { FilterCondition } from "@/domain/FilterConditions"
+import { useRouter } from "vue-router"
 
 interface AddExperiment {
   name: string
@@ -190,6 +191,7 @@ interface AddExperiment {
   endCollectTime: string
 }
 
+const router = useRouter()
 const allFeatures = reactive<Feature[]>([])
 const selectedFeature = reactive<Feature>({} as Feature)
 const features = new Features()
@@ -325,8 +327,10 @@ const submitExperimentForm = async (
         endTime: experimentForm.endTime
       }
     }
-    console.log(requestBody)
-    await experiments.create(requestBody as Experiment)
+    await experiments.create(requestBody as Experiment).then(() => {
+      ElMessage.success("创建实验成功！")
+      router.push("/experiment/list")
+    })
   } catch (e: Error) {
     ElMessage.error("请检查表单项是否填写符合规范～")
   }
