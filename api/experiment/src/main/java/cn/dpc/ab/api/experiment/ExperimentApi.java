@@ -28,7 +28,7 @@ public class ExperimentApi {
     }
 
     @GetMapping
-    Mono<PageResponse<ExperimentResponse>> getByPage(@RequestBody ExperimentPageRequest experimentPageRequest) {
+    Mono<PageResponse<ExperimentResponse>> getByPage(ExperimentPageRequest experimentPageRequest) {
         Experiments.FilterParams filterParams = experimentPageRequest.filterParams();
         return experiments.subCollection(filterParams, experimentPageRequest.getFrom(), experimentPageRequest.getTo())
                 .map(ExperimentResponse::from)
