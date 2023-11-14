@@ -1,7 +1,10 @@
 package cn.dpc.ab.domain.core;
 
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,13 +70,16 @@ public class FilterCondition {
         public enum Operator {
             EQUALS,
             NOT_EQUALS,
-            NOT_CONTAINS,
             GREATER_THAN,
             GREATER_THAN_OR_EQUALS,
             LESS_THAN,
             LESS_THAN_OR_EQUALS,
             IN,
-            NOT_IN
+            NOT_IN,
+            VERSION_GREATER_THAN,
+            VERSION_GREATER_THAN_EQUALS,
+            VERSION_LESS_THAN,
+            VERSION_LESS_THAN_OR_EQUALS
         }
 
         /**
@@ -83,9 +89,30 @@ public class FilterCondition {
          * @return true if the filter condition matches the customer
          */
         public boolean match(Map<String, String> attributes) {
-            // TODO: implement this method
+            String attributeValue = attributes.get(key);
+            if (attributeValue == null) {
+                return false; // 属性不存在，不匹配
+            }
 
-            return false;
+            return switch (operator) {
+                case EQUALS -> attributeValue.equals(value);
+                case NOT_EQUALS -> !attributeValue.equals(value);
+                case GREATER_THAN ->
+                        StringUtils.isNumeric(attributeValue) && Double.parseDouble(attributeValue) > Double.parseDouble(value);
+                case GREATER_THAN_OR_EQUALS -> StringUtils.isNumeric(attributeValue)  && attributeValue.compareTo(value) >= 0;
+                case LESS_THAN -> StringUtils.isNumeric(attributeValue)  && attributeValue.compareTo(value) < 0;
+                case LESS_THAN_OR_EQUALS -> StringUtils.isNumeric(attributeValue)  && attributeValue.compareTo(value) <= 0;
+                case IN -> Arrays.asList(value.split(",")).contains(attributeValue);
+                case NOT_IN -> !Arrays.asList(value.split(",")).contains(attributeValue);
+                case VERSION_GREATER_THAN ->
+                        new DefaultArtifactVersion(attributeValue).compareTo(new DefaultArtifactVersion(value)) > 0;
+                case VERSION_GREATER_THAN_EQUALS ->
+                        new DefaultArtifactVersion(attributeValue).compareTo(new DefaultArtifactVersion(value)) >= 0;
+                case VERSION_LESS_THAN ->
+                        new DefaultArtifactVersion(attributeValue).compareTo(new DefaultArtifactVersion(value)) < 0;
+                case VERSION_LESS_THAN_OR_EQUALS ->
+                        new DefaultArtifactVersion(attributeValue).compareTo(new DefaultArtifactVersion(value)) <= 0;
+            };
         }
     }
 
