@@ -10,7 +10,7 @@
   >
     <el-form-item label="灰度发布比例" prop="grayReleaseCondition.releasePercentage">
       <el-input-number
-        v-model.number="filterCondition.grayReleaseCondition.releasePercentage"
+        v-model="filterCondition.grayReleaseCondition.releasePercentage"
         :min="0"
         :max="100"
         :step="10"
@@ -27,9 +27,24 @@
         v-for="(conditionItem, index) in filterCondition.attributeConditions"
       >
         <div class="custom-attribute-condition-item">
-          <p class="custom-attribute-label" style="margin: 0">
-            条件
-            {{ index + 1 }}
+          <div class="custom-attribute-label" style="margin: 0">
+            <el-popover placement="top-start" :width="200" trigger="click">
+              <template #reference>
+                <span class="customer-attribute-name-area">
+                  {{ conditionItem.name }}
+                </span>
+              </template>
+              <template #default>
+                <el-input
+                  v-model="conditionItem.name"
+                  maxlength="10"
+                  placeholder="请输入条件名"
+                  show-word-limit
+                  type="text"
+                  :disabled="props.disabled"
+                />
+              </template>
+            </el-popover>
             <el-icon
               v-if="!props.disabled"
               class="delete-custom-attribute-icon"
@@ -37,7 +52,7 @@
             >
               <Delete />
             </el-icon>
-          </p>
+          </div>
           <el-input
             v-model="conditionItem.key"
             maxlength="10"
@@ -163,6 +178,7 @@ const supportOperatorList = _.map(CompareOperator, (operator: string) => ({
 const addCustomAttributeItem = () => {
   filterCondition.attributeConditions = filterCondition?.attributeConditions || []
   filterCondition.attributeConditions?.push({
+    name: "条件" + (filterCondition.attributeConditions.length + 1),
     key: "",
     operator: CompareOperator.EQUALS,
     value: ""
@@ -227,6 +243,10 @@ const removeTagValue = (customAttribute: CustomAttributeCondition, index: number
       display: flex;
       justify-content: space-between;
       align-items: center;
+
+      .customer-attribute-name-area {
+        cursor: pointer;
+      }
 
       .delete-custom-attribute-icon {
         cursor: pointer;

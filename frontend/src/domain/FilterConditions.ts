@@ -8,6 +8,7 @@ export interface GrayReleaseCondition {
 }
 
 export interface CustomAttributeCondition {
+  name: string
   key: string
   value: string | string[]
   operator: CompareOperator

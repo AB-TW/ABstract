@@ -1,7 +1,9 @@
-export enum ExperimentStatus {
-  DRAFT = "DRAFT",
-  PUBLISHED = "PUBLISHED",
-  RUNNING = "RUNNING",
-  PAUSED = "PAUSED",
-  STOPPED = "STOPPED"
+import { Status } from "@/model/Status"
+
+export interface ExperimentStatus {
+  status: Status
+  staticStatus: Status
+  startTime: string
+  endCollectTime: string
+  endTime: string
 }
