@@ -1,4 +1,4 @@
-package cn.dpc.ab.persistent.experiment.db;
+package cn.dpc.ab.persistent.experiment;
 
 import cn.dpc.ab.domain.experiment.Assignment;
 import cn.dpc.ab.domain.experiment.Assignments;
