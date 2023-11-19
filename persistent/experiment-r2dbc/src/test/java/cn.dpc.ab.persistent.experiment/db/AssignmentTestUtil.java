@@ -5,6 +5,10 @@ import cn.dpc.ab.domain.experiment.Experiment;
 
 import java.util.Map;
 
+/**
+ * Test util for Assigment.git
+ */
+
 public class AssignmentTestUtil {
 
     /**
