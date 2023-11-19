@@ -15,6 +15,9 @@ import reactor.test.StepVerifier;
 
 import static cn.dpc.ab.persistent.experiment.db.ExperimentTestUtil.createExperimentDb;
 
+/**
+ * Test for CustomerExperimentRepository.
+ */
 
 @ExtendWith(SpringExtension.class)
 @DataR2dbcTest(properties = "logging.level.org.springframework.data.r2dbc=DEBUG")
