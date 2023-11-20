@@ -33,7 +33,7 @@ public class AssignmentApiTest {
 
     @Test
     void should_getAssignmentById_return_empty_when_assignments_return_empty() {
-        when(assignments.getAssignmentById(Mockito.any()))
+        when(assignments.get(Mockito.any()))
                 .thenReturn(Mono.empty());
         String experimentId = "experimentId";
         String clientId = "clientId";
@@ -53,7 +53,7 @@ public class AssignmentApiTest {
         String clientId = "clientId";
         String bucketKey = "bucketKey";
         long experimentConfigVersion = 123456;
-        when(assignments.getAssignmentById(Mockito.any()))
+        when(assignments.get(Mockito.any()))
                 .thenReturn(Mono.just(AssignmentTestUtil.createAssignment(
                         clientId, experimentId, bucketKey, experimentConfigVersion)));
 

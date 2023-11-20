@@ -1,7 +1,5 @@
 package cn.dpc.ab.persistent.experiment;
 
-import cn.dpc.ab.domain.experiment.Assignment;
-import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDb;
 
 import java.time.LocalDateTime;
@@ -21,9 +19,6 @@ public class AssignmentTestUtil {
                                                   long experimentConfigVersion,
                                                   String bucketKey) {
         return AssignmentDb.builder()
-                .id(AssignmentDb.idFrom(new Assignment.AssignmentId(
-                        new Experiment.ExperimentId(experimentId), clientId
-                )))
                 .clientId(clientId)
                 .experimentId(experimentId)
                 .bucketKey(bucketKey)

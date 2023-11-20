@@ -96,7 +96,7 @@ public class AssignmentsImplTest {
                 "123123", "234234", 111111, "bucketKey"
                 )));
 
-        assignments.getAssignmentById(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"), "123123"))
+        assignments.get(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"), "123123"))
                 .as(StepVerifier::create)
                 .expectNextMatches(assignment -> assignment.getId().clientId().equals("123123")
                 && assignment.getId().experimentId().id().equals("234234"))
@@ -107,7 +107,7 @@ public class AssignmentsImplTest {
     void should_get_return_empty_when_id_not_exist() {
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
-        assignments.getAssignmentById(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"), "123123"))
+        assignments.get(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"), "123123"))
                 .as(StepVerifier::create)
                 .expectNextCount(0)
                 .verifyComplete();

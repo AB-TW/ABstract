@@ -23,7 +23,7 @@ public class AssignmentApi {
     @GetMapping("/{experimentId}/assignment/{clientId}")
     public Mono<AssignmentResult> getAssignment(@PathVariable("experimentId") String experimentId,
                                                 @PathVariable("clientId") String clientId) {
-        return assignments.getAssignmentById(new Assignment.AssignmentId(
+        return assignments.get(new Assignment.AssignmentId(
                 new Experiment.ExperimentId(experimentId), clientId)
                 )
                 .map(AssignmentResult::from);
