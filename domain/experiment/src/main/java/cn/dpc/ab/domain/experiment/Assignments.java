@@ -14,10 +14,8 @@ public interface Assignments {
 
     Mono<Assignment> add(Assignment assignment);
 
-    Mono<Assignment> get(Assignment.AssignmentId assignmentId);
-
     /**
-     * getAssignmentById provides an Assignment of experiment by ids.
+     * get provides an Assignment by id.
      */
-    Mono<Assignment> getAssignmentById(Assignment.AssignmentId assignmentId);
+    Mono<Assignment> get(Assignment.AssignmentId assignmentId);
 }

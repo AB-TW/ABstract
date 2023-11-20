@@ -46,11 +46,6 @@ public class AssignmentsImpl implements Assignments {
 
     @Override
     public Mono<Assignment> get(Assignment.AssignmentId assignmentId) {
-        return null;
-    }
-
-    @Override
-    public Mono<Assignment> getAssignmentById(Assignment.AssignmentId assignmentId) {
         return repository.findById(AssignmentDb.idFrom(assignmentId))
                 .map(AssignmentDb::toAssignment);
     }
