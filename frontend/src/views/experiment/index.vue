@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <el-button class="add-experiment-button" plain icon="Plus" @click="() => router.push({ path: '/experiment/add' })"
+    <el-button class="add-experiment-button" plain icon="Plus" @click="() => router.push({ path: '/experiment/edit' })"
       >添加
     </el-button>
 
@@ -24,8 +24,17 @@
       <el-table-column align="center" label="操作">
         <template #default="scope">
           <div style="display: flex">
-            <el-button type="success" size="small">查看</el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status.staticStatus === Status.DRAFT"
+            <el-button
+              type="success"
+              size="small"
+              @click="() => router.push({ path: `/experiment/edit/${scope.row.id}`, query: { type: 'view' } })"
+              >查看
+            </el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-if="scope.row?.status.staticStatus === Status.DRAFT"
+              @click="() => router.push({ path: `/experiment/edit/${scope.row.id}` })"
               >编辑
             </el-button>
             <el-button type="primary" size="small" v-if="scope.row?.status.staticStatus === Status.DRAFT"
