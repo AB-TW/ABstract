@@ -39,4 +39,8 @@ export class Experiments {
   async update(experiment: Experiment): Promise<void> {
     return await http.put(this.getUrl(`/experiments/${experiment.id}`), experiment).then((res: any) => res?.data)
   }
+
+  async publish(id: string) {
+    return await http.put(this.getUrl(`/experiments/${id}/publish`), undefined).then((res: any) => res?.data)
+  }
 }

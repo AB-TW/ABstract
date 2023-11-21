@@ -17,7 +17,13 @@
       <el-table-column align="center" prop="name" label="实验名称" />
       <el-table-column align="center" prop="status.staticStatus" label="实验状态">
         <template #default="scope">
-          {{ EXPERIMENT_STATUS_MAPPING[scope.row?.status.staticStatus] }}
+          {{
+            EXPERIMENT_STATUS_MAPPING[
+              scope.row?.status.staticStatus === Status.PUBLISHED
+                ? scope.row?.status.status
+                : scope.row?.status.staticStatus
+            ]
+          }}
         </template>
       </el-table-column>
       <el-table-column align="center" prop="createdAt" label="创建时间" />
@@ -37,12 +43,14 @@
               @click="() => router.push({ path: `/experiment/edit/${scope.row.id}` })"
               >编辑
             </el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status.staticStatus === Status.DRAFT"
+            <el-button
+              type="primary"
+              size="small"
+              v-if="scope.row?.status.staticStatus === Status.DRAFT"
+              @click="publishExperiment(scope.row.id)"
               >发布
             </el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status.staticStatus === Status.RUNNING"
-              >暂停
-            </el-button>
+            <el-button type="primary" size="small" v-if="scope.row?.status.status === Status.RUNNING">暂停</el-button>
             <el-button type="danger" size="small" :disabled="scope.row?.status.staticStatus !== Status.DRAFT"
               >删除
             </el-button>
@@ -75,7 +83,9 @@ import { PageResponse } from "@/domain/Features"
 import { ElMessage } from "element-plus"
 import { ExperimentQueryRequest } from "@/model/request/ExperimentQueryRequest"
 
+// API
 const experimentsApi = new Experiments()
+// View-Model
 const experiments = reactive<Experiment[]>([])
 const totalExperiment = ref<number>(0)
 const pageSearchParams = reactive<ExperimentQueryRequest>({
@@ -84,6 +94,7 @@ const pageSearchParams = reactive<ExperimentQueryRequest>({
   key: undefined,
   status: undefined
 })
+// about experiment function
 const getExperiments = () => {
   experimentsApi
     .page(pageSearchParams)
@@ -107,6 +118,13 @@ const pageSearchParamsChange = (field: string, value: number | string | boolean)
     _.set(pageSearchParams, field, value)
     getExperiments()
   }
+}
+
+const publishExperiment = (id: string) => {
+  experimentsApi.publish(id).then((resp) => {
+    console.log(resp)
+    getExperiments()
+  })
 }
 </script>
 
