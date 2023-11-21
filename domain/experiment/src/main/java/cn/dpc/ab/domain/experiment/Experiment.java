@@ -192,30 +192,36 @@ public class Experiment {
     /**
      * Publish the experiment.
      */
-    public void publish() {
+    public Experiment publish() {
         if (!this.description.status.staticStatus().equals(Status.StaticStatus.DRAFT)
                 && !this.description.status.staticStatus().equals(Status.StaticStatus.PAUSED)
                 && !this.description.status.staticStatus().equals(Status.StaticStatus.PUBLISHED)) {
             throw new IllegalStateException("The experiment must be in draft status");
         }
         this.description.status.updateStatus(Status.StaticStatus.PUBLISHED);
+
+        return this;
     }
 
     /**
      * Pause the experiment.
      */
-    public void pause() {
+    public Experiment pause() {
         if (!this.description.status.staticStatus().equals(Status.StaticStatus.PUBLISHED)) {
             throw new IllegalStateException("The experiment must be in published status");
         }
         this.description.status.updateStatus(Status.StaticStatus.PAUSED);
+
+        return this;
     }
 
     /**
      * Stop the experiment.
      */
-    public void stop() {
+    public Experiment stop() {
         this.description.status.updateStatus(Status.StaticStatus.STOPPED);
+
+        return this;
     }
 
     /**

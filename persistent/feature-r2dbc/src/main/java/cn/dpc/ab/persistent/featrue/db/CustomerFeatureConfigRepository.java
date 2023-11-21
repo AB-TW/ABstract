@@ -75,9 +75,9 @@ public class CustomerFeatureConfigRepository {
                 case NOT_BEGIN -> criteria = criteria.and("staticStatus").is("PUBLISHED")
                         .and("startTime").greaterThan(LocalDateTime.now());
                 case RUNNING -> criteria = criteria.and("staticStatus").is("PUBLISHED")
-                        .and(Criteria.empty().or("start_time").isNull()
+                        .and(Criteria.where("startTime").isNull()
                                 .or("startTime").lessThanOrEquals(LocalDateTime.now()))
-                        .and(Criteria.empty().or("endTime").isNull()
+                        .and(Criteria.where("endTime").isNull()
                                 .or("endTime").greaterThan(LocalDateTime.now()));
                 case EXPIRED -> criteria = criteria.and("staticStatus").is("PUBLISHED")
                         .and("endTime").lessThanOrEquals(LocalDateTime.now());
