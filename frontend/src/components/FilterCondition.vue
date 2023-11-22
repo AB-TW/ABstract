@@ -5,7 +5,7 @@
     :rules="filterConditionRules"
     ref="filterConditionFormRef"
     label-width="140px"
-    :disabled="false"
+    :disabled="props.disabled"
     :scroll-to-error="true"
   >
     <el-form-item label="灰度发布比例" prop="grayReleaseCondition.releasePercentage">
@@ -14,7 +14,6 @@
         :min="0"
         :max="100"
         :step="10"
-        :disabled="props.disabled"
         controls-position="right"
       />
     </el-form-item>
@@ -41,7 +40,6 @@
                   placeholder="请输入条件名"
                   show-word-limit
                   type="text"
-                  :disabled="props.disabled"
                 />
               </template>
             </el-popover>
@@ -59,7 +57,6 @@
             placeholder="请输入要过滤的键"
             show-word-limit
             type="text"
-            :disabled="props.disabled"
           />
 
           <el-select
@@ -67,7 +64,6 @@
             style="width: 100%"
             placeholder="Select One Operator"
             @change="conditionOperatorChanged(conditionItem.operator, conditionItem)"
-            :disabled="props.disabled"
           >
             <el-option
               v-for="operator in supportOperatorList"
@@ -84,7 +80,6 @@
             placeholder="请输入要匹配的值"
             show-word-limit
             type="text"
-            :disabled="props.disabled"
           />
 
           <div v-show="_.isArray(conditionItem.value)">
@@ -113,13 +108,7 @@
           </div>
         </div>
       </el-form-item>
-      <el-button
-        v-if="!props.disabled"
-        class="add-custom-attribute-button"
-        plain
-        icon="Plus"
-        @click="addCustomAttributeItem"
-      />
+      <el-button class="add-custom-attribute-button" plain icon="Plus" @click="addCustomAttributeItem" />
     </el-form-item>
   </el-form>
 </template>
@@ -135,6 +124,7 @@ import {
 } from "@/domain/FilterConditions"
 import { Delete } from "@element-plus/icons-vue"
 import { ElForm, ElFormItem, ElInput, FormRules } from "element-plus"
+import lodash from "lodash"
 
 defineOptions({
   name: "FilterCondition"
@@ -157,7 +147,6 @@ const emit = defineEmits(["update:modelValue"])
 
 // code about filter condition
 const filterCondition = reactive<FilterCondition>(props.modelValue)
-console.log(filterCondition)
 
 // watch reactive object then assign parent bind object
 watch<FilterCondition>(filterCondition, (cur, _) => emit("update:modelValue", cur))
@@ -168,6 +157,10 @@ const validateCustomAttributeConditions = (rule: any, customAttribute: CustomAtt
     callback()
   }
 }
+watch(
+  () => props.modelValue,
+  (cur, _) => lodash.assign(filterCondition, cur)
+)
 const filterConditionRules: FormRules = {
   "grayReleaseCondition.releasePercentage": [{ required: true, message: "灰度发布比例不可为空", trigger: "blur" }]
 }
