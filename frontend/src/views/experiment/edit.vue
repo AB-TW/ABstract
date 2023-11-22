@@ -4,7 +4,7 @@
       :model="experimentForm"
       ref="experimentFormRef"
       label-width="140px"
-      :disabled="false"
+      :disabled="isViewMode"
       :scroll-to-error="true"
     >
       <el-form-item
@@ -90,7 +90,6 @@
             >
               <el-input-number v-model.number="bucket.percentage" style="width: 100%" :min="0" :max="100" :step="10" />
             </el-form-item>
-
             <el-form-item
               class="level-2-form-item"
               label="分组配置"
@@ -155,7 +154,11 @@
         />
       </el-form-item>
 
-      <FilterConditionComponent ref="filterConditionRef" v-model="experimentForm.filterCondition" />
+      <FilterConditionComponent
+        ref="filterConditionRef"
+        v-model="experimentForm.filterCondition"
+        :disabled="isViewMode"
+      />
       <el-form-item>
         <el-button type="default" @click="resetExperimentForm(experimentFormRef, filterConditionRef)">重置</el-button>
         <el-button type="primary" @click="submitExperimentForm(experimentFormRef, filterConditionRef)">提交</el-button>
@@ -171,14 +174,19 @@ import { reactive, ref } from "vue"
 import { Delete } from "@element-plus/icons-vue"
 import { ExperimentBucket } from "@/model/ExperimentBucket"
 import _ from "lodash"
-import { convertConfigObject, transTempToTreeDataSource, validateSelectDateLowerThanToday } from "@/utils"
+import {
+  convertConfigObject,
+  mapDataToTemplate,
+  transTempToTreeDataSource,
+  validateSelectDateLowerThanToday
+} from "@/utils"
 import { Feature, Features, FeatureTemplate, PageResponse } from "@/domain/Features"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
 import moment from "moment/moment"
 import { Experiment, Experiments } from "@/domain/Experiments"
 import { Status } from "@/model/Status"
 import { FilterCondition } from "@/domain/FilterConditions"
-import { useRouter } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 
 interface AddExperiment {
   name: string
@@ -191,41 +199,15 @@ interface AddExperiment {
   endCollectTime: string
 }
 
+// Vue Component
+const route = useRoute()
 const router = useRouter()
-const allFeatures = reactive<Feature[]>([])
-const selectedFeature = reactive<Feature>({} as Feature)
+// API
 const features = new Features()
 const experiments = new Experiments()
-
-const setup = () => {
-  features
-    .fetchAll(0, 999, undefined, true)
-    .then((res: PageResponse<Feature>) => {
-      allFeatures.push(...res.content)
-    })
-    .catch((err) => {
-      console.log(err)
-      ElMessage.error("获取数据失败，请重试")
-    })
-}
-setup()
-
-const selectFeature = (featureKey: string) => {
-  console.log(featureKey)
-  const currentSelectedFeature = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
-  _.assign(selectedFeature, currentSelectedFeature, {
-    dataSource: [transTempToTreeDataSource(currentSelectedFeature.template)]
-  })
-  // 设置bucket的config为datasource
-  setBucketsConfigDataSource(selectedFeature.dataSource)
-  console.log(selectedFeature)
-}
-const setBucketsConfigDataSource = (dataSource: FeatureTemplate[]) => {
-  _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
-    bucket.datasource = _.cloneDeep(dataSource)
-  })
-}
-
+// View-Model
+const allFeatures = reactive<Feature[]>([])
+const selectedFeature = reactive<Feature>({} as Feature)
 const experimentFormRef = ref<FormInstance>()
 const filterConditionRef = ref<FormInstance>()
 const experimentForm = reactive<AddExperiment>({
@@ -238,6 +220,44 @@ const experimentForm = reactive<AddExperiment>({
     }
   ]
 } as AddExperiment)
+const experimentId = route.params.id
+const isEditMode = ref<boolean>(!_.isEmpty(experimentId))
+const isViewMode = ref<boolean>(route.query.type === "view")
+
+// setup page
+const setup = async () => {
+  const [featureResp, experimentResp]: [PageResponse<Feature>, Experiment] = await Promise.all([
+    features.fetchAll(0, 999, undefined, true),
+    isEditMode.value ? experiments.getById(experimentId as string) : Promise.resolve(undefined)
+  ])
+  allFeatures.push(...featureResp.content)
+  _.assign(experimentForm, {
+    startTime: experimentResp.status?.startTime,
+    endTime: experimentResp.status?.endTime,
+    endCollectTime: experimentResp.status?.endCollectTime,
+    ..._.omit(experimentResp, ["status"])
+  })
+  console.log(experimentForm)
+  if (!_.isEmpty(experimentResp.featureKey)) {
+    selectFeature(experimentResp.featureKey)
+  }
+}
+setup()
+
+const selectFeature = (featureKey: string) => {
+  const currentSelectedFeature = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
+  _.assign(selectedFeature, currentSelectedFeature)
+  // 设置bucket的config为datasource
+  setBucketsConfigDataSource(currentSelectedFeature.template)
+}
+const setBucketsConfigDataSource = (template: FeatureTemplate) => {
+  _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
+    bucket.datasource = isEditMode.value
+      ? [mapDataToTemplate("", bucket.config, template)]
+      : [transTempToTreeDataSource(template)]
+  })
+}
+
 const addBucket = () => {
   const currentRemainingPercentage = 100 - _.sumBy(experimentForm.buckets, (bucket) => bucket.percentage)
   experimentForm.buckets.push({
@@ -246,7 +266,7 @@ const addBucket = () => {
     description: "",
     percentage: currentRemainingPercentage
   })
-  setBucketsConfigDataSource(selectedFeature.dataSource)
+  setBucketsConfigDataSource(selectedFeature.template)
 }
 
 const validateBucket = (rule: any, bucket: ExperimentBucket, callback: any) => {
@@ -327,11 +347,14 @@ const submitExperimentForm = async (
         endTime: experimentForm.endTime
       }
     }
-    await experiments.create(requestBody as Experiment).then(() => {
-      ElMessage.success("创建实验成功！")
+    const operationFunc = () =>
+      isEditMode.value ? experiments.update(requestBody as Experiment) : experiments.create(requestBody as Experiment)
+    await operationFunc().then(() => {
+      ElMessage.success("操作成功！")
       router.push("/experiment/list")
     })
   } catch (e: Error) {
+    console.log(e)
     ElMessage.error("请检查表单项是否填写符合规范～")
   }
 }

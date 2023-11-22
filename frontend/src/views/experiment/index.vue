@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <el-button class="add-experiment-button" plain icon="Plus" @click="() => router.push({ path: '/experiment/add' })"
+    <el-button class="add-experiment-button" plain icon="Plus" @click="() => router.push({ path: '/experiment/edit' })"
       >添加
     </el-button>
 
@@ -17,24 +17,40 @@
       <el-table-column align="center" prop="name" label="实验名称" />
       <el-table-column align="center" prop="status.staticStatus" label="实验状态">
         <template #default="scope">
-          {{ EXPERIMENT_STATUS_MAPPING[scope.row?.status.staticStatus] }}
+          {{ EXPERIMENT_STATUS_MAPPING[scope.row?.status?.status] }}
         </template>
       </el-table-column>
       <el-table-column align="center" prop="createdAt" label="创建时间" />
       <el-table-column align="center" label="操作">
         <template #default="scope">
           <div style="display: flex">
-            <el-button type="success" size="small">查看</el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status.staticStatus === Status.DRAFT"
+            <el-button
+              type="success"
+              size="small"
+              @click="() => router.push({ path: `/experiment/edit/${scope.row.id}`, query: { type: 'view' } })"
+              >查看
+            </el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-if="scope.row?.status?.status !== Status.STOPPED"
+              @click="() => router.push({ path: `/experiment/edit/${scope.row.id}` })"
               >编辑
             </el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status.staticStatus === Status.DRAFT"
-              >发布
+            <el-button
+              type="primary"
+              size="small"
+              v-if="[Status.DRAFT, Status.PAUSED].includes(scope.row?.status?.status)"
+              @click="publishExperiment(scope.row.id)"
+              >{{ scope.row?.status?.status === Status.DRAFT ? "发布" : "恢复" }}
             </el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status.staticStatus === Status.RUNNING"
+            <el-button
+              type="primary"
+              size="small"
+              v-if="[Status.NOT_BEGIN, Status.COLLECTING].includes(scope.row?.status?.status)"
               >暂停
             </el-button>
-            <el-button type="danger" size="small" :disabled="scope.row?.status.staticStatus !== Status.DRAFT"
+            <el-button type="danger" size="small" :disabled="scope.row?.status?.status !== Status.DRAFT"
               >删除
             </el-button>
           </div>
@@ -66,7 +82,9 @@ import { PageResponse } from "@/domain/Features"
 import { ElMessage } from "element-plus"
 import { ExperimentQueryRequest } from "@/model/request/ExperimentQueryRequest"
 
+// API
 const experimentsApi = new Experiments()
+// View-Model
 const experiments = reactive<Experiment[]>([])
 const totalExperiment = ref<number>(0)
 const pageSearchParams = reactive<ExperimentQueryRequest>({
@@ -75,6 +93,7 @@ const pageSearchParams = reactive<ExperimentQueryRequest>({
   key: undefined,
   status: undefined
 })
+// about experiment function
 const getExperiments = () => {
   experimentsApi
     .page(pageSearchParams)
@@ -98,6 +117,13 @@ const pageSearchParamsChange = (field: string, value: number | string | boolean)
     _.set(pageSearchParams, field, value)
     getExperiments()
   }
+}
+
+const publishExperiment = (id: string) => {
+  experimentsApi.publish(id).then((resp) => {
+    console.log(resp)
+    getExperiments()
+  })
 }
 </script>
 
