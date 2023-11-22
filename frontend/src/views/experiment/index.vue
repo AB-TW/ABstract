@@ -17,13 +17,7 @@
       <el-table-column align="center" prop="name" label="实验名称" />
       <el-table-column align="center" prop="status.staticStatus" label="实验状态">
         <template #default="scope">
-          {{
-            EXPERIMENT_STATUS_MAPPING[
-              scope.row?.status.staticStatus === Status.PUBLISHED
-                ? scope.row?.status.status
-                : scope.row?.status.staticStatus
-            ]
-          }}
+          {{ EXPERIMENT_STATUS_MAPPING[scope.row?.status?.status] }}
         </template>
       </el-table-column>
       <el-table-column align="center" prop="createdAt" label="创建时间" />
@@ -39,19 +33,24 @@
             <el-button
               type="primary"
               size="small"
-              v-if="scope.row?.status.staticStatus === Status.DRAFT"
+              v-if="scope.row?.status?.status !== Status.STOPPED"
               @click="() => router.push({ path: `/experiment/edit/${scope.row.id}` })"
               >编辑
             </el-button>
             <el-button
               type="primary"
               size="small"
-              v-if="scope.row?.status.staticStatus === Status.DRAFT"
+              v-if="[Status.DRAFT, Status.PAUSED].includes(scope.row?.status?.status)"
               @click="publishExperiment(scope.row.id)"
-              >发布
+              >{{ scope.row?.status?.status === Status.DRAFT ? "发布" : "恢复" }}
             </el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status.status === Status.RUNNING">暂停</el-button>
-            <el-button type="danger" size="small" :disabled="scope.row?.status.staticStatus !== Status.DRAFT"
+            <el-button
+              type="primary"
+              size="small"
+              v-if="[Status.NOT_BEGIN, Status.COLLECTING].includes(scope.row?.status?.status)"
+              >暂停
+            </el-button>
+            <el-button type="danger" size="small" :disabled="scope.row?.status?.status !== Status.DRAFT"
               >删除
             </el-button>
           </div>
