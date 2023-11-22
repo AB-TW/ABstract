@@ -94,7 +94,7 @@ public class FeatureConfigDb {
      */
     public FeatureConfig to() {
         return FeatureConfig.builder()
-                .id(new FeatureConfig.FeatureConfigId(String.valueOf(this.id)))
+                .id(Optional.ofNullable(id).map(item -> new FeatureConfig.FeatureConfigId(String.valueOf(item))).orElse(null))
                 .featureKey(new Feature.FeatureId(this.featureKey))
                 .description(new FeatureConfig.Description(
                         this.key,
@@ -118,7 +118,7 @@ public class FeatureConfigDb {
      */
     public void updateDescription(FeatureConfig.Description description) {
         this.title = description.title();
-        this.description = description.title();
+        this.description = description.description();
         this.setData(description.data());
         this.setSaData(JsonUtil.toJson(description.saData()));
         this.staticStatus = description.status().getStaticStatus();
