@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static cn.dpc.ab.domain.experiment.Experiment.Status.DynamicStatus.DRAFT;
+
 /**
  * Implement experiments.
  */
@@ -107,5 +109,17 @@ public class ExperimentsImpl implements Experiments {
                     experiment.setAssignments(new AssignmentsImpl(assignmentDbRepository, experiment));
                     return experiment;
                 });
+    }
+
+    @Override
+    public Mono<Void> delete(Experiment.ExperimentId id) {
+        return experimentDbRepository.findById(id.id())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
+                .flatMap(experimentDb -> {
+                    if (experimentDb.getStatus().getStatus().equals(DRAFT)) {
+                        return experimentDbRepository.deleteById(id.id());
+                    }
+                    return Mono.error(new IllegalArgumentException("Only draft experiment can be deleted!"));
+                }).then();
     }
 }

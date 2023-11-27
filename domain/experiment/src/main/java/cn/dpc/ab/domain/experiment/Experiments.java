@@ -91,4 +91,6 @@ public interface Experiments {
     Mono<Void> stop(Experiment.ExperimentId id);
 
     Mono<Experiment> getByFeatureKey(String featureKey);
+
+    Mono<Void> delete(Experiment.ExperimentId id);
 }

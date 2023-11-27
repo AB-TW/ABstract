@@ -68,4 +68,9 @@ public class ExperimentApi {
         return experiments.update(Experiment.ExperimentId.builder().id(experimentId).build(),
                 experimentRequest.to().getDescription());
     }
+
+    @DeleteMapping("/{experimentId}")
+    Mono<Void> delete(@PathVariable String experimentId) {
+        return experiments.delete(Experiment.ExperimentId.builder().id(experimentId).build());
+    }
 }

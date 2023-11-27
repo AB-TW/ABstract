@@ -5,6 +5,7 @@ import cn.dpc.ab.api.experiment.dto.ExperimentRequest;
 import cn.dpc.ab.api.experiment.dto.ExperimentResponse;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Experiments;
+import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -51,5 +52,22 @@ class ExperimentApiTest {
                 .expectStatus().isOk()
                 .expectBodyList(ExperimentResponse.class)
                 .hasSize(0);
+    }
+
+    @Test
+    void delete() {
+        ExperimentDb experimentDb = ExperimentDb.builder()
+                .id("123")
+                .buckets(List.of(ExperimentDb.BucketDb.builder().key("key").percentage(100).name("test").build()))
+                .build();
+        Experiment experiment = experimentDb.toExperiment();
+
+        when(experiments.getExperiment(Mockito.any())).thenReturn(Mono.just(experiment));
+
+        webClient.delete()
+                .uri("/experiments/123")
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 }
