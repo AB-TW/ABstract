@@ -24,6 +24,10 @@
       <el-button type="primary" icon="Plus" @click="() => router.push({ path: '/experiment/edit' })">新增</el-button>
     </div>
 
+    <el-button class="add-experiment-button" plain icon="Plus" @click="() => router.push({ path: '/experiment/edit' })"
+      >添加
+    </el-button>
+
     <el-table :data="experiments" border style="width: 100%; margin-top: 30px">
       <el-table-column align="center" prop="name" label="实验名称" />
       <el-table-column align="center" prop="status.staticStatus" label="实验状态">
