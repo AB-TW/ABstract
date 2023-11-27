@@ -1,23 +1,36 @@
 <template>
   <el-card>
     <div class="header">
-      <span>实验搜索：</span>
-      <el-input class="search-input" v-model="pageSearchParams.key" placeholder="请输入实验名称或ID" />
+      <el-input
+        v-model="pageSearchParams.key"
+        clearable
+        placeholder="请输入实验名称"
+        class="search-input"
+        @clear="() => getExperiments()"
+      >
+        <template #append>
+          <el-button icon="Search" @click="() => getExperiments()" />
+        </template>
+      </el-input>
       <div class="operation-btn-group">
-        <el-button @click="() => (pageSearchParams.key = '')">重置</el-button>
-        <el-button type="primary" @click="() => getExperiments()">查询</el-button>
+        <el-radio-group v-model="pageSearchParams.status" @change="() => getExperiments()">
+          <el-radio-button :label="undefined">全部</el-radio-button>
+          <el-radio-button label="DRAFT">草稿</el-radio-button>
+          <el-radio-button label="NOT_BEGIN">未生效</el-radio-button>
+          <el-radio-button label="COLLECTING">生效中</el-radio-button>
+          <el-radio-button label="FINISH_COLLECT">已过期</el-radio-button>
+        </el-radio-group>
       </div>
+      <el-button type="primary" icon="Plus" @click="() => router.push({ path: '/experiment/edit' })">新增</el-button>
     </div>
-
-    <el-button class="add-experiment-button" plain icon="Plus" @click="() => router.push({ path: '/experiment/edit' })"
-      >添加
-    </el-button>
 
     <el-table :data="experiments" border style="width: 100%; margin-top: 30px">
       <el-table-column align="center" prop="name" label="实验名称" />
       <el-table-column align="center" prop="status.staticStatus" label="实验状态">
         <template #default="scope">
-          {{ EXPERIMENT_STATUS_MAPPING[scope.row?.status?.status] }}
+          <el-tag :type="EXPERIMENT_STATUS_TAG_STATUS_MAPPING[scope.row?.status?.status]">
+            {{ EXPERIMENT_STATUS_TEXT_MAPPING[scope.row?.status?.status] }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column align="center" prop="createdAt" label="创建时间" />
@@ -25,7 +38,6 @@
         <template #default="scope">
           <div style="display: flex">
             <el-button
-              type="success"
               size="small"
               @click="() => router.push({ path: `/experiment/edit/${scope.row.id}`, query: { type: 'view' } })"
               >查看
@@ -45,12 +57,17 @@
               >{{ scope.row?.status?.status === Status.DRAFT ? "发布" : "恢复" }}
             </el-button>
             <el-button
-              type="primary"
+              type="warning"
               size="small"
               v-if="[Status.NOT_BEGIN, Status.COLLECTING].includes(scope.row?.status?.status)"
+              @click="pausedExperiment(scope.row.id)"
               >暂停
             </el-button>
-            <el-button type="danger" size="small" :disabled="scope.row?.status?.status !== Status.DRAFT"
+            <el-button
+              type="danger"
+              size="small"
+              v-if="scope.row?.status?.status === Status.DRAFT"
+              @click="deleteExperiment(scope.row.id)"
               >删除
             </el-button>
           </div>
@@ -74,7 +91,7 @@
 <script setup lang="ts">
 import router from "@/router"
 import { reactive, ref } from "vue"
-import { EXPERIMENT_STATUS_MAPPING } from "@/constants/constants"
+import { EXPERIMENT_STATUS_TAG_STATUS_MAPPING, EXPERIMENT_STATUS_TEXT_MAPPING } from "@/constants/constants"
 import _ from "lodash"
 import { Status } from "@/model/Status"
 import { Experiment, Experiments } from "@/domain/Experiments"
@@ -120,8 +137,17 @@ const pageSearchParamsChange = (field: string, value: number | string | boolean)
 }
 
 const publishExperiment = (id: string) => {
-  experimentsApi.publish(id).then((resp) => {
-    console.log(resp)
+  experimentsApi.publish(id).then((_) => {
+    getExperiments()
+  })
+}
+const pausedExperiment = (id: string) => {
+  experimentsApi.paused(id).then((_) => {
+    getExperiments()
+  })
+}
+const deleteExperiment = (id: string) => {
+  experimentsApi.deleted(id).then((_) => {
     getExperiments()
   })
 }
@@ -131,20 +157,14 @@ const publishExperiment = (id: string) => {
 .header {
   display: flex;
   align-items: center;
+  gap: 20px;
 
   .search-input {
-    flex: 1;
+    width: 400px;
   }
 
   .operation-btn-group {
     display: flex;
-    margin-left: 25px;
   }
-}
-
-.add-experiment-button {
-  width: 100%;
-  margin-top: 15px;
-  border-style: dashed;
 }
 </style>

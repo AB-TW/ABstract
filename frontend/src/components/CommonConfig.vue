@@ -1,15 +1,28 @@
 <template>
   <div class="common-container">
-    <div class="label">{{ name  || "" }}</div>
+    <div class="label">{{ name || "" }}</div>
     <div>
       <div v-if="dataType == 'STRING'">
-        <el-input v-model="value" type="string" :maxlength="maxLength" @change="onInput" />
+        <el-input
+          v-model="value"
+          :disabled="props.isViewModel"
+          type="string"
+          :maxlength="maxLength"
+          @change="onInput"
+        />
       </div>
       <div v-else-if="dataType == 'NUMBER'">
-        <el-input-number v-model="value" :placeholder="description" :max="maxValue" :min="minValue" @change="onInput" />
+        <el-input-number
+          v-model="value"
+          :disabled="props.isViewModel"
+          :placeholder="description"
+          :max="maxValue"
+          :min="minValue"
+          @change="onInput"
+        />
       </div>
       <div v-else-if="dataType == 'BOOLEAN'">
-        <el-switch v-model="value" @change="onInput" />
+        <el-switch v-model="value" :disabled="props.isViewModel" @change="onInput" />
       </div>
     </div>
   </div>
@@ -32,7 +45,7 @@ const props = defineProps({
     required: true
   },
   defaultValue: {
-    type: [String , Number , Boolean],
+    type: [String, Number, Boolean],
     required: true
   },
   maxLength: {
@@ -46,16 +59,20 @@ const props = defineProps({
   minValue: {
     type: Number,
     required: false
+  },
+  isViewModel: {
+    type: Boolean,
+    required: true
   }
 })
 const emit = defineEmits(["update:modelValue"])
 // 绑定控件的值
 const value = ref(props.defaultValue)
 const onInput = (e) => {
-  let tempValue = e;
-  if (props.dataType == 'NUMBER') {
-    tempValue = Number(e);
-  } else if(props.dataType == 'BOOLEAN'){
+  let tempValue = e
+  if (props.dataType == "NUMBER") {
+    tempValue = Number(e)
+  } else if (props.dataType == "BOOLEAN") {
     tempValue = Boolean(e)
   }
   emit("update:modelValue", tempValue)
@@ -77,6 +94,7 @@ watch(
   justify-content: center;
   align-content: center;
 }
+
 .label {
   width: 80px;
   text-align: center;
