@@ -30,7 +30,12 @@
         prop="featureKey"
         :rules="[{ required: true, message: '请选择一个关联的Feature', trigger: 'blur' }]"
       >
-        <el-select v-model="experimentForm.featureKey" @change="selectFeature" placeholder="请选择实验项">
+        <el-select
+          v-model="experimentForm.featureKey"
+          @change="selectFeature"
+          placeholder="请选择实验项"
+          :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
+        >
           <el-option v-for="feature in allFeatures" :key="feature.id" :label="feature.name" :value="feature.featureKey">
             <span style="float: left">{{ feature.name }}</span>
             <span style="float: right; color: var(--el-text-color-secondary); font-size: 13px">
@@ -46,7 +51,19 @@
             <p class="bucket-label" style="margin: 0">
               分组
               {{ index + 1 }}
-              <el-icon class="delete-bucket-icon" @click="() => experimentForm.buckets?.splice(index, 1)">
+              <el-icon
+                :class="
+                  isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)
+                    ? ''
+                    : 'delete-bucket-icon'
+                "
+                :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
+                @click="
+                  isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)
+                    ? () => experimentForm.buckets?.splice(index, 1)
+                    : undefined
+                "
+              >
                 <Delete />
               </el-icon>
             </p>
@@ -56,7 +73,14 @@
               :rules="[{ required: true, message: '请输入分组键', trigger: 'blur' }]"
               class="level-2-form-item"
             >
-              <el-input v-model="bucket.key" maxlength="10" placeholder="请输入分组键" show-word-limit type="text" />
+              <el-input
+                :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
+                v-model="bucket.key"
+                maxlength="10"
+                placeholder="请输入分组键"
+                show-word-limit
+                type="text"
+              />
             </el-form-item>
             <el-form-item
               label="分组名称"
@@ -64,7 +88,14 @@
               class="level-2-form-item"
               :validate-status="'success'"
             >
-              <el-input v-model="bucket.name" maxlength="10" placeholder="请输入分组名称" show-word-limit type="text" />
+              <el-input
+                :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
+                v-model="bucket.name"
+                maxlength="10"
+                placeholder="请输入分组名称"
+                show-word-limit
+                type="text"
+              />
             </el-form-item>
             <el-form-item
               label="分组描述"
@@ -75,6 +106,7 @@
               <el-input
                 v-model="bucket.description"
                 maxlength="10"
+                :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
                 placeholder="请输入分组描述"
                 show-word-limit
                 type="text"
@@ -197,6 +229,13 @@ interface AddExperiment {
   startTime: string
   endTime: string
   endCollectTime: string
+  status?: {
+    status: Status
+    staticStatus: Status
+    startTime: string
+    endCollectTime: string
+    endTime: string
+  }
 }
 
 // Vue Component

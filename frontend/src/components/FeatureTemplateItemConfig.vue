@@ -13,6 +13,7 @@
         <div class="custom-tree-node">
           <el-form-item label-width="auto">
             <CommonConfig
+              :isViewModel="props.isViewModel"
               :default-value="getDataValue(data)"
               :max-length="data?.validator?.maxLength || Number.MAX_SAFE_INTEGER"
               :max-value="data?.validator?.max || Number.MAX_SAFE_INTEGER"
@@ -26,7 +27,13 @@
         </div>
         <div class="operation-container">
           <div class="right">
-            <el-button @click="addChildNode(node, data)" type="primary" icon="plus" v-if="showAddNextBtn(node, data)">
+            <el-button
+              :disabled="props.isViewModel"
+              @click="addChildNode(node, data)"
+              type="primary"
+              icon="plus"
+              v-if="showAddNextBtn(node, data)"
+            >
               新增
             </el-button>
             <el-button
@@ -35,6 +42,7 @@
               type="danger"
               icon="delete"
               v-if="showDelBtn(node, data)"
+              :disabled="props.isViewModel"
             >
               删除
             </el-button>
