@@ -1,7 +1,6 @@
 package cn.dpc.ab.persistent.experiment;
 
 import cn.dpc.ab.domain.experiment.Assignment;
-import cn.dpc.ab.domain.experiment.Assignments;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDb;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDbRepository;
@@ -31,12 +30,14 @@ public class AssignmentsImplTest {
 
     @Mock
     ExperimentDbRepository experimentDbRepository;
-
-    Assignments assignments;
+    @Mock
+    Experiment.Assignments assignments;
+    @Mock
+    Experiment experiment;
 
     @BeforeEach
     void setUp() {
-        assignments = new AssignmentsImpl(repository, experimentDbRepository);
+        assignments = new AssignmentsImpl(repository, experiment);
     }
 
     @Test
@@ -96,7 +97,7 @@ public class AssignmentsImplTest {
                 "123123", "234234", 111111, "bucketKey"
                 )));
 
-        assignments.getAssignmentById(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"), "123123"))
+        assignments.get(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"), "123123"))
                 .as(StepVerifier::create)
                 .expectNextMatches(assignment -> assignment.getId().clientId().equals("123123")
                 && assignment.getId().experimentId().id().equals("234234"))
@@ -107,7 +108,7 @@ public class AssignmentsImplTest {
     void should_get_return_empty_when_id_not_exist() {
         when(repository.findById(anyString())).thenReturn(Mono.empty());
 
-        assignments.getAssignmentById(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"), "123123"))
+        assignments.get(new Assignment.AssignmentId(new Experiment.ExperimentId("234234"), "123123"))
                 .as(StepVerifier::create)
                 .expectNextCount(0)
                 .verifyComplete();

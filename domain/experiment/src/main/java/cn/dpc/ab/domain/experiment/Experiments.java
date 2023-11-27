@@ -90,5 +90,5 @@ public interface Experiments {
      */
     Mono<Void> stop(Experiment.ExperimentId id);
 
-    Flux<Experiment> getByFeatureKey(String featureKey);
+    Mono<Experiment> getByFeatureKey(String featureKey);
 }

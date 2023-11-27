@@ -2,6 +2,7 @@ package cn.dpc.ab.persistent.experiment;
 
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Experiments;
+import cn.dpc.ab.persistent.experiment.db.AssignmentDbRepository;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDbRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 public class ExperimentsImpl implements Experiments {
 
     private final ExperimentDbRepository experimentDbRepository;
+    private final AssignmentDbRepository assignmentDbRepository;
 
     @Override
     public Flux<Experiment> getAllExperiments(FilterParams params) {
@@ -49,7 +51,11 @@ public class ExperimentsImpl implements Experiments {
 
     @Override
     public Mono<Experiment> getExperiment(Experiment.ExperimentId id) {
-        return experimentDbRepository.findById(id.id()).map(ExperimentDb::toExperiment);
+        return experimentDbRepository.findById(id.id()).map(experimentDb -> {
+            Experiment experiment = experimentDb.toExperiment();
+            experiment.setAssignments(new AssignmentsImpl(assignmentDbRepository, experiment));
+            return experiment;
+        });
     }
 
     @Override
@@ -93,8 +99,13 @@ public class ExperimentsImpl implements Experiments {
     }
 
     @Override
-    public Flux<Experiment> getByFeatureKey(String featureKey) {
+    public Mono<Experiment> getByFeatureKey(String featureKey) {
         return experimentDbRepository.findByFeatureKey(featureKey, Sort.by("description.updatedAt").descending())
-                .map(ExperimentDb::toExperiment);
+                .next()
+                .map(experimentDb -> {
+                    Experiment experiment = experimentDb.toExperiment();
+                    experiment.setAssignments(new AssignmentsImpl(assignmentDbRepository, experiment));
+                    return experiment;
+                });
     }
 }

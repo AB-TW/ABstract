@@ -3,7 +3,7 @@ package cn.dpc.ab.api.experiment;
 import cn.dpc.ab.api.TestConfiguration;
 import cn.dpc.ab.api.experiment.dto.AssignmentResult;
 import cn.dpc.ab.domain.experiment.Assignment;
-import cn.dpc.ab.domain.experiment.Assignments;
+import cn.dpc.ab.domain.experiment.Experiment;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -29,11 +29,11 @@ public class AssignmentApiTest {
     WebTestClient webClient;
 
     @MockBean
-    Assignments assignments;
+    Experiment.Assignments assignments;
 
     @Test
     void should_getAssignmentById_return_empty_when_assignments_return_empty() {
-        when(assignments.getAssignmentById(Mockito.any()))
+        when(assignments.get(Mockito.any()))
                 .thenReturn(Mono.empty());
         String experimentId = "experimentId";
         String clientId = "clientId";
@@ -53,7 +53,7 @@ public class AssignmentApiTest {
         String clientId = "clientId";
         String bucketKey = "bucketKey";
         long experimentConfigVersion = 123456;
-        when(assignments.getAssignmentById(Mockito.any()))
+        when(assignments.get(Mockito.any()))
                 .thenReturn(Mono.just(AssignmentTestUtil.createAssignment(
                         clientId, experimentId, bucketKey, experimentConfigVersion)));
 

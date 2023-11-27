@@ -2,6 +2,7 @@ package cn.dpc.ab.domain.experiment;
 
 import cn.dpc.ab.domain.core.FilterCondition;
 import lombok.*;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -16,6 +17,8 @@ import java.util.UUID;
 public class Experiment {
     private final ExperimentId id;
     private Description description;
+    @Setter
+    private Assignments assignments;
 
     /**
      * Create a new experiment.
@@ -249,5 +252,18 @@ public class Experiment {
         if (sum != 100) {
             throw new IllegalArgumentException("The sum of all bucket percentages must be 100");
         }
+    }
+
+    /**
+     * Assignments domain.
+     */
+    public interface Assignments {
+        Mono<Void> updateBucketKey(Assignment.AssignmentId assignmentId, String bucketKey);
+
+        Mono<Assignment> add(Assignment assignment);
+
+        Mono<Assignment> get(Assignment.AssignmentId assignmentId);
+
+        Mono<Assignment> update(Assignment assignment);
     }
 }
