@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation project(':domain:experiment')
+    implementation project(':persistent:persistent-experiment')
     implementation project(':domain:core')
     implementation project(':api:api-core')
     testImplementation  project(':api:api-core').sourceSets.test.output
