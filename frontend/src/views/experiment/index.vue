@@ -2,37 +2,57 @@
   <el-card>
     <div class="header">
       <span>实验搜索：</span>
-      <el-input class="search-input" v-model="pageSearchParams.keyword" placeholder="请输入实验名称或ID" />
+      <el-input class="search-input" v-model="pageSearchParams.key" placeholder="请输入实验名称或ID" />
       <div class="operation-btn-group">
-        <el-button @click="() => (pageSearchParams.keyword = '')">重置</el-button>
-        <el-button type="primary">查询</el-button>
+        <el-button @click="() => (pageSearchParams.key = '')">重置</el-button>
+        <el-button type="primary" @click="() => getExperiments()">查询</el-button>
       </div>
     </div>
 
-    <el-button class="add-experiment-button" plain icon="Plus" @click="() => router.push({ path: '/experiment/add' })"
+    <el-button class="add-experiment-button" plain icon="Plus" @click="() => router.push({ path: '/experiment/edit' })"
       >添加
     </el-button>
 
     <el-table :data="experiments" border style="width: 100%; margin-top: 30px">
       <el-table-column align="center" prop="name" label="实验名称" />
-      <el-table-column align="center" prop="status" label="实验状态">
+      <el-table-column align="center" prop="status.staticStatus" label="实验状态">
         <template #default="scope">
-          {{ EXPERIMENT_STATUS_MAPPING[scope.row?.status] }}
+          {{ EXPERIMENT_STATUS_MAPPING[scope.row?.status?.status] }}
         </template>
       </el-table-column>
       <el-table-column align="center" prop="createdAt" label="创建时间" />
       <el-table-column align="center" label="操作">
         <template #default="scope">
           <div style="display: flex">
-            <el-button type="success" size="small">查看</el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status === ExperimentStatus.DRAFT">编辑</el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status === ExperimentStatus.DRAFT">发布</el-button>
-            <el-button type="primary" size="small" v-if="scope.row?.status === ExperimentStatus.RUNNING"
-              >暂停</el-button
-            >
-            <el-button type="danger" size="small" :disabled="scope.row?.status === ExperimentStatus.DRAFT"
-              >删除</el-button
-            >
+            <el-button
+              type="success"
+              size="small"
+              @click="() => router.push({ path: `/experiment/edit/${scope.row.id}`, query: { type: 'view' } })"
+              >查看
+            </el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-if="scope.row?.status?.status !== Status.STOPPED"
+              @click="() => router.push({ path: `/experiment/edit/${scope.row.id}` })"
+              >编辑
+            </el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-if="[Status.DRAFT, Status.PAUSED].includes(scope.row?.status?.status)"
+              @click="publishExperiment(scope.row.id)"
+              >{{ scope.row?.status?.status === Status.DRAFT ? "发布" : "恢复" }}
+            </el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-if="[Status.NOT_BEGIN, Status.COLLECTING].includes(scope.row?.status?.status)"
+              >暂停
+            </el-button>
+            <el-button type="danger" size="small" :disabled="scope.row?.status?.status !== Status.DRAFT"
+              >删除
+            </el-button>
           </div>
         </template>
       </el-table-column>
@@ -40,13 +60,13 @@
 
     <el-pagination
       style="margin-top: 20px"
-      :current-page="pageSearchParams.page"
-      :page-size="pageSearchParams.size"
+      :current-page="pageSearchParams.page + 1"
+      :page-size="pageSearchParams.pageSize"
       :page-sizes="[10, 30, 50, 100]"
       layout="->,total, sizes, prev, pager, next, jumper"
       :total="totalExperiment"
-      @size-change="(currentSize: number) => pageSearchParamsChange('size', currentSize)"
-      @current-change="(currentPage: number) => pageSearchParamsChange('page', currentPage)"
+      @size-change="(currentSize: number) => pageSearchParamsChange('pageSize', currentSize)"
+      @current-change="(currentPage: number) => pageSearchParamsChange('page', currentPage - 1)"
     />
   </el-card>
 </template>
@@ -54,62 +74,56 @@
 <script setup lang="ts">
 import router from "@/router"
 import { reactive, ref } from "vue"
-import { Experiment } from "@/api/experiment/types/experiment"
 import { EXPERIMENT_STATUS_MAPPING } from "@/constants/constants"
 import _ from "lodash"
-import { ExperimentStatus } from "@/model/ExperimentStatus"
+import { Status } from "@/model/Status"
+import { Experiment, Experiments } from "@/domain/Experiments"
+import { PageResponse } from "@/domain/Features"
+import { ElMessage } from "element-plus"
+import { ExperimentQueryRequest } from "@/model/request/ExperimentQueryRequest"
 
+// API
+const experimentsApi = new Experiments()
+// View-Model
+const experiments = reactive<Experiment[]>([])
 const totalExperiment = ref<number>(0)
-const pageSearchParams = reactive<{
-  page: number
-  size: number
-  keyword: string
-  [key: string]: number | string | boolean
-}>({
-  page: 1,
-  size: 10,
-  keyword: ""
+const pageSearchParams = reactive<ExperimentQueryRequest>({
+  page: 0,
+  pageSize: 10,
+  key: undefined,
+  status: undefined
 })
-const experiments = reactive<Experiment[]>([
-  {
-    id: "afe2566a-5998-492b-9eea-8a5a1e5ee4ee",
-    name: "早餐换购弹窗排序推荐",
-    description: "此实验测试了这些两种不同弹窗UI对于用户下单的提升率",
-    featureKey: "feature-key",
-    samplePercentage: 100,
-    buckets: [],
-    status: ExperimentStatus.PUBLISHED,
-    createdUsername: "Zhouzhou Wang(PSP)",
-    createdAt: "2023-07-23 17:26:00"
-  },
-  {
-    id: "afe2566a-5998-492b-9eea-8a5a1e5ee4ee",
-    name: "菜单UI推荐",
-    description: "此实验测试了这些两种UI对于用户下单的提升率",
-    featureKey: "feature-key",
-    samplePercentage: 100,
-    buckets: [],
-    status: ExperimentStatus.DRAFT,
-    createdUsername: "Zhouzhou Wang(PSP)",
-    createdAt: "2023-07-23 17:26:00"
-  },
-  {
-    id: "afe2566a-5998-492b-9eea-8a5a1e5ee4ee",
-    name: "运行中实验",
-    description: "运行哦",
-    featureKey: "feature-key",
-    samplePercentage: 100,
-    buckets: [],
-    status: ExperimentStatus.RUNNING,
-    createdUsername: "Zhouzhou Wang(PSP)",
-    createdAt: "2023-07-23 17:26:00"
-  }
-])
+// about experiment function
+const getExperiments = () => {
+  experimentsApi
+    .page(pageSearchParams)
+    .then((res: PageResponse<Experiment>) => {
+      experiments.splice(0, experiments.length)
+      experiments.push(...res.content)
+      totalExperiment.value = res.total
+    })
+    .catch((err) => {
+      console.log(err)
+      ElMessage.error("获取数据失败，请重试")
+    })
+}
+const setup = () => {
+  getExperiments()
+}
+setup()
 
 const pageSearchParamsChange = (field: string, value: number | string | boolean): void => {
   if (_.has(pageSearchParams, field)) {
     _.set(pageSearchParams, field, value)
+    getExperiments()
   }
+}
+
+const publishExperiment = (id: string) => {
+  experimentsApi.publish(id).then((resp) => {
+    console.log(resp)
+    getExperiments()
+  })
 }
 </script>
 

@@ -2,6 +2,7 @@ export interface ExperimentBucket {
   key: string
   name: string
   description: string
-  config: any
+  config?: any
+  datasource?: any
   percentage: number
 }
