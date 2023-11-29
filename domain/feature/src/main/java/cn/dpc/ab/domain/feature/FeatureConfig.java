@@ -140,6 +140,7 @@ public class FeatureConfig {
     public FeatureConfig update(Description newDescription) {
         this.description = Description.builder()
                 .title(newDescription.title())
+                .key(newDescription.key())
                 .description(newDescription.description())
                 .data(newDescription.data())
                 .saData(newDescription.saData())
