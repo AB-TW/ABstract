@@ -132,7 +132,13 @@
             </el-form-item>
           </div>
         </el-form-item>
-        <el-button class="add-bucket-button" @click="addBucket" plain icon="Plus" />
+        <el-button
+          class="add-bucket-button"
+          v-if="!isViewMode && isEditMode && experimentForm?.status?.status === Status.DRAFT"
+          @click="addBucket"
+          plain
+          icon="Plus"
+        />
       </el-form-item>
 
       <el-form-item
