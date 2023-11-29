@@ -61,8 +61,8 @@ public class CustomerAssignments implements Customer.Assignments {
     }
 
     private boolean shouldReassign(Experiment experiment, Assignment assignment) {
-        return !Objects.equals(experiment.getDescription().configVersion(), assignment.getExperimentConfigVersion())
-                && (assignment.getBucket().key() == null);
+        return !Objects.equals(experiment.getDescription().configVersion(), assignment.getDescription().experimentConfigVersion())
+                && (assignment.getDescription().bucket().key() == null);
     }
 
     private boolean shouldUpdateCustomerId(CustomerId customerId, Assignment assignment) {

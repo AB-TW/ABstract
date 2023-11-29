@@ -22,6 +22,11 @@ public class AssignmentsImpl implements Assignments {
     }
 
     @Override
+    public Mono<Void> updateBucketKey(Assignment.AssignmentId assignmentId, String bucketKey) {
+        return null;
+    }
+
+    @Override
     public Mono<Assignment> add(Assignment assignment) {
         return null;
     }
