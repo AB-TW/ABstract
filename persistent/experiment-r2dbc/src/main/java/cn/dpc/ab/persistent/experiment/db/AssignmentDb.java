@@ -50,11 +50,11 @@ public class AssignmentDb {
      */
     public Assignment to(Experiment experiment) {
         return Assignment.builder()
-                .id(new Assignment.AssignmentId(new Experiment.ExperimentId(this.experimentId), this.clientId))
+                .id(new Assignment.AssignmentId(new Experiment.ExperimentId(experimentId), clientId))
                 .description(Assignment.Description.builder()
-                        .extraInfo(JsonUtil.fromJson(this.extraInfo, Map.class))
-                        .experimentConfigVersion(this.experimentConfigVersion)
-                        .bucket(Optional.ofNullable(this.bucketKey)
+                        .extraInfo(JsonUtil.fromJson(extraInfo, Map.class))
+                        .experimentConfigVersion(experimentConfigVersion)
+                        .bucket(Optional.ofNullable(bucketKey)
                                 .flatMap(key -> experiment.getDescription().buckets().stream()
                                         .filter(bucket -> bucket.key().equals(key))
                                         .findFirst())

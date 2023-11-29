@@ -24,8 +24,11 @@ import static org.springframework.data.couchbase.core.mapping.id.GenerationStrat
 @Data
 @Builder
 public class AssignmentDb {
-    @IdPrefix
     private static final String ASSIGNMENT_PREFIX = "assignment";
+
+    @IdPrefix
+    @Builder.Default
+    private String idPrefix = ASSIGNMENT_PREFIX;
 
     @Version
     private long version;
@@ -34,7 +37,7 @@ public class AssignmentDb {
     @GeneratedValue(strategy = USE_ATTRIBUTES)
     private String id;
 
-    @IdAttribute(order = 0)
+    @IdAttribute
     private String experimentId;
 
     @IdAttribute(order = 1)
