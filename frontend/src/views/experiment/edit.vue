@@ -4,7 +4,7 @@
       :model="experimentForm"
       ref="experimentFormRef"
       label-width="140px"
-      :disabled="false"
+      :disabled="isViewMode"
       :scroll-to-error="true"
     >
       <el-form-item
@@ -25,7 +25,11 @@
         <el-input v-model="experimentForm.description" placeholder="请输入实验描述" type="text" />
       </el-form-item>
 
-      <el-form-item label="关联Feature" prop="feature">
+      <el-form-item
+        label="关联Feature"
+        prop="featureKey"
+        :rules="[{ required: true, message: '请选择一个关联的Feature', trigger: 'blur' }]"
+      >
         <el-select v-model="experimentForm.featureKey" @change="selectFeature" placeholder="请选择实验项">
           <el-option v-for="feature in allFeatures" :key="feature.id" :label="feature.name" :value="feature.featureKey">
             <span style="float: left">{{ feature.name }}</span>
@@ -86,9 +90,13 @@
             >
               <el-input-number v-model.number="bucket.percentage" style="width: 100%" :min="0" :max="100" :step="10" />
             </el-form-item>
-
-            <el-form-item class="level-2-form-item" label="分组配置" prop="template" v-if="!_.isEmpty(selectedFeature)">
-              <FeatureTemplateConfig :isViewModel="false" :dataSource="bucket.config" />
+            <el-form-item
+              class="level-2-form-item"
+              label="分组配置"
+              :prop="`buckets.${index}.config`"
+              v-if="!_.isEmpty(selectedFeature)"
+            >
+              <FeatureTemplateConfig :isViewModel="true" :dataSource="bucket.datasource" />
             </el-form-item>
           </div>
         </el-form-item>
@@ -99,7 +107,7 @@
         label="实验开始时间"
         :rules="[
           { required: true, message: '请选择选择实验开始的时间', trigger: 'blur' },
-          { validator: validStartTime, message: '开始时间需早于结束/收集时间', trigger: 'blur' }
+          { validator: () => validStartTime(), message: '开始时间需早于结束/收集时间', trigger: 'blur' }
         ]"
         prop="startTime"
       >
@@ -107,8 +115,8 @@
           v-model="experimentForm.startTime"
           type="datetime"
           placeholder="请选择选择实验开始的时间"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          :disabled-date="validateSelectDateLowerThanToday"
+          value-format="YYYY-MM-DDTHH:mm:ss"
+          :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validStartTime(time)"
         />
       </el-form-item>
 
@@ -116,7 +124,7 @@
         label="停止收集数据时间"
         :rules="[
           { required: true, message: '请选择选择停止收集数据的时间', trigger: 'blur' },
-          { validator: validEndCollectTime, message: '收集时间需晚于开始/收集时间', trigger: 'blur' }
+          { validator: () => validEndCollectTime(), message: '收集时间需晚于开始/收集时间', trigger: 'blur' }
         ]"
         prop="endCollectTime"
       >
@@ -124,8 +132,8 @@
           v-model="experimentForm.endCollectTime"
           type="datetime"
           placeholder="选择停止收集数据时间"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          :disabled-date="validateSelectDateLowerThanToday"
+          value-format="YYYY-MM-DDTHH:mm:ss"
+          :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validEndCollectTime(time)"
         />
       </el-form-item>
 
@@ -133,7 +141,7 @@
         label="实验结束时间"
         :rules="[
           { required: true, message: '请选择选择实验结束的时间', trigger: 'blur' },
-          { validator: validEndTime, message: '结束时间需晚于开始/停止收据时间且早于结束时间', trigger: 'blur' }
+          { validator: () => validEndTime(), message: '结束时间需晚于开始/停止收据时间且早于结束时间', trigger: 'blur' }
         ]"
         prop="endTime"
       >
@@ -141,12 +149,16 @@
           v-model="experimentForm.endTime"
           type="datetime"
           placeholder="请选择选择实验结束的时间"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          :disabled-date="validateSelectDateLowerThanToday"
+          value-format="YYYY-MM-DDTHH:mm:ss"
+          :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validEndTime(time)"
         />
       </el-form-item>
 
-      <FilterConditionComponent ref="filterConditionRef" v-model="experimentForm.filterCondition" />
+      <FilterConditionComponent
+        ref="filterConditionRef"
+        v-model="experimentForm.filterCondition"
+        :disabled="isViewMode"
+      />
       <el-form-item>
         <el-button type="default" @click="resetExperimentForm(experimentFormRef, filterConditionRef)">重置</el-button>
         <el-button type="primary" @click="submitExperimentForm(experimentFormRef, filterConditionRef)">提交</el-button>
@@ -156,17 +168,25 @@
 </template>
 
 <script setup lang="ts">
-import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance, FormRules } from "element-plus"
+import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance } from "element-plus"
 import FilterConditionComponent from "@/components/FilterCondition.vue"
 import { reactive, ref } from "vue"
 import { Delete } from "@element-plus/icons-vue"
 import { ExperimentBucket } from "@/model/ExperimentBucket"
 import _ from "lodash"
-import { transTempToTreeDataSource, validateSelectDateLowerThanToday } from "@/utils"
+import {
+  convertConfigObject,
+  mapDataToTemplate,
+  transTempToTreeDataSource,
+  validateSelectDateLowerThanToday
+} from "@/utils"
 import { Feature, Features, FeatureTemplate, PageResponse } from "@/domain/Features"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
-import { FilterCondition } from "@/domain/FilterConditions"
 import moment from "moment/moment"
+import { Experiment, Experiments } from "@/domain/Experiments"
+import { Status } from "@/model/Status"
+import { FilterCondition } from "@/domain/FilterConditions"
+import { useRoute, useRouter } from "vue-router"
 
 interface AddExperiment {
   name: string
@@ -179,39 +199,15 @@ interface AddExperiment {
   endCollectTime: string
 }
 
+// Vue Component
+const route = useRoute()
+const router = useRouter()
+// API
+const features = new Features()
+const experiments = new Experiments()
+// View-Model
 const allFeatures = reactive<Feature[]>([])
 const selectedFeature = reactive<Feature>({} as Feature)
-const features = new Features()
-
-const setup = () => {
-  features
-    .fetchAll(0, 999, undefined, true)
-    .then((res: PageResponse<Feature>) => {
-      allFeatures.push(...res.content)
-    })
-    .catch((err) => {
-      console.log(err)
-      ElMessage.error("获取数据失败，请重试")
-    })
-}
-setup()
-
-const selectFeature = (featureKey: string) => {
-  console.log(featureKey)
-  const currentSelectedFeature = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
-  _.assign(selectedFeature, currentSelectedFeature, {
-    dataSource: [transTempToTreeDataSource(currentSelectedFeature.template)]
-  })
-  // 设置bucket的config为datasource
-  setBucketsConfig(selectedFeature.dataSource)
-  console.log(selectedFeature)
-}
-const setBucketsConfig = (dataSource: FeatureTemplate[]) => {
-  _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
-    bucket.config = _.cloneDeep(dataSource)
-  })
-}
-
 const experimentFormRef = ref<FormInstance>()
 const filterConditionRef = ref<FormInstance>()
 const experimentForm = reactive<AddExperiment>({
@@ -220,21 +216,57 @@ const experimentForm = reactive<AddExperiment>({
       key: "",
       name: "",
       description: "",
-      percentage: 100,
-      config: []
+      percentage: 100
     }
   ]
 } as AddExperiment)
+const experimentId = route.params.id
+const isEditMode = ref<boolean>(!_.isEmpty(experimentId))
+const isViewMode = ref<boolean>(route.query.type === "view")
+
+// setup page
+const setup = async () => {
+  const [featureResp, experimentResp]: [PageResponse<Feature>, Experiment] = await Promise.all([
+    features.fetchAll(0, 999, undefined, true),
+    isEditMode.value ? experiments.getById(experimentId as string) : Promise.resolve(undefined)
+  ])
+  allFeatures.push(...featureResp.content)
+  _.assign(experimentForm, {
+    startTime: experimentResp.status?.startTime,
+    endTime: experimentResp.status?.endTime,
+    endCollectTime: experimentResp.status?.endCollectTime,
+    ..._.omit(experimentResp, ["status"])
+  })
+  console.log(experimentForm)
+  if (!_.isEmpty(experimentResp.featureKey)) {
+    selectFeature(experimentResp.featureKey)
+  }
+}
+setup()
+
+const selectFeature = (featureKey: string) => {
+  const currentSelectedFeature = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
+  _.assign(selectedFeature, currentSelectedFeature)
+  // 设置bucket的config为datasource
+  setBucketsConfigDataSource(currentSelectedFeature.template)
+}
+const setBucketsConfigDataSource = (template: FeatureTemplate) => {
+  _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
+    bucket.datasource = isEditMode.value
+      ? [mapDataToTemplate("", bucket.config, template)]
+      : [transTempToTreeDataSource(template)]
+  })
+}
+
 const addBucket = () => {
   const currentRemainingPercentage = 100 - _.sumBy(experimentForm.buckets, (bucket) => bucket.percentage)
   experimentForm.buckets.push({
     key: "",
     name: "",
     description: "",
-    percentage: currentRemainingPercentage,
-    config: {}
+    percentage: currentRemainingPercentage
   })
-  setBucketsConfig(selectedFeature.dataSource)
+  setBucketsConfigDataSource(selectedFeature.template)
 }
 
 const validateBucket = (rule: any, bucket: ExperimentBucket, callback: any) => {
@@ -259,18 +291,18 @@ const validateBucket = (rule: any, bucket: ExperimentBucket, callback: any) => {
     callback()
   }
 }
-const validStartTime = () => {
-  const startTime = moment(experimentForm.startTime)
-  const nextDay = moment(experimentForm.startTime).add(1, "day")
+const validStartTime = (time = experimentForm.startTime) => {
+  const startTime = moment(time)
+  const nextDay = moment(time).add(1, "day")
   return (
     startTime.isBefore(experimentForm.endCollectTime ?? nextDay) &&
     startTime.isBefore(experimentForm.endTime ?? nextDay)
   )
 }
-const validEndCollectTime = () => {
-  const endCollectTime = moment(experimentForm.endCollectTime)
-  const prevDay = moment(experimentForm.endCollectTime).subtract(1, "day")
-  const nextDay = moment(experimentForm.endCollectTime).add(1, "day")
+const validEndCollectTime = (time = experimentForm.endCollectTime) => {
+  const endCollectTime = moment(time)
+  const prevDay = moment(time).subtract(1, "day")
+  const nextDay = moment(time).add(1, "day")
   return endCollectTime.isBetween(
     experimentForm.startTime ?? prevDay,
     experimentForm.endTime ?? nextDay,
@@ -278,9 +310,9 @@ const validEndCollectTime = () => {
     "[]"
   )
 }
-const validEndTime = () => {
-  const endTime = moment(experimentForm.endTime)
-  const prevDay = moment(experimentForm.endTime)
+const validEndTime = (time = experimentForm.endTime) => {
+  const endTime = moment(time)
+  const prevDay = moment(time).subtract(1, "day")
   return (
     endTime.isAfter(experimentForm.startTime ?? prevDay) && endTime.isAfter(experimentForm.endCollectTime ?? prevDay)
   )
@@ -302,8 +334,27 @@ const submitExperimentForm = async (
   if (!experimentFormEl || !filterConditionRef) return
   try {
     await Promise.all([experimentFormEl.validate(), filterConditionRef.$refs.filterConditionFormRef.validate()])
-    console.log(experimentForm)
+    const requestBody = {
+      ..._.omit(experimentForm, ["startTime", "endCollectTime", "endTime"]),
+      buckets: _.map(experimentForm.buckets, (bucket: ExperimentBucket) => ({
+        ..._.omit(bucket, ["datasource"]),
+        config: convertConfigObject(bucket.datasource[0])
+      })),
+      status: {
+        staticStatus: Status.DRAFT,
+        startTime: experimentForm.startTime,
+        endCollectTime: experimentForm.endCollectTime,
+        endTime: experimentForm.endTime
+      }
+    }
+    const operationFunc = () =>
+      isEditMode.value ? experiments.update(requestBody as Experiment) : experiments.create(requestBody as Experiment)
+    await operationFunc().then(() => {
+      ElMessage.success("操作成功！")
+      router.push("/experiment/list")
+    })
   } catch (e: Error) {
+    console.log(e)
     ElMessage.error("请检查表单项是否填写符合规范～")
   }
 }

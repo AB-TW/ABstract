@@ -61,7 +61,6 @@
           :key="featureConfig.filterCondition"
           v-model="featureConfig.filterCondition"
           :disabled="formType == 'view'"
-          @update:filterCondition="updateFilterCondition"
         />
         <el-form-item v-if="formType !== 'view'">
           <el-button type="default" @click="resetForm()">重置</el-button>
@@ -192,10 +191,6 @@ const addTrackingData = () => {
     key: "",
     value: ""
   })
-}
-
-const updateFilterCondition = (value: any) => {
-  featureConfig.value.filterCondition = value
 }
 
 const submitForm = async () => {

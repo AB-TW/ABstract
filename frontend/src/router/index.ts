@@ -107,11 +107,11 @@ export const constantRoutes: RouteRecordRaw[] = [
         }
       },
       {
-        path: "/experiment/add",
-        component: () => import("@/views/experiment/add.vue"),
-        name: "Add-Experiment",
+        path: "/experiment/edit/:id?",
+        component: () => import("@/views/experiment/edit.vue"),
+        name: "Edit-Experiment",
         meta: {
-          title: "新增实验",
+          title: "Experiment管理",
           hidden: true
         }
       }

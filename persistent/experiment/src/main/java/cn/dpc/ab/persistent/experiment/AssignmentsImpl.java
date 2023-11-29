@@ -12,7 +12,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * AssignmentImpl implements Assignments.
+ * Implement Assignments.
  */
 @Component
 @RequiredArgsConstructor
