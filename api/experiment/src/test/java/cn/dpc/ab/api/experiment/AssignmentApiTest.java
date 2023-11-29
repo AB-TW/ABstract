@@ -29,11 +29,11 @@ public class AssignmentApiTest {
     WebTestClient webClient;
 
     @MockBean
-    Experiment.Assignments assignments;
+    Experiment experiment;
 
     @Test
     void should_getAssignmentById_return_empty_when_assignments_return_empty() {
-        when(assignments.get(Mockito.any()))
+        when(experiment.getAssignments().get(Mockito.any()))
                 .thenReturn(Mono.empty());
         String experimentId = "experimentId";
         String clientId = "clientId";
@@ -53,7 +53,7 @@ public class AssignmentApiTest {
         String clientId = "clientId";
         String bucketKey = "bucketKey";
         long experimentConfigVersion = 123456;
-        when(assignments.get(Mockito.any()))
+        when(experiment.getAssignments().get(Mockito.any()))
                 .thenReturn(Mono.just(AssignmentTestUtil.createAssignment(
                         clientId, experimentId, bucketKey, experimentConfigVersion)));
 
@@ -71,7 +71,7 @@ public class AssignmentApiTest {
         String experimentId = "experimentId";
         String clientId = "clientId";
         String bucketKey = "bucketKey";
-        when(assignments.updateBucketKey(any(Assignment.AssignmentId.class), any(String.class)))
+        when(experiment.getAssignments().updateBucketKey(any(Assignment.AssignmentId.class), any(String.class)))
                 .thenReturn(Mono.empty());
         webClient.put()
                 .uri((builder) -> builder.path("/assignments/" + experimentId
