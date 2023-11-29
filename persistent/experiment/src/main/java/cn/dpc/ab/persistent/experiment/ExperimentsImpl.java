@@ -114,7 +114,6 @@ public class ExperimentsImpl implements Experiments {
     @Override
     public Mono<Void> delete(Experiment.ExperimentId id) {
         return experimentDbRepository.findById(id.id())
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
                 .flatMap(experimentDb -> {
                     if (experimentDb.getStatus().getStatus().equals(DRAFT)) {
                         return experimentDbRepository.deleteById(id.id());
