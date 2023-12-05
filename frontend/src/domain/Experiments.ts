@@ -43,4 +43,12 @@ export class Experiments {
   async publish(id: string) {
     return await http.put(this.getUrl(`/experiments/${id}/publish`), undefined).then((res: any) => res?.data)
   }
+
+  async paused(id: string) {
+    return await http.put(this.getUrl(`/experiments/${id}/pause`), undefined).then((res: any) => res?.data)
+  }
+
+  async deleted(id: string) {
+    return await http.del(this.getUrl(`/experiments/${id}`), undefined).then((res: any) => res?.data)
+  }
 }
