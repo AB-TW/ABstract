@@ -1,7 +1,6 @@
 package cn.dpc.ab.api.experiment.dto;
 
 import cn.dpc.ab.domain.experiment.Assignment;
-import cn.dpc.ab.domain.experiment.Experiment;
 import lombok.*;
 
 import java.util.Optional;

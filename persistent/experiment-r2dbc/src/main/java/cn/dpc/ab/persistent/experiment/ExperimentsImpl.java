@@ -161,8 +161,14 @@ public class ExperimentsImpl implements Experiments {
      * @see Experiments#getByFeatureKey(String)
      */
     @Override
-    public Flux<Experiment> getByFeatureKey(String featureKey) {
+    public Mono<Experiment> getByFeatureKey(String featureKey) {
         return customerExperimentRepository.findByFeatureKey(featureKey)
+                .next()
                 .map(ExperimentDb::to);
+    }
+
+    @Override
+    public Mono<Void> delete(Experiment.ExperimentId id) {
+        return null;
     }
 }

@@ -1,7 +1,6 @@
 package cn.dpc.ab.persistent.experiment;
 
 import cn.dpc.ab.domain.experiment.Assignment;
-import cn.dpc.ab.domain.experiment.Assignments;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDb;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDbRepository;
@@ -31,12 +30,14 @@ public class AssignmentsImplTest {
 
     @Mock
     ExperimentDbRepository experimentDbRepository;
-
-    Assignments assignments;
+    @Mock
+    Experiment.Assignments assignments;
+    @Mock
+    Experiment experiment;
 
     @BeforeEach
     void setUp() {
-        assignments = new AssignmentsImpl(repository, experimentDbRepository);
+        assignments = new AssignmentsImpl(repository, experiment);
     }
 
     @Test
