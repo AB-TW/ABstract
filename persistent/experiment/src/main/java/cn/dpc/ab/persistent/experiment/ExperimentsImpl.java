@@ -25,7 +25,7 @@ public class ExperimentsImpl implements Experiments {
     private final AssignmentDbRepository assignmentDbRepository;
 
     @Override
-    public Flux<Experiment> getAllExperiments(FilterParams params) {
+    public Flux<Experiment> getAll(FilterParams params) {
         return null;
     }
 
@@ -52,7 +52,7 @@ public class ExperimentsImpl implements Experiments {
     }
 
     @Override
-    public Mono<Experiment> getExperiment(Experiment.ExperimentId id) {
+    public Mono<Experiment> get(Experiment.ExperimentId id) {
         return experimentDbRepository.findById(id.id()).map(experimentDb -> {
             Experiment experiment = experimentDb.toExperiment();
             experiment.setAssignments(new AssignmentsImpl(assignmentDbRepository, experiment));
