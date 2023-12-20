@@ -62,7 +62,7 @@ class ExperimentApiTest {
                 .build();
         Experiment experiment = experimentDb.toExperiment();
 
-        when(experiments.getExperiment(Mockito.any())).thenReturn(Mono.just(experiment));
+        when(experiments.get(Mockito.any())).thenReturn(Mono.just(experiment));
 
         webClient.delete()
                 .uri("/experiments/123")
