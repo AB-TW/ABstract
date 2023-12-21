@@ -36,4 +36,32 @@ public class ExperimentTestUtil {
                 .description("description")
                 .build();
     }
+
+    /**
+     * createExperimentDb creates an experiment.
+     *
+     * @param id          the experiment id
+     * @return the experiment
+     */
+    public static Experiment generateExperiment(String id) {
+        return new Experiment(Experiment.ExperimentId.builder()
+                .id(id)
+                .build(),
+                Experiment.Description.builder()
+                        .name("name")
+                        .description("description")
+                        .status(Experiment.Status.builder()
+                                .staticStatus(Experiment.Status.StaticStatus.DRAFT)
+                                .startTime(null)
+                                .endTime(null)
+                                .endCollectTime(null)
+                                .build())
+                        .featureKey("featureKey")
+                        .filterCondition(FilterCondition.builder()
+                                .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
+                                .build())
+                        .configVersion(0L)
+                        .buckets(List.of(Experiment.Bucket.builder().key("bucketKey").percentage(100).build()))
+                        .build());
+    }
 }
