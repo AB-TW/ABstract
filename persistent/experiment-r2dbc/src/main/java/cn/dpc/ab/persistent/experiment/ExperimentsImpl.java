@@ -3,6 +3,7 @@ package cn.dpc.ab.persistent.experiment;
 import cn.dpc.ab.domain.exception.RecordNotFoundException;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Experiments;
+import cn.dpc.ab.persistent.experiment.db.AssignmentRepository;
 import cn.dpc.ab.persistent.experiment.db.CustomerExperimentRepository;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
 import cn.dpc.ab.persistent.experiment.db.ExperimentRepository;
@@ -21,6 +22,7 @@ import reactor.core.publisher.Mono;
 public class ExperimentsImpl implements Experiments {
 
     private final ExperimentRepository repository;
+    private final AssignmentRepository assignmentRepository;
     private final CustomerExperimentRepository customerExperimentRepository;
 
 
@@ -83,7 +85,11 @@ public class ExperimentsImpl implements Experiments {
     @Override
     public Mono<Experiment> get(Experiment.ExperimentId id) {
         return repository.findById(id.id())
-                .map(ExperimentDb::to);
+                .map(experimentDb -> {
+                    Experiment experiment = experimentDb.to();
+                    experiment.setAssignments(new AssignmentsImpl(assignmentRepository, experiment));
+                    return experiment;
+                });
     }
 
 
@@ -164,11 +170,21 @@ public class ExperimentsImpl implements Experiments {
     public Mono<Experiment> getByFeatureKey(String featureKey) {
         return customerExperimentRepository.findByFeatureKey(featureKey)
                 .next()
-                .map(ExperimentDb::to);
+                .map(experimentDb -> {
+                    Experiment experiment = experimentDb.to();
+                    experiment.setAssignments(new AssignmentsImpl(assignmentRepository, experiment));
+                    return experiment;
+                });
     }
 
     @Override
     public Mono<Void> delete(Experiment.ExperimentId id) {
-        return null;
+        return repository.findById(id.id())
+                .flatMap(experimentDb -> {
+                    if (experimentDb.getStaticStatus().equals(Experiment.Status.StaticStatus.DRAFT)) {
+                        return repository.deleteById(id.id());
+                    }
+                    return Mono.error(new RecordNotFoundException(id.id()));
+                });
     }
 }
