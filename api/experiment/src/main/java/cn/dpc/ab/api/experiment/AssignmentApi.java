@@ -23,7 +23,7 @@ public class AssignmentApi {
     @GetMapping("/{experimentId}/assignment/{clientId}")
     public Mono<AssignmentResult> getAssignment(@PathVariable("experimentId") String experimentId,
                                                 @PathVariable("clientId") String clientId) {
-        return experiments.getExperiment(Experiment.ExperimentId.builder().id(experimentId).build())
+        return experiments.get(Experiment.ExperimentId.builder().id(experimentId).build())
                 .flatMap(experiment -> experiment.getAssignments()
                         .get(new Assignment.AssignmentId(new Experiment.ExperimentId(experimentId), clientId))
                         .map(AssignmentResult::from));
@@ -37,7 +37,7 @@ public class AssignmentApi {
     public Mono<Void> updateAssignment(@PathVariable("experimentId") String experimentId,
                                                    @PathVariable("clientId") String clientId,
                                                    @RequestBody String bucketKey) {
-        return experiments.getExperiment(Experiment.ExperimentId.builder().id(experimentId).build())
+        return experiments.get(Experiment.ExperimentId.builder().id(experimentId).build())
                 .flatMap(experiment -> experiment.getAssignments()
                         .updateBucketKey(new Assignment.AssignmentId(new Experiment.ExperimentId(experimentId), clientId), bucketKey));
     }
