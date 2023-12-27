@@ -43,7 +43,7 @@ public class ExperimentApi {
 
     @GetMapping("/{experimentId}")
     Mono<ExperimentResponse> get(@PathVariable String experimentId) {
-        return experiments.getExperiment(Experiment.ExperimentId.builder().id(experimentId).build())
+        return experiments.get(Experiment.ExperimentId.builder().id(experimentId).build())
                 .map(ExperimentResponse::from)
                 .switchIfEmpty(Mono.error(new RecordNotFoundException(experimentId)));
     }
@@ -67,5 +67,10 @@ public class ExperimentApi {
     Mono<Void> update(@PathVariable String experimentId, @RequestBody ExperimentRequest experimentRequest) {
         return experiments.update(Experiment.ExperimentId.builder().id(experimentId).build(),
                 experimentRequest.to().getDescription());
+    }
+
+    @DeleteMapping("/{experimentId}")
+    Mono<Void> delete(@PathVariable String experimentId) {
+        return experiments.delete(Experiment.ExperimentId.builder().id(experimentId).build());
     }
 }
