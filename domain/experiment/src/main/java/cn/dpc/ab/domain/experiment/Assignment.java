@@ -142,4 +142,19 @@ public class Assignment {
                 .build());
         return this;
     }
+
+    /**
+     * Update the description of the assignment.
+     *
+     * @param description the new description of the assignment
+     * @return the assignment.
+     */
+    public Assignment updateDescription(Description description) {
+        this.description = Description.builder()
+                .bucket(description.bucket)
+                .experimentConfigVersion(description.experimentConfigVersion)
+                .extraInfo(description.extraInfo)
+                .build();
+        return this;
+    }
 }
