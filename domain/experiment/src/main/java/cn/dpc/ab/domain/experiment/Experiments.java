@@ -21,7 +21,7 @@ public interface Experiments {
      * @param params the filter params
      * @return a Flux that emits all experiments
      */
-    Flux<Experiment> getAllExperiments(FilterParams params);
+    Flux<Experiment> getAll(FilterParams params);
 
     /**
      * Get a sub-collection of experiments.
@@ -55,7 +55,7 @@ public interface Experiments {
      * @param id the id of the experiment to get
      * @return a Mono that completes when the experiment has been retrieved
      */
-    Mono<Experiment> getExperiment(Experiment.ExperimentId id);
+    Mono<Experiment> get(Experiment.ExperimentId id);
 
     /**
      * Update an experiment.
@@ -90,5 +90,7 @@ public interface Experiments {
      */
     Mono<Void> stop(Experiment.ExperimentId id);
 
-    Flux<Experiment> getByFeatureKey(String featureKey);
+    Mono<Experiment> getByFeatureKey(String featureKey);
+
+    Mono<Void> delete(Experiment.ExperimentId id);
 }

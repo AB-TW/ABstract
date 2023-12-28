@@ -104,6 +104,7 @@ public class ExperimentDb {
      * @return the experimentDb
      */
     public ExperimentDb updateDescription(Experiment.Description description) {
+        this.name = description.name();
         this.description = description.description();
         this.buckets = description.buckets().stream().map(BucketDb::from).collect(Collectors.toList());
         this.configVersion = description.configVersion();
