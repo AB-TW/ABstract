@@ -35,9 +35,9 @@ public class AssignmentDb {
         AssignmentDb assignmentDb = new AssignmentDb();
         assignmentDb.setExperimentId(assignment.getId().experimentId().id());
         assignmentDb.setClientId(assignment.getId().clientId());
-        assignmentDb.setBucketKey(assignment.getBucket().key());
-        assignmentDb.setExperimentConfigVersion(assignment.getExperimentConfigVersion());
-        assignmentDb.setExtraInfo(JsonUtil.toJson(assignment.getExtraInfo()));
+        assignmentDb.setBucketKey(assignment.getDescription().bucket().key());
+        assignmentDb.setExperimentConfigVersion(assignment.getDescription().experimentConfigVersion());
+        assignmentDb.setExtraInfo(JsonUtil.toJson(assignment.getDescription().extraInfo()));
         return assignmentDb;
     }
 
@@ -50,14 +50,16 @@ public class AssignmentDb {
      */
     public Assignment to(Experiment experiment) {
         return Assignment.builder()
-                .id(new Assignment.AssignmentId(new Experiment.ExperimentId(this.experimentId), this.clientId))
-                .extraInfo(JsonUtil.fromJson(this.extraInfo, Map.class))
-                .experimentConfigVersion(this.experimentConfigVersion)
-                .bucket(Optional.ofNullable(this.bucketKey)
-                        .flatMap(key -> experiment.getDescription().buckets().stream()
-                                .filter(bucket -> bucket.key().equals(key))
-                                .findFirst())
-                        .orElse(null))
+                .id(new Assignment.AssignmentId(new Experiment.ExperimentId(experimentId), clientId))
+                .description(Assignment.Description.builder()
+                        .extraInfo(JsonUtil.fromJson(extraInfo, Map.class))
+                        .experimentConfigVersion(experimentConfigVersion)
+                        .bucket(Optional.ofNullable(bucketKey)
+                                .flatMap(key -> experiment.getDescription().buckets().stream()
+                                        .filter(bucket -> bucket.key().equals(key))
+                                        .findFirst())
+                                .orElse(null))
+                        .build())
                 .build();
     }
 

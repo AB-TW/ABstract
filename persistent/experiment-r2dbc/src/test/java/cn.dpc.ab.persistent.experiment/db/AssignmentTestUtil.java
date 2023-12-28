@@ -21,9 +21,12 @@ public class AssignmentTestUtil {
     public static AssignmentDb createAssignmentDb(String experimentId, String clientId) {
         Assignment assignment = Assignment.builder()
                 .id(new Assignment.AssignmentId(new Experiment.ExperimentId(experimentId), clientId))
-                .bucket(Experiment.Bucket.builder().key("bucketKey").build())
-                .experimentConfigVersion(1L)
-                .extraInfo(Map.of("key", "value"))
+                .description(Assignment.Description.builder()
+                        .bucket(Experiment.Bucket.builder().key("bucketKey").build())
+                        .experimentConfigVersion(1L)
+                        .extraInfo(Map.of("key", "value"))
+                        .build()
+                )
                 .build();
         return AssignmentDb.from(assignment);
     }

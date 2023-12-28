@@ -1,29 +1,57 @@
 package cn.dpc.ab.persistent.experiment;
 
 import cn.dpc.ab.domain.experiment.Assignment;
-import cn.dpc.ab.domain.experiment.Assignments;
-import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
+import cn.dpc.ab.domain.experiment.Experiment;
+import cn.dpc.ab.persistent.experiment.db.AssignmentDb;
+import cn.dpc.ab.persistent.experiment.db.AssignmentDbRepository;
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 /**
- * Implement Assignments.
+ * AssignmentImpl implements Assignments.
  */
-@Component
-public class AssignmentsImpl implements Assignments {
+@RequiredArgsConstructor
+public class AssignmentsImpl implements Experiment.Assignments {
+
+    private final AssignmentDbRepository repository;
+
+    private final Experiment experiment;
+
 
     @Override
-    public Flux<Assignment> getAssignmentByExperimentId(String experimentId) {
-        return null;
+    public Mono<Void> updateBucketKey(Assignment.AssignmentId assignmentId, String bucketKey) {
+        String id = AssignmentDb.idFrom(assignmentId);
+        return repository.findById(id)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Assignment not found: " + id)))
+                .flatMap(db ->
+                        repository.save(db.update(db.to(experiment).updateBucketKey(experiment, bucketKey).getDescription())))
+                .then();
     }
 
     @Override
     public Mono<Assignment> add(Assignment assignment) {
-        return null;
+        return repository.save(AssignmentDb.from(assignment))
+                .map(AssignmentDb::toAssignment);
     }
 
     @Override
     public Mono<Assignment> get(Assignment.AssignmentId assignmentId) {
-        return null;
+        return repository.findById(AssignmentDb.idFrom(assignmentId))
+                .map(AssignmentDb::toAssignment);
+    }
+
+    /**
+     * updates a bucket for assignment.
+     *
+     * @param assignment the assignment need to be updated
+     * @return a Mono of Void
+     */
+    @Override
+    public Mono<Assignment> update(Assignment assignment) {
+        return repository.findById(AssignmentDb.idFrom(assignment.getId()))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Assignment not found: " + AssignmentDb.idFrom(assignment.getId()))))
+                .flatMap(assignmentDb -> repository.save(assignmentDb.update(assignmentDb.toAssignment()
+                        .updateDescription(assignment.getDescription()).getDescription())))
+                .map(assignmentDb -> assignmentDb.to(experiment));
     }
 }

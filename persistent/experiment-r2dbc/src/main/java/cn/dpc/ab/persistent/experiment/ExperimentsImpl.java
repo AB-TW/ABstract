@@ -27,10 +27,10 @@ public class ExperimentsImpl implements Experiments {
     /**
      * getAllExperiments returns all experiments.
      *
-     * @see Experiments#getAllExperiments(FilterParams)
+     * @see Experiments#getAll(FilterParams)
      */
     @Override
-    public Flux<Experiment> getAllExperiments(FilterParams params) {
+    public Flux<Experiment> getAll(FilterParams params) {
         return customerExperimentRepository.findAll(params)
                 .map(ExperimentDb::to);
     }
@@ -78,10 +78,10 @@ public class ExperimentsImpl implements Experiments {
     /**
      * getExperiment retrieves an experiment by id from the database.
      *
-     * @see Experiments#getExperiment(Experiment.ExperimentId)
+     * @see Experiments#get(Experiment.ExperimentId)
      */
     @Override
-    public Mono<Experiment> getExperiment(Experiment.ExperimentId id) {
+    public Mono<Experiment> get(Experiment.ExperimentId id) {
         return repository.findById(id.id())
                 .map(ExperimentDb::to);
     }
@@ -161,8 +161,14 @@ public class ExperimentsImpl implements Experiments {
      * @see Experiments#getByFeatureKey(String)
      */
     @Override
-    public Flux<Experiment> getByFeatureKey(String featureKey) {
+    public Mono<Experiment> getByFeatureKey(String featureKey) {
         return customerExperimentRepository.findByFeatureKey(featureKey)
+                .next()
                 .map(ExperimentDb::to);
+    }
+
+    @Override
+    public Mono<Void> delete(Experiment.ExperimentId id) {
+        return null;
     }
 }
