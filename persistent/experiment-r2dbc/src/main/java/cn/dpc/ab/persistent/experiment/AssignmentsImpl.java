@@ -34,4 +34,11 @@ public class AssignmentsImpl implements Experiment.Assignments {
     public Mono<Assignment> update(Assignment assignment) {
         return null;
     }
+
+    @Override
+    public Mono<? extends Assignment> addOrUpdate(Assignment assignment) {
+        return null;
+    }
+
+
 }

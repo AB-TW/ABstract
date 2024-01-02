@@ -38,7 +38,11 @@
             </el-select>
           </el-form-item>
           <el-form-item label="初值" prop="defaultValue" label-width="auto" v-if="showDefaultValue(node, data)">
-            <el-input v-model="data.defaultValue" :type="data.dataType == 'NUMBER' ? 'number':'string'" @change="updateData"/>
+            <el-input
+              v-model="data.defaultValue"
+              :type="data.dataType == 'NUMBER' ? 'number' : 'string'"
+              @change="updateData"
+            />
           </el-form-item>
           <el-form-item
             label="校验"
@@ -112,7 +116,8 @@ const props = defineProps({
   },
   isViewModel: {
     type: Boolean,
-    required: true
+    required: true,
+    default: false
   },
   debugMode: {
     type: Boolean,
