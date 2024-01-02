@@ -28,6 +28,11 @@ spring:
   rsocket:
     server:
       port: 7001
+
 logging:
   level:
     root: debug
+
+cache:
+  local:
+    expire-after-write: 10s

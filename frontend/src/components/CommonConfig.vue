@@ -68,6 +68,7 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"])
 // 绑定控件的值
 const value = ref(props.defaultValue)
+debugger
 const onInput = (e) => {
   let tempValue = e
   if (props.dataType == "NUMBER") {

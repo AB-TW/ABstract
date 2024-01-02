@@ -1,10 +1,12 @@
 package cn.dpc.ab.api.customer.dto;
 
+import cn.dpc.ab.domain.experiment.Assignment;
 import cn.dpc.ab.domain.feature.FeatureConfig;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * FeatureConfigResponse represents a feature config response.
@@ -50,5 +52,29 @@ public class FeatureConfigResponse {
                 .priority(featureConfig.getDescription().priority())
                 .updatedAt(featureConfig.getDescription().updatedAt())
                 .build();
+    }
+
+    /**
+     * from converts Assignment to FeatureConfigResponse.
+     *
+     * @param assignment Assignment
+     * @param featureKey featureKey
+     * @return FeatureConfigResponse
+     */
+    public static FeatureConfigResponse from(Assignment assignment, String featureKey) {
+        return Optional.ofNullable(assignment)
+                .map(Assignment::getDescription)
+                .map(Assignment.Description::bucket)
+                .map(bucket -> null == bucket.config() ? EMPTY : FeatureConfigResponse.builder()
+                        .id(null)
+                        .featureKey(featureKey)
+                        .key(bucket.key())
+                        .data(bucket.config())
+                        .saData(null)
+                        .expiredAt(null)
+                        .priority(0L)
+                        .updatedAt(LocalDateTime.now())
+                        .build())
+                .orElse(EMPTY);
     }
 }

@@ -31,13 +31,13 @@ public class AssignmentsImpl implements Experiment.Assignments {
     @Override
     public Mono<Assignment> add(Assignment assignment) {
         return repository.save(AssignmentDb.from(assignment))
-                .map(AssignmentDb::toAssignment);
+                .map(db -> db.to(experiment));
     }
 
     @Override
     public Mono<Assignment> get(Assignment.AssignmentId assignmentId) {
         return repository.findById(AssignmentDb.idFrom(assignmentId))
-                .map(AssignmentDb::toAssignment);
+                .map(db -> db.to(experiment));
     }
 
     /**
@@ -50,8 +50,25 @@ public class AssignmentsImpl implements Experiment.Assignments {
     public Mono<Assignment> update(Assignment assignment) {
         return repository.findById(AssignmentDb.idFrom(assignment.getId()))
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Assignment not found: " + AssignmentDb.idFrom(assignment.getId()))))
-                .flatMap(assignmentDb -> repository.save(assignmentDb.update(assignmentDb.toAssignment()
+                .flatMap(assignmentDb -> repository.save(assignmentDb.update(assignmentDb.to(experiment)
                         .updateDescription(assignment.getDescription()).getDescription())))
                 .map(assignmentDb -> assignmentDb.to(experiment));
     }
+
+    /**
+     * add or update assignment.
+     *
+     * @param assignment the assignment need to be added or updated
+     * @return a Mono of Assignment
+     */
+    @Override
+    public Mono<? extends Assignment> addOrUpdate(Assignment assignment) {
+        return repository.findById(AssignmentDb.idFrom(assignment.getId()))
+                .flatMap(assignmentDb -> repository.save(assignmentDb.update(assignmentDb.to(experiment)
+                        .updateDescription(assignment.getDescription()).getDescription())))
+                .map(assignmentDb -> assignmentDb.to(experiment))
+                .switchIfEmpty(this.add(assignment));
+    }
+
+
 }

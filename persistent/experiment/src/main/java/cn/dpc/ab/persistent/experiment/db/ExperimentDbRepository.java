@@ -21,7 +21,7 @@ public interface ExperimentDbRepository extends ReactiveCrudRepository<Experimen
             #{#n1ql.filter} \
             AND ( \
                 #{#param.key == null || #param.key == ''} \
-                OR featureKey like '%#{#param.key}% \
+                OR featureKey like '%#{#param.key}%' \
                 OR name like '%#{#param.key}%' \
             ) \
             #{#param.statusQuery}
