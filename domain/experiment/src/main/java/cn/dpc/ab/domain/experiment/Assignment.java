@@ -5,6 +5,7 @@ import lombok.*;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Assignment represents an assignment.
@@ -43,21 +44,36 @@ public class Assignment {
      * createAssignment.
      */
     public static Mono<Assignment> createAssignment(Experiment experiment, CustomerId customerId) {
-
-        //TODO add filter and assign algorithm
-
         if (experiment.getDescription().status().getStatus() != Experiment.Status.DynamicStatus.COLLECTING) {
             return Mono.just(EMPTY);
         }
+
+        if (!Optional.ofNullable(experiment.getDescription())
+                .map(Experiment.Description::filterCondition)
+                .map(filterCondition -> filterCondition.match(customerId))
+                .orElse(true)) {
+            return Mono.just(getDefaultAssignment(experiment, customerId));
+        }
+
+        AtomicInteger percentage = new AtomicInteger(0);
+        for (Experiment.Bucket bucket : Optional.ofNullable(experiment.getDescription())
+                .map(Experiment.Description::buckets).orElse(new ArrayList<>())) {
+            percentage.set(percentage.get() + bucket.percentage());
+            if (Optional.ofNullable(customerId.clientId())
+                    .filter(id -> !id.isEmpty())
+                    .map(id -> (experiment.getId().id() + id).hashCode() / 100 % 100 < percentage.get())
+                    .orElse(false)) {
+                return Mono.just(Assignment.builder()
+                        .id(new AssignmentId(experiment.getId(), customerId.clientId()))
+                        .description(Description.builder()
+                                .bucket(bucket)
+                                .experimentConfigVersion(experiment.getDescription().configVersion())
+                                .build())
+                        .build());
+            }
+        }
+
         return Mono.just(getDefaultAssignment(experiment, customerId));
-        //      return filterManager.filter(experiment.getDescription().filterCondition())
-        //      .map(filterPass -> {
-        //      if (filterPass) {
-        //              return assignmentAlgorithm.assign(experiment, customerId.clientId(), customerId.customerId());
-        //      }
-        //
-        //                    return getDefaultAssignment(experiment, customerId);
-        //                });
     }
 
     private static Assignment getDefaultAssignment(Experiment experiment, CustomerId customerId) {
@@ -84,7 +100,7 @@ public class Assignment {
         Map<String, Object> extraInfo = Optional.ofNullable(this.description)
                 .flatMap(d -> Optional.ofNullable(d.extraInfo))
                 .orElse(new HashMap<>());
-        Set<String> customerIds = (Set<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new HashSet<String>());
+        Set<String> customerIds = new HashSet<>((ArrayList<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new ArrayList<>()));
 
         if (Optional.ofNullable(customerId).filter(s -> !s.isEmpty()).isEmpty()) {
             return;
@@ -114,7 +130,7 @@ public class Assignment {
                 .flatMap(d -> Optional.ofNullable(d.extraInfo))
                 .orElse(new HashMap<>());
 
-        Set<String> customerIds = (Set<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new HashSet<String>());
+        Set<String> customerIds = new HashSet<>((ArrayList<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new ArrayList<>()));
         return customerIds.contains(customerId.customerId());
     }
 
@@ -133,12 +149,12 @@ public class Assignment {
             );
         }
         this.setDescription(Description.builder()
-                        .bucket(Experiment.Bucket.builder()
-                                .key(bucketKey)
-                                .build())
-                        .experimentConfigVersion(
-                                experiment.getDescription().configVersion())
-                        .extraInfo(this.description.extraInfo)
+                .bucket(Experiment.Bucket.builder()
+                        .key(bucketKey)
+                        .build())
+                .experimentConfigVersion(
+                        experiment.getDescription().configVersion())
+                .extraInfo(this.description.extraInfo)
                 .build());
         return this;
     }

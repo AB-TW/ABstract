@@ -58,9 +58,7 @@ const originalFeature = ref({} as Feature)
 
 onBeforeMount(async () => {
   const model = route.query.type || "add"
-  if (model == "view") {
-    isViewModel.value = true
-  }
+  isViewModel.value = model == "view"
 
   title.value = StatusMaps[model] + "Feature"
   formType.value = route.query.type == "edit" ? "edit" : "add"

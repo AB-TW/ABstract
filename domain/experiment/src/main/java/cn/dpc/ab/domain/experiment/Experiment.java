@@ -271,5 +271,7 @@ public class Experiment {
         Mono<Assignment> get(Assignment.AssignmentId assignmentId);
 
         Mono<Assignment> update(Assignment assignment);
+
+        Mono<? extends Assignment> addOrUpdate(Assignment assignment);
     }
 }

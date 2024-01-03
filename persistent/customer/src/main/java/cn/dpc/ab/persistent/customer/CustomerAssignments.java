@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 import static cn.dpc.ab.domain.experiment.Assignment.EMPTY;
 import static cn.dpc.ab.domain.experiment.Experiment.Status.DynamicStatus.*;
@@ -53,14 +54,15 @@ public class CustomerAssignments implements Customer.Assignments {
                             }).switchIfEmpty(Assignment.createAssignment(experiment, customerId)
                                     .flatMap(assignment ->
                                             EMPTY == assignment ? Mono.just(assignment)
-                                                    : experiment.getAssignments().add(assignment)));
+                                                    : experiment.getAssignments().addOrUpdate(assignment)));
                 })
                 .defaultIfEmpty(EMPTY);
     }
 
     private boolean shouldReassign(Experiment experiment, Assignment assignment) {
         return !Objects.equals(experiment.getDescription().configVersion(), assignment.getDescription().experimentConfigVersion())
-                && (assignment.getDescription().bucket().key() == null);
+                && (Optional.ofNullable(assignment.getDescription().bucket()).map(bucket -> bucket.key() == null)
+                .orElse(true));
     }
 
     private boolean shouldUpdateCustomerId(CustomerId customerId, Assignment assignment) {

@@ -51,4 +51,11 @@ public class AssignmentsImpl implements Experiment.Assignments {
                 })
                 .map(db -> db.to(experiment));
     }
+
+    @Override
+    public Mono<? extends Assignment> addOrUpdate(Assignment assignment) {
+        return null;
+    }
+
+
 }

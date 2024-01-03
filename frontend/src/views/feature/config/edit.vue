@@ -17,8 +17,8 @@
         <el-form-item label="配置内容" prop="data">
           <FeatureTemplateConfig
             :key="feature?.dataSource?.toString()"
-            :isViewModel="true"
-            :dataSource="feature?.dataSource || []"
+            :isViewModel="isViewModel"
+            :dataSource="feature.dataSource"
           />
         </el-form-item>
         <el-form-item label="生效时间" prop="startTime">
@@ -89,20 +89,21 @@ const route = useRoute()
 const router = useRouter()
 const featureConfigs = new FeatureConfigs()
 const featureConfig = ref({} as FeatureConfig)
-const feature = ref({} as Feature)
+const feature = ref({ dataSource: [] } as Feature)
 const features = new Features()
-
 const title = ref("Feature Config")
 const formType = ref("add")
 const originalFeatureConfig = ref({} as FeatureConfig)
 const featureKey = ref("")
 const id = ref("")
 const saData = ref([] as any[])
+const isViewModel = ref(false)
 let trackingDataIndex = 0
 onBeforeMount(async () => {
   title.value =
     (route.query.type == "edit" ? "编辑" : route.query.type == "view" ? "查看" : "新增") +
     (route.query.featureName || "Feature Config")
+  isViewModel.value = route.query.type == "view"
   formType.value = route.query.type == "edit" ? "edit" : route.query.type == "view" ? "view" : "add"
   featureKey.value = "" + route.query.featureKey
   // featureKey 是点击feature 模块跳转过来的
@@ -126,7 +127,6 @@ onBeforeMount(async () => {
 
       feature.value.dataSource = [templateInfo]
       debugger
-      console.log("#########", feature.value.dataSource)
     }
   } else {
     featureConfig.value = {
