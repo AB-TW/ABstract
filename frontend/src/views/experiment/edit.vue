@@ -52,17 +52,9 @@
               分组
               {{ index + 1 }}
               <el-icon
-                :class="
-                  isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)
-                    ? ''
-                    : 'delete-bucket-icon'
-                "
-                :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
-                @click="
-                  isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)
-                    ? () => experimentForm.buckets?.splice(index, 1)
-                    : undefined
-                "
+                class="delete-bucket-icon"
+                v-if="isAddMode || (isEditMode && experimentForm?.status?.status === Status.DRAFT)"
+                @click="() => experimentForm.buckets?.splice(index, 1)"
               >
                 <Delete />
               </el-icon>
@@ -70,7 +62,10 @@
             <el-form-item
               label="分组键"
               :prop="`buckets.${index}.key`"
-              :rules="[{ required: true, message: '请输入分组键', trigger: 'blur' }]"
+              :rules="[
+                { required: true, message: '请输入分组键', trigger: 'blur' },
+                { validator: () => validBucketKey(bucket), message: '分组键不唯一', trigger: 'blur' }
+              ]"
               class="level-2-form-item"
             >
               <el-input
@@ -86,7 +81,7 @@
               label="分组名称"
               :prop="`buckets.${index}.name`"
               class="level-2-form-item"
-              :validate-status="'success'"
+              validate-status="success"
             >
               <el-input
                 :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
@@ -101,7 +96,7 @@
               label="分组描述"
               :prop="`buckets.${index}.description`"
               class="level-2-form-item"
-              :validate-status="'success'"
+              validate-status="success"
             >
               <el-input
                 v-model="bucket.description"
@@ -118,7 +113,10 @@
               class="level-2-form-item"
               style="width: 300px"
               :prop="`buckets.${index}.percentage`"
-              :rules="[{ required: true, message: '请输入分组比例', trigger: 'blur' }]"
+              :rules="[
+                { required: true, message: '请输入分组比例', trigger: 'blur' },
+                { validator: () => validBucketPercentage(), message: '所有的分组比例和需为100', trigger: 'blur' }
+              ]"
             >
               <el-input-number v-model.number="bucket.percentage" style="width: 100%" :min="0" :max="100" :step="10" />
             </el-form-item>
@@ -128,13 +126,13 @@
               :prop="`buckets.${index}.config`"
               v-if="!_.isEmpty(selectedFeature)"
             >
-              <FeatureTemplateConfig :isViewModel="true" :dataSource="bucket.datasource" />
+              <FeatureTemplateConfig :isViewModel="isViewMode" :dataSource="bucket.datasource" />
             </el-form-item>
           </div>
         </el-form-item>
         <el-button
           class="add-bucket-button"
-          v-if="!isViewMode && isEditMode && experimentForm?.status?.status === Status.DRAFT"
+          v-if="isAddMode || (isEditMode && experimentForm?.status?.status === Status.DRAFT)"
           @click="addBucket"
           plain
           icon="Plus"
@@ -197,7 +195,7 @@
         v-model="experimentForm.filterCondition"
         :disabled="isViewMode"
       />
-      <el-form-item>
+      <el-form-item v-if="!isViewMode">
         <el-button type="default" @click="resetExperimentForm(experimentFormRef, filterConditionRef)">重置</el-button>
         <el-button type="primary" @click="submitExperimentForm(experimentFormRef, filterConditionRef)">提交</el-button>
       </el-form-item>
@@ -208,7 +206,7 @@
 <script setup lang="ts">
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance } from "element-plus"
 import FilterConditionComponent from "@/components/FilterCondition.vue"
-import { reactive, ref } from "vue"
+import { computed, reactive, ref } from "vue"
 import { Delete } from "@element-plus/icons-vue"
 import { ExperimentBucket } from "@/model/ExperimentBucket"
 import _ from "lodash"
@@ -266,26 +264,32 @@ const experimentForm = reactive<AddExperiment>({
   ]
 } as AddExperiment)
 const experimentId = route.params.id
-const isEditMode = ref<boolean>(!_.isEmpty(experimentId))
+const isEditMode = ref<boolean>(!_.isEmpty(experimentId) && route.query.type !== "view")
 const isViewMode = ref<boolean>(route.query.type === "view")
+const isAddMode = computed(() => !isViewMode.value && !isEditMode.value)
 
 // setup page
 const setup = async () => {
-  const [featureResp, experimentResp]: [PageResponse<Feature>, Experiment] = await Promise.all([
+  const needQueryExperiment = isViewMode.value || isEditMode.value
+  const [featureResp, experimentResp]: [PageResponse<Feature>, Experiment] = await Promise.all<
+    PageResponse<Feature> | Experiment
+  >([
     features.fetchAll(0, 999, undefined, true),
-    isEditMode.value ? experiments.getById(experimentId as string) : Promise.resolve(undefined)
+    needQueryExperiment ? experiments.getById(experimentId as string) : Promise.resolve(undefined)
   ])
   allFeatures.push(...featureResp.content)
-  _.assign(experimentForm, {
-    startTime: experimentResp.status?.startTime,
-    endTime: experimentResp.status?.endTime,
-    endCollectTime: experimentResp.status?.endCollectTime,
-    ..._.omit(experimentResp, ["status"])
-  })
-  console.log(experimentForm)
-  if (!_.isEmpty(experimentResp.featureKey)) {
-    selectFeature(experimentResp.featureKey)
+  if (needQueryExperiment) {
+    _.assign(experimentForm, {
+      startTime: experimentResp.status?.startTime,
+      endTime: experimentResp.status?.endTime,
+      endCollectTime: experimentResp.status?.endCollectTime,
+      ..._.omit(experimentResp, ["status.startTime", "status.endTime", "status.endCollectTime"])
+    })
+    if (!_.isEmpty(experimentResp.featureKey)) {
+      selectFeature(experimentResp.featureKey)
+    }
   }
+  console.log(experimentForm)
 }
 setup()
 
@@ -296,11 +300,14 @@ const selectFeature = (featureKey: string) => {
   setBucketsConfigDataSource(currentSelectedFeature.template)
 }
 const setBucketsConfigDataSource = (template: FeatureTemplate) => {
-  _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
-    bucket.datasource = isEditMode.value
-      ? [mapDataToTemplate("", bucket.config, template)]
-      : [transTempToTreeDataSource(template)]
-  })
+  if (template) {
+    _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
+      bucket.datasource =
+        isViewMode.value || isEditMode.value
+          ? [mapDataToTemplate("", bucket.config, template)]
+          : [transTempToTreeDataSource(template)]
+    })
+  }
 }
 
 const addBucket = () => {
@@ -314,27 +321,9 @@ const addBucket = () => {
   setBucketsConfigDataSource(selectedFeature.template)
 }
 
-const validateBucket = (rule: any, bucket: ExperimentBucket, callback: any) => {
-  if (
-    _.isEmpty(bucket.key) ||
-    !_.isNumber(bucket.percentage) ||
-    _.isEmpty(bucket.description) ||
-    _.isEmpty(bucket.name)
-  ) {
-    callback(new Error("请检查所有值是否填写～"))
-  } else if (_.size(_.filter(experimentForm.buckets, (b: ExperimentBucket) => b.key === bucket.key)) > 1) {
-    callback(new Error("分组键需保持唯一～"))
-  } else if (
-    !_.inRange(
-      _.sumBy(experimentForm.buckets, (b: ExperimentBucket) => b.percentage),
-      1,
-      100
-    )
-  ) {
-    callback(new Error("所有分组比例需在1-100之间～"))
-  } else {
-    callback()
-  }
+// form validator
+const validBucketPercentage = () => {
+  return _.sumBy(experimentForm.buckets, "percentage") === 100
 }
 const validStartTime = (time = experimentForm.startTime) => {
   const startTime = moment(time)
@@ -362,7 +351,14 @@ const validEndTime = (time = experimentForm.endTime) => {
     endTime.isAfter(experimentForm.startTime ?? prevDay) && endTime.isAfter(experimentForm.endCollectTime ?? prevDay)
   )
 }
+const validBucketKey = (bucket: ExperimentBucket) => {
+  const sameBucketKey = _.chain(experimentForm.buckets ?? [])
+    .filter((experimentBucket: ExperimentBucket) => bucket.key === experimentBucket.key)
+    .value()
+  return sameBucketKey.length < 2
+}
 
+// form operation
 const resetExperimentForm = (
   experimentFormEl: FormInstance | undefined,
   filterConditionRef: FormInstance | undefined
@@ -386,7 +382,7 @@ const submitExperimentForm = async (
         config: convertConfigObject(bucket.datasource[0])
       })),
       status: {
-        staticStatus: Status.DRAFT,
+        staticStatus: isEditMode.value ? experimentForm.status?.staticStatus : Status.DRAFT,
         startTime: experimentForm.startTime,
         endCollectTime: experimentForm.endCollectTime,
         endTime: experimentForm.endTime
@@ -399,7 +395,7 @@ const submitExperimentForm = async (
       router.push("/experiment/list")
     })
   } catch (e: Error) {
-    console.log(e)
+    console.error(e)
     ElMessage.error("请检查表单项是否填写符合规范～")
   }
 }

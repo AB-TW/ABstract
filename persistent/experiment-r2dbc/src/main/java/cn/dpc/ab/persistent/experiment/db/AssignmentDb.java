@@ -7,6 +7,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +24,8 @@ public class AssignmentDb {
     private String bucketKey;
     private Long experimentConfigVersion;
     private String extraInfo;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 
     /**
@@ -38,9 +41,9 @@ public class AssignmentDb {
         assignmentDb.setBucketKey(assignment.getDescription().bucket().key());
         assignmentDb.setExperimentConfigVersion(assignment.getDescription().experimentConfigVersion());
         assignmentDb.setExtraInfo(JsonUtil.toJson(assignment.getDescription().extraInfo()));
+        assignmentDb.setUpdatedAt(LocalDateTime.now());
         return assignmentDb;
     }
-
 
     /**
      * to converts an AssignmentDb to an Assignment.
@@ -61,6 +64,19 @@ public class AssignmentDb {
                                 .orElse(null))
                         .build())
                 .build();
+    }
+
+    /**
+     * to update description.
+     *
+     * @param description the description
+    */
+
+    public void updateDescription(Assignment.Description description) {
+        this.bucketKey = Optional.ofNullable(description.bucket())
+                .map(Experiment.Bucket::key).orElse(null);
+        this.experimentConfigVersion = description.experimentConfigVersion();
+        this.extraInfo = JsonUtil.toJson(description.extraInfo());
     }
 
 }
