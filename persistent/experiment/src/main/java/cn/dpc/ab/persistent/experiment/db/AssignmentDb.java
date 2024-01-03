@@ -12,6 +12,7 @@ import org.springframework.data.couchbase.core.mapping.id.IdAttribute;
 import org.springframework.data.couchbase.core.mapping.id.IdPrefix;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -59,7 +60,7 @@ public class AssignmentDb {
      * @param assignmentId the assignmentId of the assignment
      */
     public static String idFrom(Assignment.AssignmentId assignmentId) {
-        return ASSIGNMENT_PREFIX + "." + assignmentId.experimentId() + "." + assignmentId.clientId();
+        return ASSIGNMENT_PREFIX + "." + assignmentId.experimentId().id() + "." + assignmentId.clientId();
     }
 
     /**
@@ -69,11 +70,20 @@ public class AssignmentDb {
      */
     public static AssignmentDb from(Assignment assignment) {
         return AssignmentDb.builder()
-                .bucketKey(assignment.getDescription().bucket().key())
-                .clientId(assignment.getId().clientId())
-                .experimentId(assignment.getId().experimentId().id())
-                .experimentConfigVersion(assignment.getDescription().experimentConfigVersion())
-                .extraInfo(assignment.getDescription().extraInfo())
+                .bucketKey(Optional.ofNullable(assignment).map(Assignment::getDescription)
+                        .map(Assignment.Description::bucket)
+                        .map(Experiment.Bucket::key)
+                        .orElse(null))
+                .clientId(Optional.ofNullable(assignment).map(Assignment::getId).map(Assignment.AssignmentId::clientId)
+                        .orElse(null))
+                .experimentId(Optional.ofNullable(assignment).map(Assignment::getId).map(Assignment.AssignmentId::experimentId)
+                        .map(Experiment.ExperimentId::id).orElse(null))
+                .experimentConfigVersion(Optional.ofNullable(assignment).map(Assignment::getDescription)
+                        .map(Assignment.Description::experimentConfigVersion)
+                        .orElse(0L))
+                .extraInfo(Optional.ofNullable(assignment).map(Assignment::getDescription)
+                        .map(Assignment.Description::extraInfo)
+                        .orElse(new HashMap<>()))
                 .updatedAt(LocalDateTime.now())
                 .build();
     }

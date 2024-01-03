@@ -54,4 +54,21 @@ public class AssignmentsImpl implements Experiment.Assignments {
                         .updateDescription(assignment.getDescription()).getDescription())))
                 .map(assignmentDb -> assignmentDb.to(experiment));
     }
+
+    /**
+     * add or update assignment.
+     *
+     * @param assignment the assignment need to be added or updated
+     * @return a Mono of Assignment
+     */
+    @Override
+    public Mono<? extends Assignment> addOrUpdate(Assignment assignment) {
+        return repository.findById(AssignmentDb.idFrom(assignment.getId()))
+                .flatMap(assignmentDb -> repository.save(assignmentDb.update(assignmentDb.to(experiment)
+                        .updateDescription(assignment.getDescription()).getDescription())))
+                .map(assignmentDb -> assignmentDb.to(experiment))
+                .switchIfEmpty(this.add(assignment));
+    }
+
+
 }

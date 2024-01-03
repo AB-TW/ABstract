@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import { h, ref } from "vue"
+import { h, ref, watch } from "vue"
 import type Node from "element-plus/es/components/tree/src/model/node"
 import { ElNotification } from "element-plus"
 import CommonConfig from "@/components/CommonConfig.vue"
@@ -84,6 +84,7 @@ const getDataValue = (value) => {
   return getValue(value)
 }
 const dataSource = ref(props.dataSource)
+debugger
 const emit = defineEmits(["change"])
 
 // 这个不起作用，用于查看数据是否正确的发送消息
@@ -136,6 +137,16 @@ const remove = (node: Node, data: Tree) => {
   children.splice(index, 1)
   dataSource.value = [...dataSource.value]
 }
+
+watch(
+  () => props.dataSource,
+  (v1, v2) => {
+    dataSource.value = v1
+  },
+  {
+    immediate: true // 必须要深度监听，否则初始值赋不进去
+  }
+)
 </script>
 <style lang="scss">
 .custom-tree-container {

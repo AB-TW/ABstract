@@ -19,7 +19,7 @@ class FilterConditionTest {
         FilterCondition filterCondition = FilterCondition.builder()
                 .attributeConditions(List.of(new FilterCondition.CustomAttributeCondition("app_version",
                         VERSION_GREATER_THAN, "9.0.0")))
-                .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(10))
+                .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
                 .build();
         assertTrue(filterCondition.match(customerId));
     }
@@ -36,7 +36,7 @@ class FilterConditionTest {
                 .attributeConditions(List.of(new FilterCondition.CustomAttributeCondition("key1", GREATER_THAN, "18"),
                         new FilterCondition.CustomAttributeCondition("key2", LESS_THAN, "50"),
                         new FilterCondition.CustomAttributeCondition("key3", EQUALS, "60")))
-                .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(10))
+                .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
                 .build();
         assertTrue(filterCondition.match(customerId));
 
