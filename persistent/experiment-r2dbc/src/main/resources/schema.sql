@@ -22,5 +22,7 @@ CREATE TABLE assignment
     client_id                 VARCHAR(255),
     bucket_key                VARCHAR(255),
     experiment_config_version INTEGER,
-    extra_info                CLOB
+    extra_info                CLOB,
+    created_at                TIMESTAMP,
+    updated_at                TIMESTAMP
 );
