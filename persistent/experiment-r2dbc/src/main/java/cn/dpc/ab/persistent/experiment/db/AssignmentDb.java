@@ -66,6 +66,12 @@ public class AssignmentDb {
                 .build();
     }
 
+    /**
+     * to update description.
+     *
+     * @param description the description
+    */
+
     public void updateDescription(Assignment.Description description) {
         this.bucketKey = Optional.ofNullable(description.bucket())
                 .map(Experiment.Bucket::key).orElse(null);
