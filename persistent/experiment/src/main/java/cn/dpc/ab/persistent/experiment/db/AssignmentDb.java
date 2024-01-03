@@ -110,23 +110,4 @@ public class AssignmentDb {
                         .build())
                 .build();
     }
-
-    /**
-     * toAssignment converts AssignmentDb to Assignment.
-     *
-     * @return the assignment
-     */
-    public Assignment toAssignment() {
-        return Assignment.builder()
-                .id(new Assignment.AssignmentId(new Experiment.ExperimentId(this.experimentId),
-                        this.clientId))
-                .description(Assignment.Description.builder()
-                        .bucket(Experiment.Bucket.builder().key(
-                                Optional.ofNullable(this.bucketKey).orElse(null)
-                        ).build())
-                        .experimentConfigVersion(this.experimentConfigVersion)
-                        .extraInfo(this.extraInfo)
-                        .build())
-                .build();
-    }
 }

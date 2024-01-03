@@ -30,4 +30,26 @@ class AssignmentRepositoryTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
+    @Test
+    public void should_find_assignmentDb_by_experimentId_and_clientId_success() {
+        assignmentRepository.save(createAssignmentDb("experimentId", "clientId")).block();
+        assignmentRepository.save(createAssignmentDb("experimentId-1", "clientId-1")).block();
+
+        assignmentRepository.findAssignmentDbByExperimentIdAndClientId("experimentId", "clientId")
+                .as(StepVerifier::create)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    public void should_find_assignmentDb_by_experimentId_and_clientId_failed() {
+        assignmentRepository.save(createAssignmentDb("experimentId", "clientId")).block();
+        assignmentRepository.save(createAssignmentDb("experimentId-1", "clientId-1")).block();
+
+        assignmentRepository.findAssignmentDbByExperimentIdAndClientId("experimentId-2", "clientId")
+                .as(StepVerifier::create)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
 }
