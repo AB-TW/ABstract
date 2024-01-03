@@ -48,12 +48,20 @@ public class Assignment {
             return Mono.just(EMPTY);
         }
 
+        if (!Optional.ofNullable(experiment.getDescription())
+                .map(Experiment.Description::filterCondition)
+                .map(filterCondition -> filterCondition.match(customerId))
+                .orElse(true)) {
+            return Mono.just(getDefaultAssignment(experiment, customerId));
+        }
+
         AtomicInteger percentage = new AtomicInteger(0);
-        for (Experiment.Bucket bucket : experiment.getDescription().buckets()) {
+        for (Experiment.Bucket bucket : Optional.ofNullable(experiment.getDescription())
+                .map(Experiment.Description::buckets).orElse(new ArrayList<>())) {
             percentage.set(percentage.get() + bucket.percentage());
             if (Optional.ofNullable(customerId.clientId())
                     .filter(id -> !id.isEmpty())
-                    .map(id -> id.hashCode() / 100 % 100 < percentage.get())
+                    .map(id -> (experiment.getId().id() + id).hashCode() / 100 % 100 < percentage.get())
                     .orElse(false)) {
                 return Mono.just(Assignment.builder()
                         .id(new AssignmentId(experiment.getId(), customerId.clientId()))
