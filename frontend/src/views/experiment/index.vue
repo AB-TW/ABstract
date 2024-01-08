@@ -39,18 +39,17 @@
           <div style="display: flex">
             <el-button
               size="small"
-              @click="() => router.push({ path: `/experiment/edit/${scope.row.id}`, query: { type: 'view' } })"
-              >查看
+              @click="
+                () =>
+                  router.push({
+                    path: `/experiment/edit/${scope.row.id}`,
+                    query: scope.row?.status?.status === Status.STOPPED ? { type: 'view' } : undefined
+                  })
+              "
+              >{{ scope.row?.status?.status === Status.STOPPED ? "查看" : "编辑" }}
             </el-button>
             <el-button
-              type="primary"
-              size="small"
-              v-if="scope.row?.status?.status !== Status.STOPPED"
-              @click="() => router.push({ path: `/experiment/edit/${scope.row.id}` })"
-              >编辑
-            </el-button>
-            <el-button
-              type="primary"
+              type="warning"
               size="small"
               v-if="[Status.DRAFT, Status.PAUSED].includes(scope.row?.status?.status)"
               @click="publishExperiment(scope.row.id)"
@@ -62,6 +61,13 @@
               v-if="[Status.NOT_BEGIN, Status.COLLECTING].includes(scope.row?.status?.status)"
               @click="pausedExperiment(scope.row.id)"
               >暂停
+            </el-button>
+            <el-button
+              type="danger"
+              size="small"
+              v-if="![Status.STOPPED, Status.DRAFT].includes(scope.row?.status?.status)"
+              @click="stopExperiment(scope.row.id)"
+              >停止
             </el-button>
             <el-button
               type="danger"
@@ -143,6 +149,11 @@ const publishExperiment = (id: string) => {
 }
 const pausedExperiment = (id: string) => {
   experimentsApi.paused(id).then((_) => {
+    getExperiments()
+  })
+}
+const stopExperiment = (id: string) => {
+  experimentsApi.stop(id).then((_) => {
     getExperiments()
   })
 }
