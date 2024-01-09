@@ -1,8 +1,7 @@
 {
-  "name": "ABstract",
+  "name": "ab-stract",
   "version": "1.0.0",
   "description": "一个免费开源的中后台管理系统基础解决方案，基于 Vue3、TypeScript、Element Plus、Pinia 和 Vite 等主流技术.",
-  "author": {},
   "scripts": {
     "dev": "vite",
     "build:stage": "vite build --mode staging",
@@ -16,7 +15,8 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
-    "axios": "^1.4.0",
+    "@fingerprintjs/fingerprintjs": "^4.2.1",
+    "axios": "^1.6.5",
     "dayjs": "^1.11.8",
     "element-plus": "^2.3.6",
     "js-cookie": "^3.0.5",

@@ -24,6 +24,7 @@
 <script setup lang="ts">
 import { ref } from "vue"
 import { Customers } from "@/domain/Customers"
+import FingerprintJS from "@fingerprintjs/fingerprintjs"
 
 const clientId = ref<string>("123456")
 const buttonType = ref<string>("primary")
@@ -31,6 +32,17 @@ const response = ref<string>("")
 buttonType.value = "success"
 const customers = new Customers()
 
+const getDeviceFingerprint = async () => {
+  FingerprintJS.load().then((fp) => {
+    fp.get().then((result) => {
+      const fingerprintId = result.visitorId
+      localStorage.setItem("browserId", fingerprintId)
+      clientId.value = fingerprintId
+    })
+  })
+}
+
+getDeviceFingerprint()
 const fetchFeatureConfig = () => {
   customers
     .getCustomerFeatureConfigs(
