@@ -1,4 +1,6 @@
 import http from "../utils/http/http"
+import { RsocketRequester } from "@/utils/rsocket/rsocket-requester"
+import { WellKnownMimeType } from "rsocket-composite-metadata"
 
 export interface CustomerId {
   customerId?: string
@@ -18,7 +20,11 @@ export interface CustomerFeatureConfig {
 }
 
 export class Customers {
-  constructor(private readonly baseUrl: string = "/api") {}
+  private requester
+
+  constructor(private readonly baseUrl: string = "/api") {
+    this.requester = new RsocketRequester()
+  }
 
   private getUrl(path: string) {
     return this.baseUrl + path
@@ -28,5 +34,35 @@ export class Customers {
     return http
       .post(this.getUrl(`/customers/featureConfigs/${featureKey}`), customerId)
       .then((res: any) => res?.data as CustomerFeatureConfig[])
+  }
+
+  getCustomerFeatureConfigsWithRSocket(customerId: CustomerId, featureKey: string): Promise<CustomerFeatureConfig[]> {
+    return new Promise((resolve, reject) => {
+      const result = [] as CustomerFeatureConfig[]
+      this.requester
+        .route(`customers.featureConfigs.${featureKey}`)
+        .data("")
+        .metadata(WellKnownMimeType.APPLICATION_JSON, Buffer.from(JSON.stringify(customerId)))
+        .retrieveFlowable()
+        .map((data) => {
+          console.log("customers.featureConfigs receive: " + data)
+          result.push(JSON.parse(data) as CustomerFeatureConfig)
+        })
+        .subscribe({
+          onComplete: () => {
+            console.log("done")
+            resolve(result)
+          },
+          onError: (error) => {
+            console.log(error)
+            reject(error)
+          },
+          onNext: (value) => {
+            console.log(value)
+          },
+          // Nothing happens until `request(n)` is called
+          onSubscribe: (sub) => sub.request(100)
+        })
+    })
   }
 }

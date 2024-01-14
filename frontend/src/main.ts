@@ -16,6 +16,10 @@ import "vxe-table/lib/style.css"
 import "vxe-table-plugin-element/dist/style.css"
 import "@/styles/index.scss"
 
+import { Buffer } from "buffer"
+
+window.Buffer = Buffer
+
 const app = createApp(App)
 
 /** 加载插件 */

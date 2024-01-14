@@ -26,20 +26,30 @@ public class CustomerRsocketApi {
     Flux<FeatureConfigResponse> getFeatureConfigs(@DestinationVariable("featureKey") String featureKey,
                                                   @Header(CUSTOMER) CustomerId customerId) {
         return customers.getById(customerId)
-                .flatMapMany(customer -> customer.getFeatureConfigs()
-                        .getByFeatureKey(Feature.FeatureId.builder().featureKey(featureKey).build()))
-                .map(FeatureConfigResponse::from);
+                .flatMapMany(customer -> Flux.concat(
+                        customer.getAssignments()
+                                .getByFeatureKey(Feature.FeatureId.builder().featureKey(featureKey).build())
+                                .map(assignment -> FeatureConfigResponse.from(assignment, featureKey)),
+                        customer.getFeatureConfigs()
+                                .getByFeatureKey(Feature.FeatureId.builder().featureKey(featureKey).build())
+                                .map(FeatureConfigResponse::from))
+                ).filter(featureConfigResponse -> featureConfigResponse != FeatureConfigResponse.EMPTY);
     }
 
     @MessageMapping("customers.featureConfigs")
     Flux<FeatureConfigResponse> getMultiFeatureConfigs(@Header(CUSTOMER) CustomerId customerId,
-                                                  @Payload Flux<String> featureKeys) {
+                                                       @Payload Flux<String> featureKeys) {
         return customers.getById(customerId)
                 .flatMapMany(customer ->
                         featureKeys.flatMap(featureKey ->
+                                Flux.concat(
+                                        customer.getAssignments()
+                                                .getByFeatureKey(Feature.FeatureId.builder().featureKey(featureKey).build())
+                                                .map(assignment -> FeatureConfigResponse.from(assignment, featureKey)),
                                         customer.getFeatureConfigs()
-                                                .getByFeatureKey(Feature.FeatureId.builder().featureKey(featureKey).build()))
-                                .map(FeatureConfigResponse::from)
+                                                .getByFeatureKey(Feature.FeatureId.builder().featureKey(featureKey).build())
+                                                .map(FeatureConfigResponse::from))
+                        ).filter(featureConfigResponse -> featureConfigResponse != FeatureConfigResponse.EMPTY)
                 );
     }
 
