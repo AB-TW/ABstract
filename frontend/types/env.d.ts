@@ -5,6 +5,7 @@ declare interface ImportMetaEnv {
   readonly VITE_BASE_API: string
   readonly VITE_ROUTER_HISTORY: "hash" | "html5"
   readonly VITE_PUBLIC_PATH: string
+  readonly VITE_WEB_SOCKET_URL: string
 }
 
 interface ImportMeta {

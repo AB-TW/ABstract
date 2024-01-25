@@ -25,7 +25,7 @@ public class CustomersImpl implements Customers {
         Customer customer = new Customer(customerId);
         customer.setFeatureConfigs(new CustomerFeatureConfigs(features,
                 customerId, localCacheManager));
-        customer.setAssignments(new CustomerAssignments(experiments, customerId));
+        customer.setAssignments(new CustomerAssignments(experiments, customerId, localCacheManager));
         return Mono.just(customer);
     }
 }

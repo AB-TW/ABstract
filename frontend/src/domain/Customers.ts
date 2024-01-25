@@ -1,6 +1,7 @@
 import http from "../utils/http/http"
 import { RsocketRequester } from "@/utils/rsocket/rsocket-requester"
 import { WellKnownMimeType } from "rsocket-composite-metadata"
+import { RSocket } from "rsocket-core"
 
 export interface CustomerId {
   customerId?: string
@@ -20,10 +21,10 @@ export interface CustomerFeatureConfig {
 }
 
 export class Customers {
-  private requester
+  private requester: RsocketRequester
 
-  constructor(private readonly baseUrl: string = "/api") {
-    this.requester = new RsocketRequester()
+  constructor(private readonly responder: Partial<RSocket> = null, private readonly baseUrl: string = "/api") {
+    this.requester = new RsocketRequester(this.responder)
   }
 
   private getUrl(path: string) {

@@ -6,6 +6,7 @@ import cn.dpc.ab.domain.experiment.Assignment;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Experiments;
 import cn.dpc.ab.domain.feature.Feature;
+import cn.dpc.ab.persistent.cache.LocalCacheManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
@@ -26,9 +27,11 @@ public class CustomerAssignments implements Customer.Assignments {
 
     private final CustomerId customerId;
 
+    private final LocalCacheManager localCacheManager;
+
     @Override
     public Mono<Assignment> getByFeatureKey(Feature.FeatureId featureKey) {
-        return experiments.getByFeatureKey(featureKey.featureKey())
+        return getExperimentByFeatureKeyWithCache(featureKey)
                 .flatMap(experiment -> {
                     // 过滤 NOT_BEGIN  DRAFT, STOPPED
                     if (Arrays.asList(NOT_BEGIN, DRAFT, STOPPED).contains(experiment.getDescription().status().getStatus())
@@ -57,6 +60,11 @@ public class CustomerAssignments implements Customer.Assignments {
                                                     : experiment.getAssignments().addOrUpdate(assignment)));
                 })
                 .defaultIfEmpty(EMPTY);
+    }
+
+    private Mono<Experiment> getExperimentByFeatureKeyWithCache(Feature.FeatureId featureKey) {
+        String key = LocalCacheManager.EXPERIMENT_KEY_PREFIX + featureKey.featureKey();
+        return localCacheManager.cacheMono(key, () -> experiments.getByFeatureKey(featureKey.featureKey()));
     }
 
     private boolean shouldReassign(Experiment experiment, Assignment assignment) {

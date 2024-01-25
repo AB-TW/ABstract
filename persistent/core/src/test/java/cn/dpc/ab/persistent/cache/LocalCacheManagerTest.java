@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LocalCacheManagerTest {
-    private final LocalCacheManager localCacheManager = new LocalCacheManager(new LocalCacheProperties());
+    private final LocalCacheManager localCacheManager = new LocalCacheManager(new LocalCacheProperties(), null);
 
     @Test
     void should_cacheFlux_success() {
@@ -17,10 +17,10 @@ class LocalCacheManagerTest {
                 .map(i -> LocalDateTime.now())
                 .take(10);
         String key = "testKey";
-        LocalDateTime last = (LocalDateTime) localCacheManager.cacheFlux(key, () -> flux)
+        LocalDateTime last = localCacheManager.cacheFlux(key, () -> flux)
                 .blockLast();
 
-        LocalDateTime last2 = (LocalDateTime) localCacheManager.cacheFlux(key, () -> flux)
+        LocalDateTime last2 = localCacheManager.cacheFlux(key, () -> flux)
                 .blockLast();
 
         assertEquals(last, last2);
