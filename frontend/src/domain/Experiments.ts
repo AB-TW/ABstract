@@ -48,6 +48,10 @@ export class Experiments {
     return await http.put(this.getUrl(`/experiments/${id}/pause`), undefined).then((res: any) => res?.data)
   }
 
+  async stop(id: string) {
+    return await http.put(this.getUrl(`/experiments/${id}/stop`), undefined).then((res: any) => res?.data)
+  }
+
   async deleted(id: string) {
     return await http.del(this.getUrl(`/experiments/${id}`), undefined).then((res: any) => res?.data)
   }
