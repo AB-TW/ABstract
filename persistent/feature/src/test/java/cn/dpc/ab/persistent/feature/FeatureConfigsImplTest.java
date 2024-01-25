@@ -2,6 +2,8 @@ package cn.dpc.ab.persistent.feature;
 
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
+import cn.dpc.ab.persistent.cache.LocalCacheManager;
+import cn.dpc.ab.persistent.cache.LocalCacheProperties;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDb;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,9 +28,13 @@ class FeatureConfigsImplTest {
 
     Feature.Configs featureConfigs;
 
+    LocalCacheManager localCacheManager = new LocalCacheManager(new LocalCacheProperties(), null);
+
     @BeforeEach
     public void setUp() {
-        featureConfigs = new FeatureConfigsImpl(repository, Feature.FeatureId.builder().featureKey("featureKey").build());
+        featureConfigs = new FeatureConfigsImpl(repository,
+                Feature.FeatureId.builder().featureKey("featureKey").build(),
+                localCacheManager);
     }
 
     @Test
