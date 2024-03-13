@@ -3,5 +3,6 @@ plugins {
 }
 
 dependencies {
+    implementation project(':domain:core')
     implementation "com.github.ben-manes.caffeine:caffeine:${caffeineVersion}"
 }

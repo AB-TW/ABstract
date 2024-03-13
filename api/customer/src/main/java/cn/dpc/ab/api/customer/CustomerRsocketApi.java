@@ -1,5 +1,7 @@
 package cn.dpc.ab.api.customer;
 
+import cn.dpc.ab.api.customer.config.RsocketConfigProperties;
+import cn.dpc.ab.api.customer.config.RsocketRequesterStore;
 import cn.dpc.ab.api.customer.dto.FeatureConfigResponse;
 import cn.dpc.ab.domain.core.CustomerId;
 import cn.dpc.ab.domain.customer.Customers;
@@ -9,6 +11,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 
@@ -21,10 +24,14 @@ import static cn.dpc.ab.api.customer.config.ServerConfig.CUSTOMER;
 @RequiredArgsConstructor
 public class CustomerRsocketApi {
     private final Customers customers;
+    private final RsocketConfigProperties rsocketConfigProperties;
 
     @MessageMapping("customers.featureConfigs.{featureKey}")
     Flux<FeatureConfigResponse> getFeatureConfigs(@DestinationVariable("featureKey") String featureKey,
-                                                  @Header(CUSTOMER) CustomerId customerId) {
+                                                  @Header(CUSTOMER) CustomerId customerId,
+                                                  RSocketRequester requester) {
+        RsocketRequesterStore.registerRequester(customerId, featureKey, requester, rsocketConfigProperties);
+
         return customers.getById(customerId)
                 .flatMapMany(customer -> Flux.concat(
                         customer.getAssignments()

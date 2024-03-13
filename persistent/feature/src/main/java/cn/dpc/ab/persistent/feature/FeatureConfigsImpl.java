@@ -2,6 +2,7 @@ package cn.dpc.ab.persistent.feature;
 
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
+import cn.dpc.ab.persistent.cache.LocalCacheManager;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDb;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import static cn.dpc.ab.persistent.cache.LocalCacheManager.FEATURE_CONFIG_KEY_PREFIX;
 
 /**
  * FeatureConfigsImpl implements FeatureConfigs.
@@ -17,6 +21,7 @@ import reactor.core.publisher.Mono;
 public class FeatureConfigsImpl implements Feature.Configs {
     private final FeatureConfigDbRepository repository;
     private final Feature.FeatureId featureId;
+    private final LocalCacheManager localCacheManager;
 
     public Flux<FeatureConfig> all(FilterParams params) {
         return repository.findByFilterParams(featureId.featureKey(), FeatureConfigDbRepository.FilterParams.from(params))
@@ -47,7 +52,9 @@ public class FeatureConfigsImpl implements Feature.Configs {
     @Override
     public Mono<FeatureConfig> add(FeatureConfig featureConfig) {
         return repository.save(FeatureConfigDb.from(featureConfig))
-                .map(FeatureConfigDb::toFeatureConfig);
+                .map(FeatureConfigDb::toFeatureConfig)
+                .publishOn(Schedulers.boundedElastic())
+                .doOnSuccess(featureConfigDB -> clearCache());
     }
 
     @Override
@@ -57,7 +64,9 @@ public class FeatureConfigsImpl implements Feature.Configs {
                 .flatMap(featureConfigDB -> {
                     featureConfigDB.updateDescription(featureConfigDB.toFeatureConfig().update(description).getDescription());
                     return repository.save(featureConfigDB);
-                }).then();
+                }).then()
+                .publishOn(Schedulers.boundedElastic())
+                .doOnSuccess(featureConfigDB -> clearCache());
     }
 
     @Override
@@ -69,7 +78,9 @@ public class FeatureConfigsImpl implements Feature.Configs {
                     }
                     featureConfigDB.updateDescription(featureConfigDB.toFeatureConfig().delete().getDescription());
                     return repository.save(featureConfigDB)
-                            .then();
+                            .then()
+                            .publishOn(Schedulers.boundedElastic())
+                            .doOnSuccess(db -> clearCache());
                 });
     }
 
@@ -80,7 +91,9 @@ public class FeatureConfigsImpl implements Feature.Configs {
                 .flatMap(featureConfigDB -> {
                     featureConfigDB.updateDescription(featureConfigDB.toFeatureConfig().publish().getDescription());
                     return repository.save(featureConfigDB);
-                }).then();
+                }).then()
+                .publishOn(Schedulers.boundedElastic())
+                .doOnSuccess(db -> clearCache());
     }
 
     @Override
@@ -90,7 +103,13 @@ public class FeatureConfigsImpl implements Feature.Configs {
                 .flatMap(featureConfigDB -> {
                     featureConfigDB.updateDescription(featureConfigDB.toFeatureConfig().disable().getDescription());
                     return repository.save(featureConfigDB);
-                }).then();
+                }).then()
+                .publishOn(Schedulers.boundedElastic())
+                .doOnSuccess(db -> clearCache());
+    }
+
+    private void clearCache() {
+        localCacheManager.clearCache(FEATURE_CONFIG_KEY_PREFIX + featureId.featureKey()).subscribe();
     }
 }
 

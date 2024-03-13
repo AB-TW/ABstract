@@ -9,6 +9,7 @@ const MESSAGE_RSOCKET_COMPOSITE_METADATA = WellKnownMimeType.MESSAGE_RSOCKET_COM
 export class RsocketRequester {
   private _rSocket: any
   private isRsocketClosed = true
+  constructor(private readonly responder: Partial<RSocket> = null) {}
 
   private makeConnector(): RSocketConnector {
     return new RSocketConnector({
@@ -19,10 +20,11 @@ export class RsocketRequester {
         metadataMimeType: MESSAGE_RSOCKET_COMPOSITE_METADATA.string
       },
       transport: new WebsocketClientTransport({
-        url: "ws://localhost:7002",
+        url: import.meta.env.VITE_WEB_SOCKET_URL || "ws://localhost:7002",
         wsCreator: (url) => new WebSocket(url) as any,
         debug: true
-      })
+      }),
+      responder: this.responder
     })
   }
 

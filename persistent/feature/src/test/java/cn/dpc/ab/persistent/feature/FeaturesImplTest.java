@@ -3,6 +3,8 @@ package cn.dpc.ab.persistent.feature;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Features;
 import cn.dpc.ab.domain.feature.Features.FilterParams;
+import cn.dpc.ab.persistent.cache.LocalCacheManager;
+import cn.dpc.ab.persistent.cache.LocalCacheProperties;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import cn.dpc.ab.persistent.feature.db.FeatureDb;
 import cn.dpc.ab.persistent.feature.db.FeatureDbRepository;
@@ -30,11 +32,13 @@ class FeaturesImplTest {
     @Mock
     FeatureConfigDbRepository featureConfigDbRepository;
 
+    LocalCacheManager localCacheManager = new LocalCacheManager(new LocalCacheProperties(), null);
+
     Features features;
 
     @BeforeEach
     void setUp() {
-        features = new FeaturesImpl(repository, featureConfigDbRepository);
+        features = new FeaturesImpl(repository, featureConfigDbRepository, localCacheManager);
     }
 
     @Test
