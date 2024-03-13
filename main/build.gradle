@@ -9,6 +9,7 @@ dependencies {
     implementation project(':api:api-feature')
     implementation project(':api:api-customer')
     implementation project(':api:api-experiment')
+    implementation project(':persistent:persistent-core')
     implementation project(':persistent:persistent-feature')
     implementation project(':persistent:persistent-customer')
     implementation project(':persistent:persistent-experiment')

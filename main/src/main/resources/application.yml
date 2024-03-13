@@ -36,3 +36,7 @@ logging:
 cache:
   local:
     expire-after-write: 10s
+
+rsocket:
+  feature-key-push-enabled: true
+  custom-web-socket-enabled: true

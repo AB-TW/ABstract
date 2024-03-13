@@ -35,7 +35,7 @@ class CustomerFeatureConfigsTest {
     void setUp() {
         customerFeatureConfigs = new CustomerFeatureConfigs(features,
                 new CustomerId("customer-id", "clientId", Map.of()),
-                new LocalCacheManager(new LocalCacheProperties()));
+                new LocalCacheManager(new LocalCacheProperties(), null));
 
         configs = Mockito.mock(Feature.Configs.class);
         when(features.get(any(Feature.FeatureId.class)))

@@ -4,6 +4,7 @@ import cn.dpc.ab.domain.feature.AbstractFeatures;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Feature.Description;
 import cn.dpc.ab.domain.feature.Features;
+import cn.dpc.ab.persistent.cache.LocalCacheManager;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import cn.dpc.ab.persistent.feature.db.FeatureDb;
 import cn.dpc.ab.persistent.feature.db.FeatureDbRepository;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Mono;
 public class FeaturesImpl extends AbstractFeatures {
     private final FeatureDbRepository repository;
     private final FeatureConfigDbRepository featureConfigDbRepository;
+    private final LocalCacheManager localCacheManager;
 
     /**
      * enableToDb enables a feature in the database.
@@ -64,7 +66,7 @@ public class FeaturesImpl extends AbstractFeatures {
         return repository.findById(FeatureDb.idFromFeatureKey(id.featureKey()))
                 .map(FeatureDb::to)
                 .map(feature -> {
-                    feature.setConfigs(new FeatureConfigsImpl(featureConfigDbRepository, feature.getId()));
+                    feature.setConfigs(new FeatureConfigsImpl(featureConfigDbRepository, feature.getId(), localCacheManager));
                     return feature;
                 });
     }

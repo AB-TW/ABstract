@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 
+import static cn.dpc.ab.persistent.cache.LocalCacheManager.FEATURE_CONFIG_KEY_PREFIX;
+
 /**
  * CustomerFeatureConfigs implements Customer.FeatureConfigs.
  */
@@ -25,8 +27,6 @@ public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
 
     @Override
     public Flux<FeatureConfig> getByFeatureKey(Feature.FeatureId featureKey) {
-        // TODO: add cache
-
         return getByFeatureKeyFromCache(featureKey)
                 .filter(featureConfig -> Optional.ofNullable(featureConfig.getDescription())
                         .map(description -> description.status().getStatus() == FeatureConfig.Status.DynamicStatus.RUNNING)
@@ -42,7 +42,7 @@ public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
                 .status(FeatureConfig.Status.DynamicStatus.RUNNING)
                 .build();
 
-        return (Flux<FeatureConfig>) localCacheManager.cacheFlux(featureKey.featureKey(),
+        return localCacheManager.cacheFlux(FEATURE_CONFIG_KEY_PREFIX + featureKey.featureKey(),
                 () -> features.get(featureKey)
                         .flatMapMany(feature -> feature.getConfigs().all(params)));
     }

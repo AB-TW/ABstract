@@ -47,6 +47,10 @@
 import { ref } from "vue"
 import { Customers } from "@/domain/Customers"
 import FingerprintJS from "@fingerprintjs/fingerprintjs"
+import { RSocket } from "rsocket-core"
+import { Cancellable, OnTerminalSubscriber, Payload } from "rsocket-core/dist/RSocket"
+import { decodeCompositeMetadata, decodeRoutes, Entry, WellKnownMimeType } from "rsocket-composite-metadata"
+import MESSAGE_RSOCKET_ROUTING = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING
 
 const clientId = ref<string>("123456")
 const buttonType = ref<string>("primary")
@@ -55,7 +59,29 @@ buttonType.value = "success"
 const rSocketButtonType = ref<string>("primary")
 const rSocketResponse = ref<string>("")
 rSocketButtonType.value = "success"
-const customers = new Customers()
+
+const invalidateFeature = (data) => {
+  console.log(data)
+  if (data == "demoFeature") {
+    fetchFeatureConfigWithRsocket()
+  }
+}
+
+const rSocket: Partial<RSocket> = {
+  fireAndForget(payload: Payload, responderStream: OnTerminalSubscriber): Cancellable {
+    const map: Generator<Entry, void, any> = decodeCompositeMetadata(payload?.metadata)
+    const entry = map.next(MESSAGE_RSOCKET_ROUTING.string)?.value
+    const route = entry ? decodeRoutes(entry.content).next().value || "" : ""
+    const data = payload?.data?.toString("utf-8") || ""
+    console.log(route + ":" + data)
+    if (route == "feature.changed") {
+      invalidateFeature(data)
+    }
+    return { cancel: () => {} }
+  }
+}
+
+const customers = new Customers(rSocket)
 
 const getDeviceFingerprint = async () => {
   FingerprintJS.load().then((fp) => {

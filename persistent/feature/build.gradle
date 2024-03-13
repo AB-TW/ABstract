@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation project(':domain:core')
     implementation project(':domain:feature')
+    implementation project(':persistent:persistent-core')
     implementation project(':persistent:persistent-core-couchbase')
     testImplementation  project(':persistent:persistent-core-couchbase').sourceSets.test.output
 }
