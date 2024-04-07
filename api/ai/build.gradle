@@ -1,0 +1,16 @@
+plugins {
+    id 'ai'
+    id 'api'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+}
+
+dependencies {
+//    implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+//    implementation 'org.springframework.ai:spring-ai-chroma-store'
+//    implementation 'org.springframework.ai:spring-ai-tika-document-reader'
+}
