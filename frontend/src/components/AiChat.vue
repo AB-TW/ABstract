@@ -22,7 +22,12 @@ import ChatBox from "@/components/ChatBox.vue"
 const aiApi = new Ai()
 
 const newMessage = ref("请简单介绍一下ABstract系统")
-const messages = reactive([{ sender: "bot", text: "您好，我是ABstract智能助理，有什么可以帮您的吗?" }])
+const messages = reactive([
+  {
+    sender: "bot",
+    text: "您好，我是ABstract智能助理，有什么可以帮您的吗?"
+  }
+])
 
 const sendMessage = async () => {
   messages.push({ sender: "user", text: newMessage.value })
@@ -47,10 +52,17 @@ const sendMessage = async () => {
       break
     }
     const chunkText = textDecoder.decode(value)
-    message.text = message.text + chunkText.replaceAll("data:", "").replaceAll("\n", "")
+    message.text =
+      message.text +
+      chunkText
+        .replaceAll("data:", "")
+        .replaceAll("\n", "")
+        .replaceAll(
+          /feature|Feature|特性/g,
+          "<a style='color: #409eff' target='_blank' href='/#/feature/list'>特性</a>"
+        )
     messages.pop()
     messages.push(message)
-    console.log("message.text:" + message.text)
   }
 }
 </script>
