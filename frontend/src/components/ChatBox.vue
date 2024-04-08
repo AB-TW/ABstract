@@ -21,7 +21,6 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue"
 import { Cpu, UserFilled } from "@element-plus/icons-vue"
-
 interface Message {
   sender: string
   text: string
@@ -49,6 +48,10 @@ const height = ref(props.height)
   align-items: flex-start;
   justify-content: start;
   margin-top: 0;
+}
+
+a {
+  color: #409eff;
 }
 
 .chatBot {
