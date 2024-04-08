@@ -5,7 +5,7 @@ import AiChat from "@/components/AiChat.vue"
 <template>
   <div>
     <div class="main-container">
-      <div style="width: 600px; height: 600px">
+      <div style="width: 650px; height: 700px">
         <el-image src="/introduce.png" fit="scale-down" />
       </div>
       <div class="chatContainer">
