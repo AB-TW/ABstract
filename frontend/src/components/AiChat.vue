@@ -1,18 +1,7 @@
 <template>
   <div>
-    <div class="container">
-      <div class="chatBot">
-        <div v-for="(message, index) in messages" :key="index">
-          <div class="message-user" v-if="message.sender === 'user'">
-            <div class="user">{{ message.text }}</div>
-          </div>
-          <div class="message-bot" v-else>
-            <div class="bot">{{ message.text }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <form @submit.prevent="sendMessage">
+    <chat-box v-model="messages" />
+    <form @submit.prevent="sendMessage" style="margin-top: 10px">
       <input v-model="newMessage" placeholder="Type a message..." />
       <button type="submit">Send</button>
     </form>
@@ -22,6 +11,7 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue"
 import { Ai } from "@/domain/Ai"
+import ChatBox from "@/components/ChatBox.vue"
 
 const aiApi = new Ai()
 
@@ -59,43 +49,4 @@ const sendMessage = async () => {
 }
 </script>
 
-<style scoped lang="scss">
-.chatBot {
-  width: 100%;
-  height: 600px;
-  border: 1px solid #ccc;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.container {
-  display: flex;
-  align-items: flex-start;
-  justify-content: start;
-  margin-top: 0;
-}
-
-.message-user {
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.user {
-  text-align: right;
-  background-color: #c0ff90;
-  width: fit-content;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  padding: 5px;
-}
-
-.bot {
-  text-align: left;
-  background-color: #f0f0f0;
-  width: fit-content;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  padding: 5px;
-}
-</style>
+<style scoped lang="scss"></style>
