@@ -2,8 +2,14 @@
   <div>
     <chat-box v-model="messages" />
     <form @submit.prevent="sendMessage" style="margin-top: 10px">
-      <input v-model="newMessage" placeholder="Type a message..." />
-      <button type="submit">Send</button>
+      <div>
+        <el-input v-model="newMessage" placeholder="Type a message...">
+          <template #append>
+            <el-button icon="Top" @click="sendMessage" />
+          </template>
+        </el-input>
+      </div>
+      <!--      <button type="submit">Send</button>-->
     </form>
   </div>
 </template>
@@ -15,7 +21,7 @@ import ChatBox from "@/components/ChatBox.vue"
 
 const aiApi = new Ai()
 
-const newMessage = ref("AB测试是什么")
+const newMessage = ref("请简单介绍一下ABstract系统")
 const messages = reactive([{ sender: "bot", text: "您好，我是ABstract智能助理，有什么可以帮您的吗?" }])
 
 const sendMessage = async () => {
