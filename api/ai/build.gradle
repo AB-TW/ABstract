@@ -16,4 +16,5 @@ dependencies {
     implementation project(':domain:feature')
     implementation project(':domain:core')
     implementation project(':api:api-feature')
+    implementation project(':api:api-core')
 }

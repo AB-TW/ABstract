@@ -58,7 +58,7 @@ public class AiController {
         var userMessage = userPromptTemplate.createMessage(Map.of("query", message));
         var prompt = new Prompt(List.of(systemMessage, userMessage),
                 OpenAiChatOptions.builder()
-                        .withFunctions(Set.of("AddNewFeature"))
+                        .withFunctions(Set.of("addFeature", "countFeature", "getFeatureByFeatureKey"))
                         .build());
         return chatClient.stream(prompt)
                 .map(response -> Optional.ofNullable(response.getResult())
