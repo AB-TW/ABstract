@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import reactor.core.scheduler.Schedulers;
 
@@ -44,18 +46,25 @@ public class FunctionCallConfig {
     /**
      * Function to add a new feature.
      */
-    public class AddFeatureFunction implements Function<FeatureRequest, Disposable>  {
+    public class AddFeatureFunction implements Function<FeatureRequest, Response>  {
         @Override
-        public Disposable apply(FeatureRequest request) {
-            return Mono.just(request)
+        public Response apply(FeatureRequest request) {
+            CompletableFuture<Response> future = new CompletableFuture<>();
+            Mono.just(request)
                     .map(FeatureRequest::toFeature)
                     .flatMap(features::add)
                     .map(Feature::getId)
                     .map(Feature.FeatureId::featureKey)
                     .map(featureKey -> new Response(true, featureKey, "success"))
                     .onErrorResume(e -> Mono.just(new Response(false, null, e.getMessage())))
-                    .publishOn(Schedulers.boundedElastic())
+                    .doOnSuccess(future::complete)
                     .subscribe();
+
+            try {
+                return future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                return new Response(false, null, e.getMessage());
+            }
         }
     }
 
