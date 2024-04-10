@@ -1,0 +1,5 @@
+spring:
+  ai:
+    openai:
+      apiKey: ${OPENAI_API_KEY}
+      baseUrl: ${OPENAI_API_BASE}

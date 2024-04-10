@@ -82,3 +82,7 @@ task installGitHooks(type: Copy) {
 }
 
 compileJava.dependsOn installGitHooks
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add("-parameters")
+}
