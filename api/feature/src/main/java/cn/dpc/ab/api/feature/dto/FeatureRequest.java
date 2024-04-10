@@ -2,7 +2,10 @@ package cn.dpc.ab.api.feature.dto;
 
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Feature.FeatureTemplate;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+
+import java.util.Optional;
 
 /**
  * FeatureRequest represents a feature in the API.
@@ -13,6 +16,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class FeatureRequest {
+    @NotBlank
     private String featureKey;
 
     private String name;
@@ -36,7 +40,7 @@ public class FeatureRequest {
                         .name(name)
                         .description(description)
                         .enabled(enabled)
-                        .template(template)
+                        .template(Optional.ofNullable(template).orElse(FeatureTemplate.DEFAULT))
                         .build());
     }
 }
