@@ -1,25 +1,25 @@
 import instance from "./axios"
 
-const post = (url: string, data: any) => {
+const post = (url: string, data: any, config: any) => {
   return new Promise((resolve, reject) =>
     instance
-      .post(url, data)
+      .post(url, data, { headers: config.headers, timeout: 30000 })
       .then((res) => resolve(res))
       .catch((error) => reject(error))
   )
 }
 
-const get = (url: string, params: any) => {
+const get = (url: string, config: any) => {
   return new Promise((resolve, reject) =>
     instance
-      .get(url, { params, timeout: 30000 })
+      .get(url, { params: config.params, headers: config.headers, timeout: 30000 })
       .then((res) => resolve(res))
       .catch((error) => reject(error))
   )
 }
 
-const streamGet = (url: string, config = {}) => {
-  return fetch(url, { method: "GET", headers: { Accept: "text/event-stream" }, ...config })
+const streamGet = (url: string, config: any = {}) => {
+  return fetch(url, { method: "GET", headers: { ...config.headers, Accept: "text/event-stream" }, ...config })
 }
 
 const put = (url: string, data: any) => {
