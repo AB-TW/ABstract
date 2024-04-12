@@ -1,12 +1,12 @@
 <template>
-  <el-card class="container" shadow="hover">
+  <el-card>
     <div class="chatBot" :style="{ height: height }">
       <div v-for="(message, index) in messages" :key="index">
         <div class="message-user" v-if="message.sender === 'user'">
+          <div class="user" v-html="message.text" />
           <el-icon class="chat-icon">
             <UserFilled />
           </el-icon>
-          <div class="user" v-html="message.text" />
         </div>
         <div class="message-bot" v-else>
           <el-icon class="chat-icon">
@@ -21,6 +21,7 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue"
 import { Cpu, UserFilled } from "@element-plus/icons-vue"
+
 interface Message {
   sender: string
   text: string
@@ -43,19 +44,12 @@ const messages = reactive(props.modelValue)
 const height = ref(props.height)
 </script>
 <style scoped lang="scss">
-.container {
-  display: flex;
-  align-items: flex-start;
-  justify-content: start;
-  margin-top: 0;
-}
-
 a {
   color: #409eff;
 }
 
 .chatBot {
-  width: 100%;
+  margin-top: 0;
   padding: 20px;
   overflow-y: auto;
   font-size: 14px;
@@ -96,7 +90,8 @@ a {
 }
 
 .chat-icon {
-  margin-top: 10px;
+  margin-top: 12px;
   margin-right: 10px;
+  margin-left: 10px;
 }
 </style>
