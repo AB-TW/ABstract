@@ -53,7 +53,7 @@ const sendMessage = async () => {
   loading.value = true
   const response = await aiApi.ai(newMessage.value, clientId.value)
   newMessage.value = ""
-  const message = { sender: "bot", text: "" }
+  const message = { sender: "bot", text: "", sources: [] }
   messages.push(message)
   if (!response.ok) {
     message.text = "Sorry, some thing went wrong."
@@ -62,7 +62,8 @@ const sendMessage = async () => {
   const reader = response.body.getReader()
   const textDecoder = new TextDecoder()
   let result = true
-
+  let sources = false
+  let sourcesStr = ""
   while (result) {
     const { done, value } = await reader.read()
 
@@ -72,19 +73,31 @@ const sendMessage = async () => {
       break
     }
     const chunkText = textDecoder.decode(value)
-    message.text =
-      message.text +
-      chunkText
-        .replaceAll("data:", "")
-        .replaceAll("\n", "")
-        .replaceAll(
-          /feature|Feature|特性/g,
-          "<a style='color: #409eff' target='_blank' href='/#/feature/list'>特性</a>"
-        )
+    const resultText = chunkText.replaceAll("data:", "").replaceAll("\n", "")
+    if (!sources && resultText.includes("#Sources:")) {
+      sources = true
+      const splitResult = resultText.split("#Sources:")
+      message.text += splitResult[0]
+      sourcesStr += splitResult[1]
+      continue
+    }
+    if (!sources) {
+      message.text += resultText
+        .replaceAll(/feature|Feature/g, "<a style='color: #409eff' target='_blank' href='/#/feature/list'>Feature</a>")
+        .replaceAll(/特性/g, "<a style='color: #409eff' target='_blank' href='/#/feature/list'>特性</a>")
+    } else {
+      sourcesStr += resultText
+    }
     messages.pop()
     messages.push(message)
   }
 
+  console.log(sourcesStr)
+  if (sourcesStr) {
+    message.sources = JSON.parse(sourcesStr)
+  }
+  messages.pop()
+  messages.push(message)
   loading.value = false
 }
 
@@ -104,8 +117,16 @@ onMounted(() => {
     if (response.status !== 200) {
       return
     }
-    response.data.forEach((item) => {
-      messages.push(item)
+    response.data.forEach((item: any) => {
+      messages.push({
+        ...item,
+        text: item.text
+          .replaceAll(
+            /feature|Feature/g,
+            "<a style='color: #409eff' target='_blank' href='/#/feature/list'>Feature</a>"
+          )
+          .replaceAll(/特性/g, "<a style='color: #409eff' target='_blank' href='/#/feature/list'>特性</a>")
+      })
     })
   })
 })

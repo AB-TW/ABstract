@@ -1,5 +1,7 @@
 package cn.dpc.ab.api.ai;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.Generation;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +39,7 @@ public class AiController {
 
     private final OpenAiChatClient chatClient;
     private final SimpleVectorStore simpleVectorStore;
+    private final ObjectMapper objectMapper;
 
     /**
      * Chat with AI.
@@ -69,19 +73,29 @@ public class AiController {
                         .withFunctions(Set.of("addFeature", "countFeature", "getFeatureByFeatureKey"))
                         .build());
         history.add(userMessage);
-        StringBuilder assistentMessage = new StringBuilder();
+        StringBuilder assistantMessage = new StringBuilder();
+
+        String sources;
+        try {
+            sources = similarDocs.isEmpty() ? "" : "#Sources:" + objectMapper.writeValueAsString(similarDocs.stream()
+                    .map(Document::getContent)
+                    .toList());
+        } catch (JsonProcessingException e) {
+            sources = "";
+        }
 
         return chatClient.stream(prompt)
                 .map(response -> Optional.ofNullable(response.getResult())
                         .map(Generation::getOutput)
                         .map(resultMessage -> {
                             if (null != resultMessage.getContent()) {
-                                assistentMessage.append(resultMessage.getContent());
+                                assistantMessage.append(resultMessage.getContent());
                             }
                             return resultMessage.getContent();
                         })
                         .orElse(""))
-                .doOnComplete(() -> history.add(new AssistantMessage(assistentMessage.toString())));
+                .concatWith(Mono.just(sources))
+                .doOnComplete(() -> history.add(new AssistantMessage(assistantMessage.toString())));
     }
 
     /**
