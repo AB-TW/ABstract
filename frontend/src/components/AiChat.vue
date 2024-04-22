@@ -1,6 +1,6 @@
 <template>
   <div>
-    <chat-box v-model="messages" />
+    <chat-box v-model="messages" @questionClicked="questionSelected" />
     <form @submit.prevent="sendMessage" style="margin-top: 10px">
       <div>
         <el-input v-model="newMessage" placeholder="Type a message..." :disabled="loading">
@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue"
 import { Ai } from "@/domain/Ai"
-import ChatBox from "@/components/ChatBox.vue"
+import ChatBox, { Message } from "@/components/ChatBox.vue"
 import FingerprintJS from "@fingerprintjs/fingerprintjs"
 
 const aiApi = new Ai()
@@ -43,11 +43,26 @@ const newMessage = ref("请简单介绍一下ABstract系统")
 const messages = reactive([
   {
     sender: "bot",
-    text: "您好，我是ABstract智能助理，有什么可以帮您的吗?"
+    text: "您好，我是ABstract智能助理，有什么可以帮您的吗?",
+    questions: ["请简单介绍一下ABstract系统", "请问ABstract系统有哪些基本概念？", "当前系统有多少特性"]
   }
-])
+] as Message[])
 
 const loading = ref(false)
+
+function getLinkValue(href: string, text: string) {
+  const aColor = "#409eff"
+  return `<a style='color: ${aColor}' target='_blank' href='${href}'>${text}</a>`
+}
+
+function injectLink(resultText: string) {
+  return resultText
+    .replaceAll(/feature|Feature/g, getLinkValue("/#/feature/list", "Feature"))
+    .replaceAll(/特性/g, getLinkValue("/#/feature/list", "特性"))
+    .replaceAll(/experiment|Experiment/g, getLinkValue("/#/experiment/list", "Experiment"))
+    .replaceAll(/实验/g, getLinkValue("/#/experiment/list", "实验"))
+}
+
 const sendMessage = async () => {
   messages.push({ sender: "user", text: newMessage.value })
   loading.value = true
@@ -82,9 +97,7 @@ const sendMessage = async () => {
       continue
     }
     if (!sources) {
-      message.text += resultText
-        .replaceAll(/feature|Feature/g, "<a style='color: #409eff' target='_blank' href='/#/feature/list'>Feature</a>")
-        .replaceAll(/特性/g, "<a style='color: #409eff' target='_blank' href='/#/feature/list'>特性</a>")
+      message.text += injectLink(resultText)
     } else {
       sourcesStr += resultText
     }
@@ -110,6 +123,14 @@ const clearHistory = () => {
   })
 }
 
+const questionSelected = (question) => {
+  newMessage.value = question
+  // newMessage 获取焦点
+  const input = document.querySelector(".el-input__inner")
+  if (input) {
+    input.focus()
+  }
+}
 onMounted(() => {
   console.log(messages)
   console.log(clientId.value)
@@ -120,12 +141,7 @@ onMounted(() => {
     response.data.forEach((item: any) => {
       messages.push({
         ...item,
-        text: item.text
-          .replaceAll(
-            /feature|Feature/g,
-            "<a style='color: #409eff' target='_blank' href='/#/feature/list'>Feature</a>"
-          )
-          .replaceAll(/特性/g, "<a style='color: #409eff' target='_blank' href='/#/feature/list'>特性</a>")
+        text: injectLink(item.text)
       })
     })
   })
