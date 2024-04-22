@@ -38,9 +38,10 @@ export const constantRoutes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: "/feature/list",
+    path: "/features",
     component: Layout,
     name: "Feature",
+    redirect: "/feature/list",
     meta: {
       title: "Feature管理",
       elIcon: "Opportunity",
@@ -89,9 +90,10 @@ export const constantRoutes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: "/experiment/list",
+    path: "/experiments",
     component: Layout,
     name: "Experiment",
+    redirect: "/experiment/list",
     meta: {
       keepAlive: true
     },
@@ -118,8 +120,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: "/demo",
+    path: "/demos",
     component: Layout,
+    redirect: "/demo",
     name: "Demo",
     meta: {
       keepAlive: true

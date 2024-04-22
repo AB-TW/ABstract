@@ -1,45 +1,47 @@
 <template>
   <div>
-    <el-card>
-      HTTP Client Demo
-      <div class="header">
-        <el-input v-model="clientId" placeholder="请输入ClientId" class="search-input">
-          <template #append>
-            <el-button icon="Search" @click="fetchFeatureConfig" />
-          </template>
-        </el-input>
-      </div>
-
+    <div>
       <el-card>
-        <el-form>
-          <el-form-item label="Response">
-            <el-input type="textarea" placeholder="" v-model="response" autosize />
-            <el-button :type="buttonType">Feature demo按钮</el-button>
-          </el-form-item>
-        </el-form>
-      </el-card>
-    </el-card>
-  </div>
-  <div>
-    <el-card>
-      RSocket Client Demo
-      <div class="header">
-        <el-input v-model="clientId" placeholder="请输入ClientId" class="search-input">
-          <template #append>
-            <el-button icon="Search" @click="fetchFeatureConfigWithRsocket" />
-          </template>
-        </el-input>
-      </div>
+        HTTP Client Demo
+        <div class="header">
+          <el-input v-model="clientId" placeholder="请输入ClientId" class="search-input">
+            <template #append>
+              <el-button icon="Search" @click="fetchFeatureConfig" />
+            </template>
+          </el-input>
+        </div>
 
-      <el-card>
-        <el-form>
-          <el-form-item label="Response">
-            <el-input type="textarea" placeholder="" v-model="rSocketResponse" autosize />
-            <el-button :type="rSocketButtonType">Feature demo按钮</el-button>
-          </el-form-item>
-        </el-form>
+        <el-card>
+          <el-form>
+            <el-form-item label="Response">
+              <el-input type="textarea" placeholder="" v-model="response" autosize />
+              <el-button :type="buttonType">Feature demo按钮</el-button>
+            </el-form-item>
+          </el-form>
+        </el-card>
       </el-card>
-    </el-card>
+    </div>
+    <div>
+      <el-card>
+        RSocket Client Demo
+        <div class="header">
+          <el-input v-model="clientId" placeholder="请输入ClientId" class="search-input">
+            <template #append>
+              <el-button icon="Search" @click="fetchFeatureConfigWithRsocket" />
+            </template>
+          </el-input>
+        </div>
+
+        <el-card>
+          <el-form>
+            <el-form-item label="Response">
+              <el-input type="textarea" placeholder="" v-model="rSocketResponse" autosize />
+              <el-button :type="rSocketButtonType">Feature demo按钮</el-button>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </el-card>
+    </div>
   </div>
 </template>
 
@@ -77,7 +79,9 @@ const rSocket: Partial<RSocket> = {
     if (route == "feature.changed") {
       invalidateFeature(data)
     }
-    return { cancel: () => {} }
+    return {
+      cancel: () => {}
+    }
   }
 }
 
