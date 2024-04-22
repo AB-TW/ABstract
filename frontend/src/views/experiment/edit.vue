@@ -221,10 +221,11 @@ import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
 import moment from "moment/moment"
 import { Experiment, Experiments } from "@/domain/Experiments"
 import { Status } from "@/model/Status"
-import { FilterCondition } from "@/domain/FilterConditions"
+import { CompareOperator, CustomAttributeCondition, FilterCondition } from "@/domain/FilterConditions"
 import { useRoute, useRouter } from "vue-router"
 
 interface AddExperiment {
+  id?: string
   name: string
   description: string
   featureKey: string
@@ -264,13 +265,14 @@ const experimentForm = reactive<AddExperiment>({
   ]
 } as AddExperiment)
 const experimentId = route.params.id
-const isEditMode = ref<boolean>(!_.isEmpty(experimentId) && route.query.type !== "view")
+const isEditMode = ref<boolean>(!_.isEmpty(experimentId) && route.query.type === undefined)
+const isCopyMode = ref<boolean>(!_.isEmpty(experimentId) && route.query.type === "copy")
 const isViewMode = ref<boolean>(route.query.type === "view")
 const isAddMode = computed(() => !isViewMode.value && !isEditMode.value)
 
 // setup page
 const setup = async () => {
-  const needQueryExperiment = isViewMode.value || isEditMode.value
+  const needQueryExperiment = isViewMode.value || isEditMode.value || isCopyMode.value
   const [featureResp, experimentResp]: [PageResponse<Feature>, Experiment] = await Promise.all<
     PageResponse<Feature> | Experiment
   >([
@@ -283,8 +285,24 @@ const setup = async () => {
       startTime: experimentResp.status?.startTime,
       endTime: experimentResp.status?.endTime,
       endCollectTime: experimentResp.status?.endCollectTime,
-      ..._.omit(experimentResp, ["status.startTime", "status.endTime", "status.endCollectTime"])
+      ..._.omit(experimentResp, ["filterCondition", "status.startTime", "status.endTime", "status.endCollectTime"]),
+      filterCondition: {
+        ...experimentResp.filterCondition,
+        attributeConditions: _.map(
+          experimentResp.filterCondition?.attributeConditions ?? [],
+          (attributeCondition: CustomAttributeCondition) => ({
+            ...attributeCondition,
+            value: _.includes([CompareOperator.IN, CompareOperator.NOT_IN], attributeCondition.operator)
+              ? _.split(attributeCondition.value as string, ",")
+              : attributeCondition.value
+          })
+        )
+      }
     })
+    if (isCopyMode.value) {
+      experimentForm.name += "-复制"
+      experimentForm.id = undefined
+    }
     if (!_.isEmpty(experimentResp.featureKey)) {
       selectFeature(experimentResp.featureKey)
     }
@@ -303,7 +321,7 @@ const setBucketsConfigDataSource = (template: FeatureTemplate) => {
   if (template) {
     _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
       bucket.datasource =
-        isViewMode.value || isEditMode.value
+        isViewMode.value || isEditMode.value || isCopyMode.value
           ? [mapDataToTemplate("", bucket.config, template)]
           : [transTempToTreeDataSource(template)]
     })
@@ -376,7 +394,7 @@ const submitExperimentForm = async (
   try {
     await Promise.all([experimentFormEl.validate(), filterConditionRef.$refs.filterConditionFormRef.validate()])
     const requestBody = {
-      ..._.omit(experimentForm, ["startTime", "endCollectTime", "endTime"]),
+      ..._.omit(experimentForm, ["filterCondition", "startTime", "endCollectTime", "endTime"]),
       buckets: _.map(experimentForm.buckets, (bucket: ExperimentBucket) => ({
         ..._.omit(bucket, ["datasource"]),
         config: convertConfigObject(bucket.datasource[0])
@@ -386,6 +404,18 @@ const submitExperimentForm = async (
         startTime: experimentForm.startTime,
         endCollectTime: experimentForm.endCollectTime,
         endTime: experimentForm.endTime
+      },
+      filterCondition: {
+        ...experimentForm.filterCondition,
+        attributeConditions: _.map(
+          experimentForm.filterCondition?.attributeConditions ?? [],
+          (attributeCondition: CustomAttributeCondition) => ({
+            ...attributeCondition,
+            value: _.isArray(attributeCondition.value)
+              ? _.join(attributeCondition.value, ",")
+              : attributeCondition.value
+          })
+        )
       }
     }
     const operationFunc = () =>
