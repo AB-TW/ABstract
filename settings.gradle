@@ -37,4 +37,6 @@ findProject(':persistent:feature-r2dbc')?.name = 'persistent-feature-r2dbc'
 include 'api:experiment'
 findProject(':api:experiment')?.name = 'api-experiment'
 include 'main-r2dbc'
+include 'api:ai'
+findProject(':api:ai')?.name = 'ai'
 

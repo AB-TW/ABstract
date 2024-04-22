@@ -81,6 +81,15 @@ public class Feature {
      */
     @Builder
     public record FeatureId(String featureKey) {
+
+        /**
+         * Validate FeatureId.
+         */
+        public FeatureId {
+            if (featureKey == null || featureKey.isBlank()) {
+                throw new IllegalArgumentException("featureKey cannot be null or blank");
+            }
+        }
     }
 
     /**
@@ -99,6 +108,9 @@ public class Feature {
                                   String defaultValue,
                                   Validator validator,
                                   List<FeatureTemplate> items) {
+        public static final FeatureTemplate DEFAULT = new FeatureTemplate(DataType.BOOLEAN, null, null,
+                null, "false", null, null);
+
         /**
          * DataType represents the data type of a feature.
          */
