@@ -4,10 +4,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.openai.OpenAiChatClient;
-import org.springframework.ai.reader.tika.TikaDocumentReader;
+import org.springframework.ai.reader.TextReader;
 import org.springframework.ai.transformer.KeywordMetadataEnricher;
 import org.springframework.ai.transformer.splitter.TextSplitter;
-import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.stereotype.Component;
 
@@ -27,13 +26,13 @@ public class EtlConfig {
      */
     @PostConstruct
     public void initVectorStore() {
-        TikaDocumentReader textReader = new TikaDocumentReader("classpath:/docs/ABstract.md");
+        TextReader textReader = new TextReader("classpath:/docs/ABstract.md");
         textReader.get().forEach(doc -> doc.getMetadata().put("filename", "docs/ABstract.md"));
 
 
         KeywordMetadataEnricher keywordMetadataEnricher = new KeywordMetadataEnricher(chatClient, 3);
 
-        TextSplitter textSplitter = new TokenTextSplitter();
+        TextSplitter textSplitter = new MarkDownTextSplitter();
 
         List<Document> documents = keywordMetadataEnricher
                 .apply(textSplitter

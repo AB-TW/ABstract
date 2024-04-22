@@ -55,7 +55,9 @@ public class AiController {
             history.remove(0);
         }
         histories.put(clientId, history);
-        List<Document> similarDocs = simpleVectorStore.similaritySearch(SearchRequest.query(message).withSimilarityThreshold(0.8F));
+        List<Document> similarDocs = simpleVectorStore.similaritySearch(SearchRequest.query(message).withSimilarityThreshold(0.8F)
+                .withTopK(5)
+        );
         String context = similarDocs.stream()
                 .map(Document::getContent)
                 .collect(joining(System.lineSeparator()));

@@ -26,7 +26,6 @@
                   v-for="(source, index) in message.sources"
                   :key="index"
                   placement="top-start"
-                  title="Title"
                   :width="700"
                   trigger="hover"
                 >
@@ -147,7 +146,7 @@ a {
 .bot {
   text-align: left;
   background-color: #f0f0f0;
-  //width: fit-content;
+  width: fit-content;
   border-radius: 5px;
   border: 1px solid #ccc;
   padding: 5px;
@@ -163,13 +162,14 @@ a {
   margin-left: 2rem;
   margin-right: 2rem;
   display: flex;
-  //flex-wrap: wrap;
-  //flex-direction: row;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
 }
 
 .source {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
   padding: 0.5rem;
   border-radius: 5px;
   background-color: #ddd;
