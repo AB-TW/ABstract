@@ -1,6 +1,6 @@
 <template>
   <el-card>
-    <div class="chatBot" :style="{ height: height }">
+    <div class="chatBot" :style="{ height: height }" ref="chatContainer">
       <div v-for="(message, index) in messages || []" :key="index">
         <div class="message-user" v-if="message.sender === 'user'">
           <div class="user" v-html="message.text" />
@@ -13,7 +13,7 @@
             <Cpu />
           </el-icon>
           <div class="bot">
-            <div v-html="message.text" />
+            <div v-html="markdown.render(message.text)" />
             <div v-if="message.sources?.length > 0">
               <H3 style="color: #505050">
                 <el-icon class="chat-icon">
@@ -22,13 +22,35 @@
                 Sources:
               </H3>
               <div class="source-container">
-                <div class="source" v-for="(source, index) in message.sources" :key="index">
-                  <div class="source-item" :title="source">
-                    <el-icon class="chat-icon">
-                      <Document />
-                    </el-icon>
-                    {{ source }}
-                  </div>
+                <el-popover
+                  v-for="(source, index) in message.sources"
+                  :key="index"
+                  placement="top-start"
+                  title="Title"
+                  :width="700"
+                  trigger="hover"
+                >
+                  <template #reference>
+                    <div class="source">
+                      <div class="source-item">
+                        <el-icon class="chat-icon">
+                          <Document />
+                        </el-icon>
+                        {{ source }}
+                      </div>
+                    </div>
+                  </template>
+                  <div v-html="markdown.render(source)" />
+                </el-popover>
+              </div>
+            </div>
+            <div class="question-container" v-if="message.questions?.length > 0">
+              <div class="question" v-for="(question, index) in message.questions" :key="index">
+                <div class="question-item" @click="emit('questionClicked', question)">
+                  <el-icon class="chat-icon">
+                    <Edit />
+                  </el-icon>
+                  {{ question }}
                 </div>
               </div>
             </div>
@@ -39,14 +61,24 @@
   </el-card>
 </template>
 <script setup lang="ts">
-import { reactive, ref } from "vue"
+import { reactive, ref, watch } from "vue"
 import { Cpu, UserFilled } from "@element-plus/icons-vue"
+import MarkdownIt from "markdown-it"
 
-interface Message {
+const markdown = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true
+})
+
+export interface Message {
   sender: string
   text: string
   sources?: string[]
+  questions?: string[]
 }
+
+const emit = defineEmits(["questionClicked"])
 
 const props = defineProps({
   modelValue: {
@@ -60,6 +92,17 @@ const props = defineProps({
     default: "600px"
   }
 })
+
+const chatContainer = ref(null)
+
+// 监测messages prop的变化
+watch(
+  () => props.modelValue.length,
+  () => {
+    console.log(chatContainer.value.scrollHeight)
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight + 100
+  }
+)
 
 const messages = reactive(props.modelValue)
 const height = ref(props.height)
@@ -129,8 +172,12 @@ a {
 .source {
   padding: 0.5rem;
   border-radius: 5px;
-  background-color: #eee;
+  background-color: #ddd;
   border: 1px solid #ccc;
+}
+
+.source:hover {
+  background-color: #b7c5d5;
 }
 
 .source-item {
@@ -138,5 +185,16 @@ a {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.question {
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  background-color: #ddd;
+}
+
+.question:hover {
+  background-color: #b7c5d5;
 }
 </style>
