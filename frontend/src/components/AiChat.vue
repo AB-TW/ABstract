@@ -72,6 +72,7 @@ const sendMessage = async () => {
   messages.push(message)
   if (!response.ok) {
     message.text = "Sorry, some thing went wrong."
+    loading.value = false
     return
   }
   const reader = response.body.getReader()
@@ -88,7 +89,7 @@ const sendMessage = async () => {
       break
     }
     const chunkText = textDecoder.decode(value)
-    const resultText = chunkText.replaceAll("data:", "").replaceAll("\n", "")
+    const resultText = chunkText.replaceAll("data:", "")
     if (!sources && resultText.includes("#Sources:")) {
       sources = true
       const splitResult = resultText.split("#Sources:")

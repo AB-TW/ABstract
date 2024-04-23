@@ -64,9 +64,10 @@ public class MarkDownTextSplitter extends TextSplitter {
         int index = 0;
         while (index < splitText.length) {
             String title = "";
-            String line = splitText[index++];
+            String line = splitText[index];
             if (line.trim().startsWith(splitToken)) {
                 title = line.trim();
+                index++;
             }
 
             List<String> contents = new ArrayList<>();
