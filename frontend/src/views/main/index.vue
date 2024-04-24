@@ -1,16 +1,33 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import AiChat from "@/components/AiChat.vue"
+</script>
 
 <template>
-  <div class="main-container">ABstract</div>
+  <div>
+    <div class="main-container">
+      <div style="width: 650px; height: 700px">
+        <el-image src="/introduce.png" fit="scale-down" />
+      </div>
+      <div class="chatContainer">
+        <ai-chat />
+      </div>
+    </div>
+  </div>
 </template>
 <style scoped>
 .main-container {
   width: 100%;
   height: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  vertical-align: top;
   justify-content: center;
-  font-size: 50px;
+  font-size: 20px;
   font-weight: bold;
+  margin-top: 20px;
+}
+.chatContainer {
+  width: 50%;
+  margin-left: 50px;
 }
 </style>

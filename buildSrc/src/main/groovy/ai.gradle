@@ -1,0 +1,9 @@
+plugins {
+    id "io.spring.dependency-management"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+    }
+}
