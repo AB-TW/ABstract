@@ -134,7 +134,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "Demo-index",
         meta: {
           title: "Demo",
-          elIcon: "Opportunity",
+          elIcon: "Paperclip",
           keepAlive: true
         }
       }
