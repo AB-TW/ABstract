@@ -7,14 +7,21 @@
           <template #append>
             <el-button icon="Top" @click="sendMessage" :disabled="loading" />
           </template>
+          <template #prepend>
+            <el-popconfirm title="确定清除历史聊天记录吗?" @confirm="clearHistory">
+              <template #reference>
+                <el-button icon="RefreshRight" type="warning" :disabled="loading" title="清除历史记录" />
+              </template>
+            </el-popconfirm>
+          </template>
         </el-input>
-        <div style="margin-top: 10px">
-          <el-popconfirm title="确定清除历史聊天记录吗?" @confirm="clearHistory">
-            <template #reference>
-              <el-button icon="RefreshRight" type="warning" :disabled="loading"> 清除历史记录</el-button>
-            </template>
-          </el-popconfirm>
-        </div>
+        <!--        <div style="margin-top: 10px">-->
+        <!--          <el-popconfirm title="确定清除历史聊天记录吗?" @confirm="clearHistory">-->
+        <!--            <template #reference>-->
+        <!--              <el-button icon="RefreshRight" type="warning" :disabled="loading"> 清除历史记录</el-button>-->
+        <!--            </template>-->
+        <!--          </el-popconfirm>-->
+        <!--        </div>-->
       </div>
     </form>
   </div>
