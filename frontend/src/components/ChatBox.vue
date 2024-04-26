@@ -96,10 +96,9 @@ const chatContainer = ref(null)
 
 // 监测messages prop的变化
 watch(
-  () => props.modelValue.length,
+  () => props.modelValue.length + JSON.stringify(props.modelValue[props.modelValue.length - 1]).length,
   () => {
-    console.log(chatContainer.value.scrollHeight)
-    chatContainer.value.scrollTop = chatContainer.value.scrollHeight + 100
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight
   }
 )
 
@@ -113,8 +112,8 @@ a {
 
 .chatBot {
   margin-top: 0;
-  padding: 20px;
-  overflow-y: auto;
+  padding-bottom: 350px;
+  overflow-y: scroll;
   font-size: 14px;
   font-weight: normal;
   line-height: 2;
