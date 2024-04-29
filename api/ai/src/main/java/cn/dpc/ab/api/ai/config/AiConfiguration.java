@@ -20,4 +20,9 @@ public class AiConfiguration {
     public SimpleVectorStore simpleVectorStore(OpenAiEmbeddingClient openAiEmbeddingClient) {
         return new SimpleVectorStore(openAiEmbeddingClient);
     }
+
+    @Bean
+    public SimpleVectorStore historyVectorStore(OpenAiEmbeddingClient openAiEmbeddingClient) {
+        return new SimpleVectorStore(openAiEmbeddingClient);
+    }
 }

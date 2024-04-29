@@ -2,7 +2,6 @@ package cn.dpc.ab.api.ai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.Generation;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -15,6 +14,7 @@ import org.springframework.ai.openai.OpenAiChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +30,6 @@ import static java.util.stream.Collectors.joining;
  * Controller for AI module.
  */
 @RestController
-@RequiredArgsConstructor
 public class AiController {
 
     @Value("classpath:/prompts/system-message.st")
@@ -39,7 +38,26 @@ public class AiController {
 
     private final OpenAiChatClient chatClient;
     private final SimpleVectorStore simpleVectorStore;
+    private final SimpleVectorStore historyVectorStore;
+
     private final ObjectMapper objectMapper;
+
+    /**
+     * Instantiates a new Ai controller.
+     *
+     * @param chatClient         the chat client
+     * @param simpleVectorStore  the simple vector store
+     * @param objectMapper       the object mapper
+     * @param historyVectorStore the history vector store
+     */
+    public AiController(OpenAiChatClient chatClient, @Qualifier("simpleVectorStore") SimpleVectorStore simpleVectorStore,
+                        ObjectMapper objectMapper,
+                        @Qualifier("historyVectorStore") SimpleVectorStore historyVectorStore) {
+        this.chatClient = chatClient;
+        this.simpleVectorStore = simpleVectorStore;
+        this.objectMapper = objectMapper;
+        this.historyVectorStore = historyVectorStore;
+    }
 
     /**
      * Chat with AI.
@@ -50,11 +68,21 @@ public class AiController {
     @GetMapping("/ai")
     public Flux<String> ai(@RequestParam(value = "message", required = false, defaultValue = "What is ABstract?") String message,
                            @RequestHeader(value = "x-client-id") String clientId) {
+
         List<Message> history = histories.getOrDefault(clientId, new ArrayList<>());
         if (history.size() > 20) {
             history.remove(0);
         }
         histories.put(clientId, history);
+
+        List<Document> intentions = historyVectorStore.similaritySearch(
+                SearchRequest.query("user: " + message)
+                        .withSimilarityThreshold(0.8F)
+                        .withTopK(1));
+        if (intentions.isEmpty()) {
+            return Flux.just("抱歉，无法回答您的问题。");
+        }
+
         List<Document> similarDocs = simpleVectorStore.similaritySearch(SearchRequest.query(message).withSimilarityThreshold(0.8F)
                 .withTopK(5)
         );
