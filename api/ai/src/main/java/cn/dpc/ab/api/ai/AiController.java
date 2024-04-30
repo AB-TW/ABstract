@@ -1,30 +1,12 @@
 package cn.dpc.ab.api.ai;
 
+import cn.dpc.ab.api.ai.bot.ChatBot;
+import cn.dpc.ab.api.ai.bot.ChatbotMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.ai.chat.Generation;
-import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.MessageType;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.ai.document.Document;
-import org.springframework.ai.openai.OpenAiChatClient;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.SimpleVectorStore;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static java.util.stream.Collectors.joining;
+import java.util.List;
 
 /**
  * Controller for AI module.
@@ -32,31 +14,10 @@ import static java.util.stream.Collectors.joining;
 @RestController
 public class AiController {
 
-    @Value("classpath:/prompts/system-message.st")
-    private Resource systemResource;
-    private final Map<String, List<Message>> histories = new ConcurrentHashMap<>();
+    private final ChatBot chatBot;
 
-    private final OpenAiChatClient chatClient;
-    private final SimpleVectorStore simpleVectorStore;
-    private final SimpleVectorStore historyVectorStore;
-
-    private final ObjectMapper objectMapper;
-
-    /**
-     * Instantiates a new Ai controller.
-     *
-     * @param chatClient         the chat client
-     * @param simpleVectorStore  the simple vector store
-     * @param objectMapper       the object mapper
-     * @param historyVectorStore the history vector store
-     */
-    public AiController(OpenAiChatClient chatClient, @Qualifier("simpleVectorStore") SimpleVectorStore simpleVectorStore,
-                        ObjectMapper objectMapper,
-                        @Qualifier("historyVectorStore") SimpleVectorStore historyVectorStore) {
-        this.chatClient = chatClient;
-        this.simpleVectorStore = simpleVectorStore;
-        this.objectMapper = objectMapper;
-        this.historyVectorStore = historyVectorStore;
+    public AiController(ChatBot chatBot) {
+        this.chatBot = chatBot;
     }
 
     /**
@@ -67,65 +28,9 @@ public class AiController {
      */
     @GetMapping("/ai")
     public Flux<String> ai(@RequestParam(value = "message", required = false, defaultValue = "What is ABstract?") String message,
-                           @RequestHeader(value = "x-client-id") String clientId) {
+                           @RequestHeader(value = "x-client-id") String clientId) throws JsonProcessingException {
 
-        List<Message> history = histories.getOrDefault(clientId, new ArrayList<>());
-        if (history.size() > 20) {
-            history.remove(0);
-        }
-        histories.put(clientId, history);
-
-        List<Document> intentions = historyVectorStore.similaritySearch(
-                SearchRequest.query("user: " + message)
-                        .withSimilarityThreshold(0.8F)
-                        .withTopK(1));
-        if (intentions.isEmpty()) {
-            return Flux.just("抱歉，无法回答您的问题。");
-        }
-
-        List<Document> similarDocs = simpleVectorStore.similaritySearch(SearchRequest.query(message).withSimilarityThreshold(0.8F)
-                .withTopK(5)
-        );
-        String context = similarDocs.stream()
-                .map(Document::getContent)
-                .collect(joining(System.lineSeparator()));
-        var systemPromptTemplate = new SystemPromptTemplate(systemResource);
-
-        var systemMessage = systemPromptTemplate.createMessage(Map.of("context", context));
-        var userPromptTemplate = new PromptTemplate("{query}");
-        var userMessage = userPromptTemplate.createMessage(Map.of("query", message));
-        var messages = new ArrayList<Message>();
-        messages.add(systemMessage);
-        messages.addAll(history);
-        messages.add(userMessage);
-        var prompt = new Prompt(messages,
-                OpenAiChatOptions.builder()
-                        .withFunctions(Set.of("addFeature", "countFeature", "getFeatureByFeatureKey"))
-                        .build());
-        history.add(userMessage);
-        StringBuilder assistantMessage = new StringBuilder();
-
-        String sources;
-        try {
-            sources = similarDocs.isEmpty() ? "" : "#Sources:" + objectMapper.writeValueAsString(similarDocs.stream()
-                    .map(Document::getContent)
-                    .toList());
-        } catch (JsonProcessingException e) {
-            sources = "";
-        }
-
-        return chatClient.stream(prompt)
-                .map(response -> Optional.ofNullable(response.getResult())
-                        .map(Generation::getOutput)
-                        .map(resultMessage -> {
-                            if (null != resultMessage.getContent()) {
-                                assistantMessage.append(resultMessage.getContent());
-                            }
-                            return resultMessage.getContent();
-                        })
-                        .orElse(""))
-                .concatWith(Mono.just(sources))
-                .doOnComplete(() -> history.add(new AssistantMessage(assistantMessage.toString())));
+        return chatBot.chat(clientId, message);
     }
 
     /**
@@ -135,16 +40,8 @@ public class AiController {
      * @return the list
      */
     @GetMapping("/ai/history")
-    public List<RobotMessage> history(@RequestHeader(value = "x-client-id") String clientId) {
-        return histories.getOrDefault(clientId, new ArrayList<>())
-                .stream()
-                .map(resultMessage -> {
-                    if (resultMessage.getMessageType() == MessageType.USER) {
-                        return new RobotMessage("user", resultMessage.getContent());
-                    }
-                    return new RobotMessage("bot", resultMessage.getContent());
-                })
-                .toList();
+    public List<ChatbotMessage> history(@RequestHeader(value = "x-client-id") String clientId) {
+        return chatBot.getHistory(clientId);
     }
 
     /**
@@ -154,12 +51,6 @@ public class AiController {
      */
     @PostMapping("/ai/history/clear")
     public void clearHistory(@RequestHeader(value = "x-client-id") String clientId) {
-        histories.remove(clientId);
-    }
-
-    /**
-     * The record Robot message.
-     */
-    public record RobotMessage(String sender, String text) {
+        chatBot.clearHistory(clientId);
     }
 }

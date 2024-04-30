@@ -14,19 +14,12 @@ public class MarkDownTextSplitter extends TextSplitter {
      */
     private int defaultChunkSize = 800;
 
-    /**
-     * The minimum chunk size in characters.
-     */
-    private int minChunkSizeChars = 350;
-
-
     public MarkDownTextSplitter() {
     }
 
 
-    public MarkDownTextSplitter(int defaultChunkSize, int minChunkSizeChars) {
+    public MarkDownTextSplitter(int defaultChunkSize) {
         this.defaultChunkSize = defaultChunkSize;
-        this.minChunkSizeChars = minChunkSizeChars;
     }
 
     @Override
@@ -47,10 +40,6 @@ public class MarkDownTextSplitter extends TextSplitter {
         }
 
         List<String> chunks = new ArrayList<>();
-        if (text.length() < minChunkSizeChars) {
-            chunks.add(text);
-            return chunks;
-        }
 
         String[] splitText = text.split("\n");
 

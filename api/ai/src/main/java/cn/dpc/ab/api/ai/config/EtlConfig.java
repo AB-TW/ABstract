@@ -1,5 +1,6 @@
 package cn.dpc.ab.api.ai.config;
 
+import cn.dpc.ab.api.ai.bot.Intention;
 import jakarta.annotation.PostConstruct;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.openai.OpenAiChatClient;
@@ -20,6 +21,7 @@ public class EtlConfig {
     private final OpenAiChatClient chatClient;
     private final SimpleVectorStore simpleVectorStore;
     private final SimpleVectorStore historyVectorStore;
+    public static final String INTENTION = "intention";
 
     /**
      * Instantiates a new Etl config.
@@ -41,7 +43,8 @@ public class EtlConfig {
     @PostConstruct
     public void initVectorStore() {
         initDocVectorStore();
-        initHistoryVectorStore();
+        initHistoryVectorStore("classpath:/docs/history.md", Intention.QA.name());
+        initHistoryVectorStore("classpath:/docs/history-add-feature.md", Intention.ADD_FEATURE.name());
     }
 
     private void initDocVectorStore() {
@@ -60,9 +63,9 @@ public class EtlConfig {
         simpleVectorStore.add(documents);
     }
 
-    private void initHistoryVectorStore() {
-        TextReader textReader = new TextReader("classpath:/docs/history.md");
-        textReader.get().forEach(doc -> doc.getMetadata().put("filename", "docs/history.md"));
+    private void initHistoryVectorStore(String sourceLink, String intention) {
+        TextReader textReader = new TextReader(sourceLink);
+        textReader.get().forEach(doc -> doc.getMetadata().put(INTENTION, intention));
 
 
         KeywordMetadataEnricher keywordMetadataEnricher = new KeywordMetadataEnricher(chatClient, 3);
