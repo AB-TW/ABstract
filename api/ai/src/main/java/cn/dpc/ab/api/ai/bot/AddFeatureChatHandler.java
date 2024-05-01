@@ -84,7 +84,7 @@ public class AddFeatureChatHandler extends AbstractChatHandler {
 
         SystemPromptTemplate queryPromptTemplate = new SystemPromptTemplate(intention.getQueryPrompt());
         Prompt queryprompt = new Prompt(List.of(queryPromptTemplate.createMessage(Map.of()),
-                new UserMessage(objectMapper.writeValueAsString(slots))));
+                new UserMessage(objectMapper.writeValueAsString(ChatStore.addFeatureSlots.get(clientId)))));
 
         return streamChat(history, queryprompt, "");
     }
