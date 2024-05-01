@@ -235,7 +235,7 @@ a {
 }
 
 .source-item {
-  width: 300px;
+  width: 280px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
