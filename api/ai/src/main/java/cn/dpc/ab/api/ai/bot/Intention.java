@@ -172,7 +172,7 @@ public enum Intention {
     public static Intention getIntentionByMessage(String message, SimpleVectorStore historyVectorStore) {
         List<Document> intentions = historyVectorStore.similaritySearch(
                 SearchRequest.query(message)
-                        .withSimilarityThreshold(0.8F)
+                        .withSimilarityThreshold(0.85F)
                         .withTopK(1));
         if (intentions.isEmpty()) {
             return Intention.OTHER;
