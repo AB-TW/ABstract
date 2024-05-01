@@ -1,22 +1,6 @@
 <template>
   <div>
-    <chat-box v-model="messages" @questionClicked="questionSelected" />
-    <form @submit.prevent="sendMessage" style="margin-top: 10px">
-      <div>
-        <el-input v-model="newMessage" placeholder="Type a message..." :disabled="loading">
-          <template #append>
-            <el-button icon="Top" @click="sendMessage" :disabled="loading" />
-          </template>
-          <template #prepend>
-            <el-popconfirm title="确定清除历史聊天记录吗?" @confirm="clearHistory">
-              <template #reference>
-                <el-button icon="RefreshRight" type="warning" :disabled="loading" title="清除历史记录" />
-              </template>
-            </el-popconfirm>
-          </template>
-        </el-input>
-      </div>
-    </form>
+    <chat-box v-model="messages" ref="chatBoxRef" @send-message="sendMessage" @clear-history="clearHistory" />
   </div>
 </template>
 
@@ -39,7 +23,7 @@ const getDeviceFingerprint = async () => {
 }
 getDeviceFingerprint()
 
-const newMessage = ref("")
+const chatBoxRef = ref(null)
 const messages = reactive([
   {
     sender: "bot",
@@ -47,8 +31,6 @@ const messages = reactive([
     questions: ["请简单介绍一下ABstract系统", "请问ABstract系统有哪些基本概念？", "当前系统有多少特性"]
   }
 ] as Message[])
-
-const loading = ref(false)
 
 function getLinkValue(href: string, text: string) {
   const aColor = "#409eff"
@@ -63,16 +45,13 @@ function injectLink(resultText: string) {
     .replaceAll(/实验/g, getLinkValue("/#/experiment/list", "实验"))
 }
 
-const sendMessage = async () => {
-  messages.push({ sender: "user", text: newMessage.value })
-  loading.value = true
-  const response = await aiApi.ai(newMessage.value, clientId.value)
-  newMessage.value = ""
+const sendMessage = async (newMesssage: string) => {
+  const response = await aiApi.ai(newMesssage, clientId.value)
   const message = { sender: "bot", text: "", sources: [] }
   messages.push(message)
   if (!response.ok) {
     message.text = "Sorry, some thing went wrong."
-    loading.value = false
+    chatBoxRef.value.stopLoading()
     return
   }
   const reader = response.body.getReader()
@@ -112,7 +91,7 @@ const sendMessage = async () => {
   }
   messages.pop()
   messages.push(message)
-  loading.value = false
+  chatBoxRef.value.stopLoading()
 }
 
 const clearHistory = () => {
@@ -124,14 +103,6 @@ const clearHistory = () => {
   })
 }
 
-const questionSelected = (question) => {
-  newMessage.value = question
-  // newMessage 获取焦点
-  const input = document.querySelector(".el-input__inner")
-  if (input) {
-    input.focus()
-  }
-}
 onMounted(() => {
   console.log(messages)
   console.log(clientId.value)
