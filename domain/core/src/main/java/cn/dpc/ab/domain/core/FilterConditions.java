@@ -23,4 +23,8 @@ public interface FilterConditions {
      */
     Flux<FilterConditionTemplate> getAll();
 
+    Mono<Void> update(String templateId, FilterConditionTemplate filterConditionTemplate);
+
+    Mono<Void> delete(String templateId);
+
 }
