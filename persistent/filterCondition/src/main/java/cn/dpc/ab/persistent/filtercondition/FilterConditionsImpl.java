@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
 
@@ -31,6 +32,20 @@ public class FilterConditionsImpl implements FilterConditions {
     @Override
     public Flux<FilterConditionTemplate> getAll() {
         return repository.findAll().map(FilterConditionTemplateDb::to);
+    }
+
+    @Override
+    public Mono<Void> update(String templateId, FilterConditionTemplate filterConditionTemplate) {
+        return repository.findById(templateId)
+                .switchIfEmpty(Mono.error(new IllegalStateException("FilterCondition template not found: " + templateId)))
+                .flatMap(repository::save)
+                .publishOn(Schedulers.boundedElastic())
+                .then();
+    }
+
+    @Override
+    public Mono<Void> delete(String templateId) {
+        return repository.deleteById(templateId);
     }
 
 }

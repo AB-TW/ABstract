@@ -29,4 +29,14 @@ public class FilterConditionApi {
         return filterConditions.getAll()
                 .map(FilterConditionTemplateResponse::from);
     }
+
+    @PutMapping("/{templateId}")
+    Mono<Void> update(@PathVariable String templateId, @RequestBody FilterConditionTemplateRequest filterConditionTemplateRequest) {
+        return filterConditions.update(templateId, filterConditionTemplateRequest.to());
+    }
+
+    @DeleteMapping("/{templateId}")
+    Mono<Void> delete(@PathVariable String templateId) {
+        return filterConditions.delete(templateId);
+    }
 }
