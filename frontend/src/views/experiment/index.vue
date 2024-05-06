@@ -49,6 +49,19 @@
               >{{ scope.row?.status?.status === Status.STOPPED ? "查看" : "编辑" }}
             </el-button>
             <el-button
+              type="primary"
+              size="small"
+              @click="
+                () =>
+                  router.push({
+                    path: `/experiment/edit/${scope.row.id}`,
+                    query: { type: 'copy' }
+                  })
+              "
+            >
+              复制
+            </el-button>
+            <el-button
               type="warning"
               size="small"
               v-if="[Status.DRAFT, Status.PAUSED].includes(scope.row?.status?.status)"

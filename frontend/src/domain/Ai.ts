@@ -7,7 +7,15 @@ export class Ai {
     return this.baseUrl + path
   }
 
-  async ai(message: string): Promise<any> {
-    return await http.streamGet(this.getUrl("/ai?message=" + message))
+  async ai(message: string, clientId: string): Promise<any> {
+    return await http.streamGet(this.getUrl("/ai?message=" + message), { headers: { "x-client-id": clientId } })
+  }
+
+  history(clientId: string): Promise<any> {
+    return http.get(this.getUrl("/ai/history"), { headers: { "x-client-id": clientId } })
+  }
+
+  clearHistory(clientId: string): Promise<any> {
+    return http.post(this.getUrl("/ai/history/clear"), undefined, { headers: { "x-client-id": clientId } })
   }
 }
