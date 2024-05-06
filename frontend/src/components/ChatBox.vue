@@ -4,7 +4,7 @@
       <div class="chatBot" :style="{ height: height }" ref="chatContainer">
         <div v-for="(message, index) in messages || []" :key="index">
           <div class="message-user" v-if="message.sender === 'user'">
-            <div class="user" v-html="message.text" @click="newMessage = message.text" />
+            <div class="user" v-html="message.text" @click="questionSelected(message.text)" />
             <el-icon class="chat-icon">
               <UserFilled />
             </el-icon>
