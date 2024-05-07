@@ -113,7 +113,7 @@ onMounted(() => {
     response.data.forEach((item: any) => {
       messages.push({
         ...item,
-        text: injectLink(item.text)
+        text: item.sender === "user" ? item.text : injectLink(item.text)
       })
     })
   })
