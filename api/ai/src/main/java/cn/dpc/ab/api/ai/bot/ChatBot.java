@@ -1,5 +1,6 @@
 package cn.dpc.ab.api.ai.bot;
 
+import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.messages.Message;
@@ -47,9 +48,10 @@ public class ChatBot {
                    SimpleVectorStore simpleVectorStore,
                    ObjectMapper objectMapper,
                    @Qualifier("historyVectorStore")
-                   SimpleVectorStore historyVectorStore) {
+                   SimpleVectorStore historyVectorStore,
+                   Features features) {
         this.historyVectorStore = historyVectorStore;
-        this.addFeatureChatHandler = new AddFeatureChatHandler(chatClient, chatClient, objectMapper);
+        this.addFeatureChatHandler = new AddFeatureChatHandler(chatClient, chatClient, objectMapper, features);
         this.qaChatHandler = new QaChatHandler(chatClient, chatClient, simpleVectorStore, systemResource, objectMapper);
         this.otherChatHandler = new OtherChatHandler();
     }

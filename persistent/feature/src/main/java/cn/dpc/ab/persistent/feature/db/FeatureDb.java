@@ -27,7 +27,7 @@ public class FeatureDb {
     private long version;
 
     @IdPrefix
-    private static final String PREFIX = "feature_flag";
+    private static final String PREFIX = "feature";
 
     @Id
     @GeneratedValue(strategy = USE_ATTRIBUTES)
