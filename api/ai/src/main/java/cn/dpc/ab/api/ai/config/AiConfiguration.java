@@ -17,12 +17,12 @@ public class AiConfiguration {
     }
 
     @Bean
-    public SimpleVectorStore simpleVectorStore(OpenAiEmbeddingClient openAiEmbeddingClient) {
-        return new SimpleVectorStore(openAiEmbeddingClient);
+    public SimpleVectorStore simpleVectorStore(OpenAiEmbeddingClient embeddingClient) {
+        return new SimpleVectorStore(embeddingClient);
     }
 
     @Bean
-    public SimpleVectorStore historyVectorStore(OpenAiEmbeddingClient openAiEmbeddingClient) {
-        return new SimpleVectorStore(openAiEmbeddingClient);
+    public SimpleVectorStore historyVectorStore(OpenAiEmbeddingClient embeddingClient) {
+        return new SimpleVectorStore(embeddingClient);
     }
 }

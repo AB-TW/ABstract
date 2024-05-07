@@ -18,34 +18,35 @@ public enum Intention {
 
     ADD_FEATURE(
             List.of(Slot.builder()
-                            .title("特性键")
-                            .description("特性的唯一标识，只能由英文字母数字和下划线组成")
+                            .title("key")
+                            .description("特性键，特性的的唯一标识，只能由英文字母数字和下划线组成")
                             .required(true)
                             .build(),
                     Slot.builder()
-                            .title("特性名称")
+                            .title("name")
                             .description("特性的名称")
                             .required(true)
                             .build(),
                     Slot.builder()
-                            .title("特性描述")
+                            .title("description")
                             .description("特性的描述")
                             .required(false)
                             .build()
             ),
             Slot.SLOT_DESCRIPTION
                     + """
-                    \s
-                     需求：
-                     #01 根据用户输入信息提取有用的信息更新到JSON中的value字段并返回更新后的JSON
-                     #02 仅更新value字段，其他字段都原样返回
-                     #03 如果没有可更新的value则原样返回
-                    \s
-                     参考示例：
-                     '''
-                     JSON: [
+                    
+                    Instructions:
+                    #01 Extract relevant information from user input and update the "value" field in the JSON, returning the updated JSON.
+                    #02 Only modify the "value" field; keep other fields unchanged.
+                    #03 If there's no value to update, return the JSON as is.
+                    #04 Just return JSON array result.
+                    
+                    Example:
+                    ===Example Start===
+                    SLOTS: [
                          {{
-                             "title": "特性键",
+                             "title": "key",
                              "description": "特性的唯一标识，只能由英文字母数字和下划线组成",
                              "transform": "",
                              "util": "",
@@ -53,7 +54,7 @@ public enum Intention {
                              "required": true
                          }},
                          {{
-                             "title": "特性名称",
+                             "title": "name",
                              "description": "特性的名称",
                              "transform": "",
                              "util": "",
@@ -61,20 +62,20 @@ public enum Intention {
                              "required": true
                          }},
                          {{
-                             "title": "特性描述",
+                             "title": "description",
                              "description": "特性的描述",
                              "transform": "",
                              "util": "",
                              "value": "",
                              "required": false
                          }}
-                     ]
-                    \s
-                     user：请帮我创建一个键是HOME_TITLE的特性
-                    \s
-                     assistant：[
+                    ]
+                    
+                    user: 请帮我创建一个key是HOME_TITLE的特性
+                    
+                    you return: [
                          {{
-                             "title": "特性键",
+                             "title": "key",
                              "description": "特性的唯一标识，只能由英文字母数字和下划线组成",
                              "transform": "",
                              "util": "",
@@ -82,7 +83,7 @@ public enum Intention {
                              "required": true
                          }},
                          {{
-                             "title": "特性名称",
+                             "title": "name",
                              "description": "特性的名称",
                              "transform": "",
                              "util": "",
@@ -90,31 +91,34 @@ public enum Intention {
                              "required": true
                          }},
                          {{
-                             "title": "特性描述",
+                             "title": "description",
                              "description": "特性的描述",
                              "transform": "",
                              "util": "",
                              "value": "",
                              "required": false
                          }}
-                     ]
-                     '''
-                    \s
-                     JSON：{slots}
-                    \s""",
+                    ]
+                    ===Example End===
+                    
+                    SLOTS: {slots}
+                    """,
+
             Slot.SLOT_DESCRIPTION
                     + """
                     
-                    需求：
-                    #01 通过提问让用户补充未填写的value字段
-                    #02 如果有多个未填写value的参数则可以一起向用户提问
-                    #03 value已经填写的参数不用再次提问
+                    Instructions:
+                          #01 Prompt users to complete unfilled "value" fields through questions.
+                          #02 If there are multiple parameters with unfilled "value" fields, ask questions together.
+                          #03 Skip parameters with already filled values.
+                          #04 Just return the question in Chinese.
                     
-                    参考示例：
+                    Example：
+                    ===Example Start===
                     '''
-                    user: [
+                    SLOTS: [
                         {{
-                            "title": "特性键",
+                            "title": "key",
                             "description": "特性的唯一标识，只能由英文字母数字和下划线组成",
                             "transform": "",
                             "util": "",
@@ -122,7 +126,7 @@ public enum Intention {
                             "required": true
                         }},
                         {{
-                            "title": "特性名称",
+                            "title": "name",
                             "description": "特性的名称",
                             "transform": "",
                             "util": "",
@@ -130,7 +134,7 @@ public enum Intention {
                             "required": true
                         }},
                         {{
-                            "title": "特性描述",
+                            "title": "description",
                             "description": "特性的描述",
                             "transform": "",
                             "util": "",
@@ -139,8 +143,10 @@ public enum Intention {
                         }}
                     ]
                     
-                    assistant：请问特性名称是什么？
-                    '''
+                    you return: 请问特性名称是什么？
+                    ===Example End===
+                    
+                    SLOTS: {slots}
                     """),
 
     OTHER();
@@ -172,7 +178,7 @@ public enum Intention {
     public static Intention getIntentionByMessage(String message, SimpleVectorStore historyVectorStore) {
         List<Document> intentions = historyVectorStore.similaritySearch(
                 SearchRequest.query(message)
-                        .withSimilarityThreshold(0.85F)
+                        .withSimilarityThreshold(0.8F)
                         .withTopK(1));
         if (intentions.isEmpty()) {
             return Intention.OTHER;

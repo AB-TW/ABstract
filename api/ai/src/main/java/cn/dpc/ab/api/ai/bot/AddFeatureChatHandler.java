@@ -1,5 +1,7 @@
 package cn.dpc.ab.api.ai.bot;
 
+import cn.dpc.ab.api.feature.dto.FeatureRequest;
+import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.ChatClient;
@@ -9,14 +11,11 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.ai.openai.OpenAiChatOptions;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Add feature chat handler.
@@ -25,6 +24,7 @@ public class AddFeatureChatHandler extends AbstractChatHandler {
 
     private final ObjectMapper objectMapper;
     private final Intention intention = Intention.ADD_FEATURE;
+    private final Features features;
 
     /**
      * Instantiates a new Add feature chat handler.
@@ -32,12 +32,15 @@ public class AddFeatureChatHandler extends AbstractChatHandler {
      * @param streamingChatClient the streaming chat client
      * @param chatClient          the chat client
      * @param objectMapper        the object mapper
+     * @param features            the features
      */
     public AddFeatureChatHandler(StreamingChatClient streamingChatClient,
                                  ChatClient chatClient,
-                                 ObjectMapper objectMapper) {
+                                 ObjectMapper objectMapper,
+                                 Features features) {
         super(streamingChatClient, chatClient);
         this.objectMapper = objectMapper;
+        this.features = features;
     }
 
     @Override
@@ -68,23 +71,45 @@ public class AddFeatureChatHandler extends AbstractChatHandler {
                         || null != slot.getValue()
                         && !slot.getValue().isEmpty())) {
 
-            var prompt = new Prompt(List.of(new UserMessage("请帮我创建特性: "
-                    + slots.stream()
-                    .map(slot -> slot.getTitle() + ":"
-                            + slot.getValue()).collect(Collectors.joining("  ")))),
-                    OpenAiChatOptions.builder()
-                            .withFunctions(Set.of("addFeature"))
-                            .build());
-            history.add(userMessage);
-            return streamChat(history, prompt, "")
-                    .doOnComplete(() -> ChatStore.restoreIntention(clientId));
+            FeatureRequest request = new FeatureRequest();
+            slots.forEach(slot -> {
+                if ("key".equalsIgnoreCase(slot.getTitle())) {
+                    request.setFeatureKey(slot.getValue());
+                }
+
+                if ("name".equalsIgnoreCase(slot.getTitle())) {
+                    request.setName(slot.getValue());
+                }
+
+                if ("description".equalsIgnoreCase(slot.getTitle())) {
+                    request.setDescription(slot.getValue());
+                }
+            });
+
+            return features.add(request.toFeature())
+                    .flatMapMany(feature -> Flux.just("添加成功! key为" + feature.getId().featureKey() + "，可在Feature管理模块查看结果！"))
+                    .onErrorResume(e -> {
+                        List<Message> errorTipMessages = new ArrayList<>();
+                        errorTipMessages.add(new SystemPromptTemplate("""
+                                当前用户正在添加特性，但是添加特性失败，请根据如下error信息，给予用户简短友好的提示失败原因:
+                                error: {error}
+                                """)
+                                .createMessage(Map.of("error",
+                                        "{\"exceptionName\": \""
+                                                + e.toString()
+                                                + "\", \"message\": \""
+                                                + e.getMessage() + "\"}")));
+                        return streamChat(history, new Prompt(errorTipMessages), "");
+                    }).doOnComplete(() -> ChatStore.restoreIntention(clientId));
         }
 
         ChatStore.addFeatureSlots.put(clientId, slots.isEmpty() ? addFeatureSlot : slots);
 
         SystemPromptTemplate queryPromptTemplate = new SystemPromptTemplate(intention.getQueryPrompt());
-        Prompt queryprompt = new Prompt(List.of(queryPromptTemplate.createMessage(Map.of()),
-                new UserMessage(objectMapper.writeValueAsString(ChatStore.addFeatureSlots.get(clientId)))));
+        Prompt queryprompt = new Prompt(List.of(queryPromptTemplate
+                .createMessage(
+                        Map.of("slots",
+                                objectMapper.writeValueAsString(ChatStore.addFeatureSlots.get(clientId))))));
 
         return streamChat(history, queryprompt, "");
     }
