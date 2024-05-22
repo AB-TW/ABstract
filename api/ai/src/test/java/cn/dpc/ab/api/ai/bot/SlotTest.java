@@ -18,22 +18,19 @@ class SlotTest {
                     “value”: “HomeHome”,
                     “description”: “特性的唯一标识，只能由英文字母数字和下划线组成”,
                     “required”: true,
-                    “transform”: null,
-                    “util”: null
+                    “transform”: null
                 },{
                     “title”: “特性名称”,
                     “value”: null,
                     “description”: “特性的名称”,
                     “required”: true,
-                    “transform”: null,
-                    “util”: null
+                    “transform”: null
                 },{
                     “title”: “特性描述”,
                     “value”: null,
                     “description”: “特性的描述”,
                     “required”: false,
-                    “transform”: null,
-                    “util”: null
+                    “transform”: null
                 }]
                 """;
         List<Slot> slots = Slot.extractSlotsFromContent(content, new ObjectMapper());
