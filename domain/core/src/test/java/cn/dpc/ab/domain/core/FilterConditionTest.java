@@ -17,7 +17,7 @@ class FilterConditionTest {
         map.put("app_version", "9.1.1");
         CustomerId customerId = CustomerId.builder().customerId("111").clientId("222").attributes(map).build();
         FilterCondition filterCondition = FilterCondition.builder()
-                .attributeConditions(List.of(new FilterCondition.CustomAttributeCondition("app_version",
+                .attributeConditions(List.of(new FilterCondition.CustomAttributeCondition("test", "app_version",
                         VERSION_GREATER_THAN, "9.0.0")))
                 .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
                 .build();
@@ -33,9 +33,10 @@ class FilterConditionTest {
         map.put("key3", "60");
         CustomerId customerId = CustomerId.builder().customerId("111").clientId("222").attributes(map).build();
         FilterCondition filterCondition = FilterCondition.builder()
-                .attributeConditions(List.of(new FilterCondition.CustomAttributeCondition("key1", GREATER_THAN, "18"),
-                        new FilterCondition.CustomAttributeCondition("key2", LESS_THAN, "50"),
-                        new FilterCondition.CustomAttributeCondition("key3", EQUALS, "60")))
+                .attributeConditions(List.of(new FilterCondition.CustomAttributeCondition("test1", "key1", GREATER_THAN,
+                                "18"),
+                        new FilterCondition.CustomAttributeCondition("test2", "key2", LESS_THAN, "50"),
+                        new FilterCondition.CustomAttributeCondition("test3", "key3", EQUALS, "60")))
                 .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
                 .build();
         assertTrue(filterCondition.match(customerId));
