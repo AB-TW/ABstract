@@ -69,7 +69,7 @@ export const getTemplateDefaultValue = (template: FeatureTemplate | undefined): 
 }
 
 export class Features {
-  constructor(private readonly baseUrl: string = "/api") {}
+  constructor(private readonly baseUrl: string = "") {}
 
   private getUrl(path: string) {
     return this.baseUrl + path

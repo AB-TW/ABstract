@@ -18,7 +18,7 @@ export interface Experiment {
 }
 
 export class Experiments {
-  constructor(private readonly baseUrl: string = "/api") {}
+  constructor(private readonly baseUrl: string = "") {}
 
   private getUrl(path: string) {
     return this.baseUrl + path
