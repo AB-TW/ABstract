@@ -1,7 +1,7 @@
-version: '3'
+version: '4'
 services:
   couchbase:
-    container_name: app-provision-couchbase
+    container_name: abstract-couchbase
     image: couchbase-nosetup:community-7.1.1
     build:
       dockerfile: couchbase.Dockerfile
