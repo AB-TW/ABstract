@@ -63,7 +63,7 @@ public class FilterCondition {
     /**
      * CustomAttributeCondition represents the custom attribute condition of a filter.
      */
-    public record CustomAttributeCondition(String key, Operator operator, String value) {
+    public record CustomAttributeCondition(String name, String key, Operator operator, String value) {
         /**
          * Operator represents the operator of a custom attribute condition.
          */
