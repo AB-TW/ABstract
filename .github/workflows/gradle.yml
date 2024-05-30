@@ -30,3 +30,9 @@ jobs:
           run: ./gradlew npmBuild
         - name: Build Docker image
           run: docker build -t a_bstract/abstract:latest .
+        - name: Login Docker registry
+          run: docker login --username=$REGISTRY_USERNAME --password=$REGISTRY_PASSWORD registry.cn-wulanchabu.aliyuncs.com
+        - name: Tag Docker image
+          run: docker tag a_bstract/abstract:latest registry.cn-wulanchabu.aliyuncs.com/pc-dong/ab-stract:latest
+        - name: Push Docker image
+          run: docker push registry.cn-wulanchabu.aliyuncs.com/pc-dong/ab-stract:latest
