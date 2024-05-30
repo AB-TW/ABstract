@@ -12,6 +12,15 @@ spring:
     openai:
       apiKey: ${OPENAI_API_KEY}
       baseUrl: ${OPENAI_API_BASE}
+      chat:
+        options:
+          model: gpt-3.5-turbo
+      embedding:
+        options:
+          model: text-embedding-ada-002
+    ollama:
+      embedding:
+        model: milkey/m3e
 
 ---
 spring:
@@ -35,7 +44,7 @@ spring:
 
 logging:
   level:
-    root: DEBUG
+    root: INFO
 
 cache:
   local:

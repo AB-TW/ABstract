@@ -1,9 +1,9 @@
 import instance from "./axios"
 
-const post = (url: string, data: any, config: any) => {
+const post = (url: string, data: any, config?: any) => {
   return new Promise((resolve, reject) =>
     instance
-      .post(url, data, { headers: config.headers, timeout: 30000 })
+      .post(url, data, { headers: config?.headers, timeout: 30000 })
       .then((res) => resolve(res))
       .catch((error) => reject(error))
   )

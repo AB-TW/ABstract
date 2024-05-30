@@ -3,6 +3,8 @@ package cn.dpc.ab;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.ResourceHandlerRegistry;
+import org.springframework.web.reactive.config.ViewResolverRegistry;
+import org.springframework.web.reactive.result.view.RedirectView;
 
 /**
  * WebFluxConfigurer.
@@ -16,9 +18,11 @@ public class WebFluxConfigurer implements org.springframework.web.reactive.confi
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         org.springframework.web.reactive.config.WebFluxConfigurer.super.addResourceHandlers(registry);
-        registry.addResourceHandler("/**").addResourceLocations("file:static/");
         registry.addResourceHandler("/").addResourceLocations("file:static/index.html");
+        registry.addResourceHandler("/v3-admin-vite/**").addResourceLocations("file:static/");
+        registry.addResourceHandler("/**").addResourceLocations("file:static/");
     }
+
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -28,5 +32,10 @@ public class WebFluxConfigurer implements org.springframework.web.reactive.confi
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .allowedOriginPatterns("*");
+    }
+
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        registry.defaultViews(new RedirectView("/index.html"));
     }
 }
