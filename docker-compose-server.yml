@@ -1,0 +1,32 @@
+version: '3'
+services:
+  couchbase:
+    container_name: couchbase
+    image: couchbase-nosetup:community-7.1.1
+    build:
+      dockerfile: couchbase.Dockerfile
+    ports:
+      - "8091-8094:8091-8094"
+      - "11210:11210"
+    networks:
+      - couchbase
+  server:
+    container_name: server
+    restart: on-failure
+    image: ab-stract:latest
+#    image: registry.cn-wulanchabu.aliyuncs.com/pc-dong/ab-stract:latest
+    ports:
+      - "8080:8080"
+      - "7001:7001"
+      - "7002:7002"
+    networks:
+      - couchbase
+    environment:
+      SPRING_APPLICATION_JSON: '{
+          "spring.couchbase.connectionString": "couchbase://couchbase"
+      }'
+      OPENAI_API_BASE: https://api.chatanywhere.com.cn/
+      OPENAI_API_KEY: sk-ehksizQsM6FbB6jICPKP4ExhJy6WPmvL5xZiCinHXmZdUxCd
+#      OPENAI_API_KEY: sk-EBTlziAb9HClAkWre0gr6avW3mSdMnxkJ4iixM0EFeEimasM
+networks:
+  couchbase:

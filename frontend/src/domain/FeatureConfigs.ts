@@ -3,7 +3,7 @@ import http from "../utils/http/http"
 import { FilterCondition } from "./FilterConditions"
 
 export class FeatureConfigs {
-  constructor(private readonly baseUrl: string = "/api/features") {}
+  constructor(private readonly baseUrl: string = "/features") {}
 
   private getUrl(path: string) {
     return this.baseUrl + path

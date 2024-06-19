@@ -23,7 +23,7 @@ export interface CustomerFeatureConfig {
 export class Customers {
   private requester: RsocketRequester
 
-  constructor(private readonly responder: Partial<RSocket> = null, private readonly baseUrl: string = "/api") {
+  constructor(private readonly responder: Partial<RSocket> = null, private readonly baseUrl: string = "") {
     this.requester = new RsocketRequester(this.responder)
   }
 
