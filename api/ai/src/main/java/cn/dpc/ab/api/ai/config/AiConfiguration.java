@@ -1,5 +1,6 @@
 package cn.dpc.ab.api.ai.config;
 
+import org.springframework.ai.ollama.OllamaEmbeddingClient;
 import org.springframework.ai.openai.OpenAiEmbeddingClient;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.context.annotation.Bean;

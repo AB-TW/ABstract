@@ -1,7 +1,7 @@
 import http from "@/utils/http/http"
 
 export class Ai {
-  constructor(private readonly baseUrl: string = "/api") {}
+  constructor(private readonly baseUrl: string = import.meta.env.VITE_BASE_API || "") {}
 
   private getUrl(path: string) {
     return this.baseUrl + path

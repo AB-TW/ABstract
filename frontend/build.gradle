@@ -51,7 +51,7 @@ task npmBuild(type: NpmTask, dependsOn: npmInstall) {
 
   group = 'npm'
 
-  args = ['run', 'build']
+  args = ['run', 'build:prod']
 }
 
 task npmDev(type: NpmTask, dependsOn: npmInstall) {
