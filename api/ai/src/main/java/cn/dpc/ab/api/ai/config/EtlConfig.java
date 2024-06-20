@@ -1,16 +1,15 @@
 package cn.dpc.ab.api.ai.config;
 
-import cn.dpc.ab.api.ai.bot.Intention;
 import groovy.util.logging.Slf4j;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.openai.OpenAiChatClient;
 import org.springframework.ai.reader.TextReader;
 import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,6 +19,7 @@ import java.util.List;
  */
 @Component
 @Slf4j
+@ConditionalOnProperty(name = "ai.enabled", havingValue = "true")
 public class EtlConfig {
     private static final Logger log = LoggerFactory.getLogger(EtlConfig.class);
     private final SimpleVectorStore simpleVectorStore;

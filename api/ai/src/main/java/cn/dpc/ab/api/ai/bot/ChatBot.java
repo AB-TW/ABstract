@@ -1,5 +1,6 @@
 package cn.dpc.ab.api.ai.bot;
 
+import cn.dpc.ab.api.ai.config.AiConfiguration;
 import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +31,7 @@ public class ChatBot {
     private final AddFeatureChatHandler addFeatureChatHandler;
     private final QaChatHandler qaChatHandler;
     private final OtherChatHandler otherChatHandler;
-
+    private final boolean enabled;
 
     /**
      * Instantiates a new ChatBot.
@@ -49,11 +50,13 @@ public class ChatBot {
                    ObjectMapper objectMapper,
                    @Qualifier("historyVectorStore")
                    SimpleVectorStore historyVectorStore,
-                   Features features) {
+                   Features features,
+                   AiConfiguration aiConfiguration) {
         this.historyVectorStore = historyVectorStore;
         this.addFeatureChatHandler = new AddFeatureChatHandler(chatClient, chatClient, objectMapper, features);
         this.qaChatHandler = new QaChatHandler(chatClient, chatClient, simpleVectorStore, systemResource, objectMapper);
         this.otherChatHandler = new OtherChatHandler();
+        this.enabled = aiConfiguration.isEnabled();
     }
 
     /**
@@ -64,6 +67,9 @@ public class ChatBot {
      * @return the robot message
      */
     public Flux<String> chat(String clientId, String message) throws JsonProcessingException {
+        if (!this.enabled) {
+            return Flux.just("抱歉，暂时无法回答您的问题。");
+        }
         List<Message> history = getHistoryOfClient(clientId);
 
         var intention = Intention.getIntentionByMessage(message, historyVectorStore);
