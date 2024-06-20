@@ -4,6 +4,7 @@ import cn.dpc.ab.api.feature.dto.FeatureRequest;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Features;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Description;
@@ -19,6 +20,7 @@ import java.util.function.Function;
  */
 @Configuration
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "ai.enabled", havingValue = "true")
 public class FunctionCallConfig {
 
     private final Features features;
