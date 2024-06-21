@@ -10,6 +10,7 @@ import org.springframework.ai.reader.TextReader;
 import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
  */
 @Component
 @Slf4j
+@ConditionalOnProperty(name = "ai.enabled", havingValue = "true")
 public class HistoryQaConfig {
     private static final Logger log = LoggerFactory.getLogger(HistoryQaConfig.class);
     private final SimpleVectorStore historyVectorStore;
