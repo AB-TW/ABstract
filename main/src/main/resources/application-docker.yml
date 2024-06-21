@@ -43,3 +43,6 @@ cache:
 rsocket:
   feature-key-push-enabled: true
   custom-web-socket-enabled: true
+
+ai:
+  enabled: true

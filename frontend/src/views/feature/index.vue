@@ -1,33 +1,36 @@
 <template>
   <div>
     <el-card>
-      <el-input
-        v-model="searchForm.featureKey"
-        clearable
-        placeholder="请输入featureKey或名称"
-        class="input-with-select"
-        @clear="searchData"
-      >
-        <template #append>
-          <el-button icon="Search" @click="searchData" />
-        </template>
-      </el-input>
-
-      <el-radio-group v-model="searchForm.enabled" @change="searchData" class="status-check-group">
-        <el-radio-button label="null">全部</el-radio-button>
-        <el-radio-button label="true">启用</el-radio-button>
-        <el-radio-button label="false">禁用</el-radio-button>
-      </el-radio-group>
-      <el-button
-        type="primary"
-        @click="() => router.push({ path: '/feature/edit', query: { type: 'add' } })"
-        class="add-btn"
-      >
-        <el-icon>
-          <Plus />
-        </el-icon>
-        新增
-      </el-button>
+      <div class="header">
+        <el-input
+          v-model="searchForm.featureKey"
+          clearable
+          placeholder="请输入featureKey或名称"
+          class="search-input"
+          @clear="searchData"
+        >
+          <template #append>
+            <el-button icon="Search" @click="searchData" />
+          </template>
+        </el-input>
+        <div class="operation-btn-group">
+          <el-radio-group v-model="searchForm.enabled" @change="searchData" class="status-check-group">
+            <el-radio-button label="null">全部</el-radio-button>
+            <el-radio-button label="true">启用</el-radio-button>
+            <el-radio-button label="false">禁用</el-radio-button>
+          </el-radio-group>
+        </div>
+        <el-button
+          type="primary"
+          @click="() => router.push({ path: '/feature/edit', query: { type: 'add' } })"
+          class="add-btn"
+        >
+          <el-icon>
+            <Plus />
+          </el-icon>
+          新增
+        </el-button>
+      </div>
       <el-table :data="tableData" border style="width: 100%; margin-top: 50px">
         <el-table-column label="Feature Key" width="200">
           <template #default="scope">
@@ -60,7 +63,7 @@
             <el-button v-if="scope.row?.enabled == true" type="info" size="small" @click="disable(scope.row.featureKey)"
               >禁用
             </el-button>
-            <el-button v-else type="success" size="small" @click="enable(scope.row.featureKey)">启用 </el-button>
+            <el-button v-else type="success" size="small" @click="enable(scope.row.featureKey)">启用</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -168,14 +171,24 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.input-with-select {
-  width: 400px;
-  float: left;
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  .search-input {
+    width: 400px;
+  }
+
+  .operation-btn-group {
+    display: flex;
+  }
 }
 
 .add-btn {
   margin-left: 20px;
 }
+
 .status-check-group {
   margin-left: 20px;
 }

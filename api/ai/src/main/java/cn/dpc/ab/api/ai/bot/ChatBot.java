@@ -1,6 +1,5 @@
 package cn.dpc.ab.api.ai.bot;
 
-import cn.dpc.ab.api.ai.config.AiConfiguration;
 import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,12 +50,13 @@ public class ChatBot {
                    @Qualifier("historyVectorStore")
                    SimpleVectorStore historyVectorStore,
                    Features features,
-                   AiConfiguration aiConfiguration) {
+                   @Value("${ai.enabled}")
+                   boolean enabled) {
         this.historyVectorStore = historyVectorStore;
         this.addFeatureChatHandler = new AddFeatureChatHandler(chatClient, chatClient, objectMapper, features);
         this.qaChatHandler = new QaChatHandler(chatClient, chatClient, simpleVectorStore, systemResource, objectMapper);
         this.otherChatHandler = new OtherChatHandler();
-        this.enabled = aiConfiguration.isEnabled();
+        this.enabled = enabled;
     }
 
     /**
