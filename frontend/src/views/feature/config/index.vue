@@ -4,50 +4,54 @@
       <el-card-header style="padding: 5px">
         <div class="card-header">
           <span class="title"> Feature: {{ featureName }}</span>
-          <el-button size="small" style="float: right" @click="router.push({ path: '/feature/list' })">返回 </el-button>
+          <el-button size="small" style="float: right" @click="router.push({ path: '/feature/list' })">返回</el-button>
         </div>
       </el-card-header>
       <el-divider />
-      <el-input
-        v-model="searchForm.key"
-        clearable
-        placeholder="请输入关键字"
-        class="input-with-select"
-        @clear="searchData"
-      >
-        <template #append>
-          <el-button icon="Search" @click="searchData" />
-        </template>
-      </el-input>
-      <el-radio-group v-model="searchForm.status" @change="searchData" class="status-check-group">
-        <el-radio-button label="ALL">全部</el-radio-button>
-        <el-radio-button label="DRAFT">草稿</el-radio-button>
-        <el-radio-button label="NOT_BEGIN">未生效</el-radio-button>
-        <el-radio-button label="RUNNING">生效中</el-radio-button>
-        <el-radio-button label="EXPIRED">已过期</el-radio-button>
-        <el-radio-button label="DISABLED">已撤销</el-radio-button>
-      </el-radio-group>
-      <el-button
-        type="primary"
-        class="add-btn"
-        @click="
-          () =>
-            router.push({
-              path: '/feature/config/edit',
-              query: {
-                type: 'add',
-                featureKey: featureKey,
-                featureName,
-                feature: encodeURI(JSON.stringify(feature))
-              }
-            })
-        "
-      >
-        <el-icon>
-          <Plus />
-        </el-icon>
-        新增
-      </el-button>
+      <div class="header">
+        <el-input
+          v-model="searchForm.key"
+          clearable
+          placeholder="请输入关键字"
+          class="search-input"
+          @clear="searchData"
+        >
+          <template #append>
+            <el-button icon="Search" @click="searchData" />
+          </template>
+        </el-input>
+        <div class="operation-btn-group">
+          <el-radio-group v-model="searchForm.status" @change="searchData" class="status-check-group">
+            <el-radio-button label="ALL">全部</el-radio-button>
+            <el-radio-button label="DRAFT">草稿</el-radio-button>
+            <el-radio-button label="NOT_BEGIN">未生效</el-radio-button>
+            <el-radio-button label="RUNNING">生效中</el-radio-button>
+            <el-radio-button label="EXPIRED">已过期</el-radio-button>
+            <el-radio-button label="DISABLED">已撤销</el-radio-button>
+          </el-radio-group>
+        </div>
+        <el-button
+          type="primary"
+          class="add-btn"
+          @click="
+            () =>
+              router.push({
+                path: '/feature/config/edit',
+                query: {
+                  type: 'add',
+                  featureKey: featureKey,
+                  featureName,
+                  feature: encodeURI(JSON.stringify(feature))
+                }
+              })
+          "
+        >
+          <el-icon>
+            <Plus />
+          </el-icon>
+          新增
+        </el-button>
+      </div>
       <el-table :data="tableData" border style="width: 100%; margin-top: 50px">
         <!--        <el-table-column label="id" prop="id" width="320" />-->
         <!--        <el-table-column prop="featureKey" label="Feature Key" width="180" />-->
@@ -80,7 +84,7 @@
             <el-button v-if="scope.row?.status === 'RUNNING'" type="warning" size="small" @click="disable(scope.row.id)"
               >撤销
             </el-button>
-            <el-button type="danger" size="small" @click="deleteData(scope.row.id)">删除 </el-button>
+            <el-button type="danger" size="small" @click="deleteData(scope.row.id)">删除</el-button>
             <el-button
               v-if="scope.row?.status !== 'RUNNING'"
               size="small"
@@ -151,6 +155,7 @@ const features = new Features()
 
 const featureKey = ref()
 const featureName = ref("")
+
 onBeforeMount(async () => {
   featureKey.value = route.query.featureKey
   featureName.value = <string>route.query.featureName
@@ -244,9 +249,18 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.input-with-select {
-  width: 400px;
-  float: left;
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  .search-input {
+    width: 400px;
+  }
+
+  .operation-btn-group {
+    display: flex;
+  }
 }
 
 span.title {
