@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.joining;
 /**
  * QA chat handler.
  */
-public class QaChatHandler extends AbstractChatHandler {
+public class QueryChatHandler extends AbstractChatHandler {
     private final SimpleVectorStore simpleVectorStore;
     private final Resource systemResource;
     private final ObjectMapper objectMapper;
@@ -40,12 +40,12 @@ public class QaChatHandler extends AbstractChatHandler {
      * @param objectMapper       the object mapper
      * @param chatOptions        the chat options may with function calling
      */
-    public QaChatHandler(StreamingChatModel streamingChatModel,
-                         ChatModel chatModel,
-                         SimpleVectorStore simpleVectorStore,
-                         Resource systemResource,
-                         ChatOptions chatOptions,
-                         ObjectMapper objectMapper) {
+    public QueryChatHandler(StreamingChatModel streamingChatModel,
+                            ChatModel chatModel,
+                            SimpleVectorStore simpleVectorStore,
+                            Resource systemResource,
+                            ChatOptions chatOptions,
+                            ObjectMapper objectMapper) {
         super(streamingChatModel, chatModel);
         this.simpleVectorStore = simpleVectorStore;
         this.systemResource = systemResource;

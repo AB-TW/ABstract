@@ -1,6 +1,9 @@
 package cn.dpc.ab.persistent.ai;
 
+import cn.dpc.ab.domain.ai.AddFeatureChatHandler;
 import cn.dpc.ab.domain.ai.ChatBot;
+import cn.dpc.ab.domain.ai.Intention;
+import cn.dpc.ab.domain.ai.QueryChatHandler;
 import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -12,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -23,14 +27,14 @@ public class ChatbotConfiguration {
     /**
      * Chat bot chat bot.
      *
-     * @param systemResource      the system resource
-     * @param openAiChatModel     the open ai chat model
-     * @param qaVectorStore       the qa vector store
-     * @param objectMapper         the object mapper
-     * @param historyVectorStore  the history vector store
-     * @param features            the features
-     * @param functions           the functions
-     * @param enabled             the enabled
+     * @param systemResource     the system resource
+     * @param openAiChatModel    the open ai chat model
+     * @param qaVectorStore      the qa vector store
+     * @param objectMapper       the object mapper
+     * @param historyVectorStore the history vector store
+     * @param features           the features
+     * @param functions          the functions
+     * @param enabled            the enabled
      * @return the chat bot
      */
     @Bean
@@ -47,10 +51,14 @@ public class ChatbotConfiguration {
                            Set<String> functions,
                            @Value("${ai.enabled}")
                            boolean enabled) {
-        return new ChatBot(systemResource, openAiChatModel, openAiChatModel,
-                qaVectorStore, objectMapper, historyVectorStore,
-                features, OpenAiChatOptions.builder()
-                .withFunctions(functions)
-                .build(), enabled);
+        var qaChatHandler = new QueryChatHandler(openAiChatModel, openAiChatModel, qaVectorStore, systemResource,
+                OpenAiChatOptions.builder()
+                        .withFunctions(functions)
+                        .build(), objectMapper);
+        var addFeatureChatHandler = new AddFeatureChatHandler(openAiChatModel, openAiChatModel, objectMapper, features);
+        return new ChatBot(historyVectorStore,
+                Map.of(Intention.QA, qaChatHandler,
+                        Intention.ADD_FEATURE, addFeatureChatHandler),
+                enabled);
     }
 }
