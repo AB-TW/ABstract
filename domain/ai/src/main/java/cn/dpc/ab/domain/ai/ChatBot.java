@@ -1,19 +1,14 @@
 package cn.dpc.ab.domain.ai;
 
-import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.StreamingChatModel;
-import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
-import org.springframework.core.io.Resource;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static cn.dpc.ab.domain.ai.Intention.OTHER;
 import static cn.dpc.ab.domain.ai.Intention.QA;
@@ -23,41 +18,25 @@ import static cn.dpc.ab.domain.ai.Intention.QA;
  * The type Chat bot.
  */
 public class ChatBot {
-
-
     private final SimpleVectorStore historyVectorStore;
-    private final AddFeatureChatHandler addFeatureChatHandler;
-    private final QaChatHandler qaChatHandler;
-    private final OtherChatHandler otherChatHandler;
+
     private final boolean enabled;
+    private final Map<Intention, ChatHandler> chatHandlerMap;
+    private final OtherChatHandler otherChatHandler = new OtherChatHandler();
 
     /**
      * Instantiates a new cn.dpc.ab.domain.ai.ChatBot.
      *
-     * @param systemResource     the system resource
-     * @param streamingChatModel the stream chat client
-     * @param chatModel          the chat client
-     * @param qaVectorStore      the qa vector store
-     * @param objectMapper       the object mapper
      * @param historyVectorStore the history vector store
-     * @param features           the features
-     * @param chatOptions        the chat options
+     * @param chatHandlerMap     the chat handler map
      * @param enabled            the enabled
      */
-    public ChatBot(Resource systemResource,
-                   StreamingChatModel streamingChatModel,
-                   ChatModel chatModel,
-                   SimpleVectorStore qaVectorStore,
-                   ObjectMapper objectMapper,
-                   SimpleVectorStore historyVectorStore,
-                   Features features,
-                   ChatOptions chatOptions,
-                   boolean enabled) {
+    public ChatBot(
+            SimpleVectorStore historyVectorStore,
+            Map<Intention, ChatHandler> chatHandlerMap,
+            boolean enabled) {
         this.historyVectorStore = historyVectorStore;
-        this.addFeatureChatHandler = new AddFeatureChatHandler(streamingChatModel, chatModel, objectMapper, features);
-        this.qaChatHandler = new QaChatHandler(streamingChatModel, chatModel, qaVectorStore, systemResource,
-                chatOptions, objectMapper);
-        this.otherChatHandler = new OtherChatHandler();
+        this.chatHandlerMap = chatHandlerMap;
         this.enabled = enabled;
     }
 
@@ -69,10 +48,10 @@ public class ChatBot {
      * @return the robot message
      */
     public Flux<String> chat(String clientId, String message) throws JsonProcessingException {
-        if (!this.enabled) {
-            return Flux.just("抱歉，暂时无法回答您的问题。");
-        }
         List<Message> history = getHistoryOfClient(clientId);
+        if (!this.enabled) {
+            return otherChatHandler.handle(clientId, message, history);
+        }
 
         var intention = Intention.getIntentionByMessage(message, historyVectorStore);
         if (intention != OTHER && intention != QA) {
@@ -83,17 +62,9 @@ public class ChatBot {
             intention = ChatStore.globalIntention.getOrDefault(clientId, OTHER);
         }
 
-        switch (intention) {
-            case QA -> {
-                return qaChatHandler.handle(clientId, message, history);
-            }
-            case ADD_FEATURE -> {
-                return addFeatureChatHandler.handle(clientId, message, history);
-            }
-            default -> {
-                return otherChatHandler.handle(clientId, message, history);
-            }
-        }
+        return chatHandlerMap.containsKey(intention)
+                ? chatHandlerMap.get(intention).handle(clientId, message, history)
+                : otherChatHandler.handle(clientId, message, history);
     }
 
     private List<Message> getHistoryOfClient(String clientId) {
