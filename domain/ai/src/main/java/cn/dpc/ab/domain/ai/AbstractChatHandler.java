@@ -1,4 +1,4 @@
-package cn.dpc.ab.api.ai.bot;
+package cn.dpc.ab.domain.ai;
 
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;

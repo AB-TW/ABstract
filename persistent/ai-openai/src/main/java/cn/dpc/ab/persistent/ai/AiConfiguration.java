@@ -1,4 +1,4 @@
-package cn.dpc.ab.api.ai.config;
+package cn.dpc.ab.persistent.ai;
 
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.vectorstore.SimpleVectorStore;

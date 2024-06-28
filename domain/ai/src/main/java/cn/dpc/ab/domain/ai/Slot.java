@@ -1,13 +1,11 @@
-package cn.dpc.ab.api.ai.bot;
+package cn.dpc.ab.domain.ai;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import groovy.util.logging.Slf4j;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Slot of chatBot.
+ * cn.dpc.ab.domain.ai.Slot of chatBot.
  */
 @Data
 @Builder
@@ -23,7 +21,6 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 @Slf4j
 public class Slot {
-    private static final Logger log = LoggerFactory.getLogger(Slot.class);
     private String title;
     private String value;
     private String description;

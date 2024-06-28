@@ -1,4 +1,4 @@
-package cn.dpc.ab.api.ai.bot;
+package cn.dpc.ab.domain.ai;
 
 import lombok.Getter;
 import org.springframework.ai.document.Document;
@@ -7,10 +7,11 @@ import org.springframework.ai.vectorstore.SimpleVectorStore;
 
 import java.util.List;
 
-import static cn.dpc.ab.api.ai.config.EtlConfig.INTENTION;
+import static cn.dpc.ab.domain.ai.AiConsts.INTENTION;
+
 
 /**
- * Intention of the user.
+ * cn.dpc.ab.domain.ai.Intention of the user.
  */
 @Getter
 public enum Intention {

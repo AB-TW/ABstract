@@ -1,4 +1,4 @@
-package cn.dpc.ab.api.ai.config;
+package cn.dpc.ab.domain.ai;
 
 import org.springframework.ai.transformer.splitter.TextSplitter;
 

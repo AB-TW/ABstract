@@ -1,9 +1,8 @@
 package cn.dpc.ab.api.ai.config;
 
-import groovy.util.logging.Slf4j;
+import cn.dpc.ab.domain.ai.MarkDownTextSplitter;
 import jakarta.annotation.PostConstruct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.TextReader;
 import org.springframework.ai.transformer.splitter.TextSplitter;
@@ -21,9 +20,7 @@ import java.util.List;
 @Slf4j
 @ConditionalOnProperty(name = "ai.enabled", havingValue = "true")
 public class EtlConfig {
-    private static final Logger log = LoggerFactory.getLogger(EtlConfig.class);
     private final SimpleVectorStore simpleVectorStore;
-    public static final String INTENTION = "intention";
 
     /**
      * Instantiates a new Etl config.

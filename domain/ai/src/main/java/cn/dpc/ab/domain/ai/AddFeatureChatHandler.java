@@ -1,9 +1,10 @@
-package cn.dpc.ab.api.ai.bot;
+package cn.dpc.ab.domain.ai;
 
-import cn.dpc.ab.api.feature.dto.FeatureRequest;
+import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.*;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Flux;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Add feature chat handler.
@@ -112,5 +114,42 @@ public class AddFeatureChatHandler extends AbstractChatHandler {
                                 objectMapper.writeValueAsString(ChatStore.addFeatureSlots.get(clientId))))));
 
         return streamChat(history, queryprompt, "");
+    }
+
+    /**
+     * The type Feature request.
+     */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class FeatureRequest {
+        private String featureKey;
+
+        private String name;
+
+        private String description;
+
+        private boolean enabled;
+
+        private Feature.FeatureTemplate template;
+
+
+        /**
+         * Creates a Feature from a FeatureRequest.
+         *
+         * @return the Feature
+         */
+        public Feature toFeature() {
+            return new Feature(
+                    new Feature.FeatureId(featureKey),
+                    Feature.Description.builder()
+                            .name(name)
+                            .description(description)
+                            .enabled(enabled)
+                            .template(Optional.ofNullable(template).orElse(Feature.FeatureTemplate.DEFAULT))
+                            .build());
+        }
     }
 }
