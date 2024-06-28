@@ -4,11 +4,11 @@ import cn.dpc.ab.api.feature.dto.FeatureRequest;
 import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.ai.chat.ChatClient;
-import org.springframework.ai.chat.ChatResponse;
-import org.springframework.ai.chat.StreamingChatClient;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.StreamingChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import reactor.core.publisher.Flux;
@@ -34,8 +34,8 @@ public class AddFeatureChatHandler extends AbstractChatHandler {
      * @param objectMapper        the object mapper
      * @param features            the features
      */
-    public AddFeatureChatHandler(StreamingChatClient streamingChatClient,
-                                 ChatClient chatClient,
+    public AddFeatureChatHandler(StreamingChatModel streamingChatClient,
+                                 ChatModel chatClient,
                                  ObjectMapper objectMapper,
                                  Features features) {
         super(streamingChatClient, chatClient);
@@ -61,7 +61,7 @@ public class AddFeatureChatHandler extends AbstractChatHandler {
         messages.add(userMessage);
 
         history.add(userMessage);
-        ChatResponse response = chatClient.call(new Prompt(messages));
+        ChatResponse response = chatModel.call(new Prompt(messages));
         String content = response.getResult().getOutput().getContent();
         List<Slot> slots = Slot.extractSlotsFromContent(content, objectMapper);
 

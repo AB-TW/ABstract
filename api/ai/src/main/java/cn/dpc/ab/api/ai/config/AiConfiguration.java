@@ -1,6 +1,6 @@
 package cn.dpc.ab.api.ai.config;
 
-import org.springframework.ai.openai.OpenAiEmbeddingClient;
+import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,12 +18,12 @@ public class AiConfiguration {
     }
 
     @Bean
-    public SimpleVectorStore simpleVectorStore(OpenAiEmbeddingClient embeddingClient) {
-        return new SimpleVectorStore(embeddingClient);
+    public SimpleVectorStore simpleVectorStore(OpenAiEmbeddingModel embeddingModel) {
+        return new SimpleVectorStore(embeddingModel);
     }
 
     @Bean
-    public SimpleVectorStore historyVectorStore(OpenAiEmbeddingClient embeddingClient) {
-        return new SimpleVectorStore(embeddingClient);
+    public SimpleVectorStore historyVectorStore(OpenAiEmbeddingModel embeddingModel) {
+        return new SimpleVectorStore(embeddingModel);
     }
 }

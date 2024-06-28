@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
-import org.springframework.ai.openai.OpenAiChatClient;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,14 +36,14 @@ public class ChatBot {
      * Instantiates a new ChatBot.
      *
      * @param systemResource     the system resource
-     * @param chatClient         the chat client
+     * @param chatModel         the chat client
      * @param simpleVectorStore  the simple vector store
      * @param objectMapper       the object mapper
      * @param historyVectorStore the history vector store
      */
     public ChatBot(@Value("classpath:/prompts/system-message.st")
                    Resource systemResource,
-                   OpenAiChatClient chatClient,
+                   OpenAiChatModel chatModel,
                    @Qualifier("simpleVectorStore")
                    SimpleVectorStore simpleVectorStore,
                    ObjectMapper objectMapper,
@@ -53,8 +53,8 @@ public class ChatBot {
                    @Value("${ai.enabled}")
                    boolean enabled) {
         this.historyVectorStore = historyVectorStore;
-        this.addFeatureChatHandler = new AddFeatureChatHandler(chatClient, chatClient, objectMapper, features);
-        this.qaChatHandler = new QaChatHandler(chatClient, chatClient, simpleVectorStore, systemResource, objectMapper);
+        this.addFeatureChatHandler = new AddFeatureChatHandler(chatModel, chatModel, objectMapper, features);
+        this.qaChatHandler = new QaChatHandler(chatModel, chatModel, simpleVectorStore, systemResource, objectMapper);
         this.otherChatHandler = new OtherChatHandler();
         this.enabled = enabled;
     }
