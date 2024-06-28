@@ -1,10 +1,10 @@
 package cn.dpc.ab.api.ai.bot;
 
-import org.springframework.ai.chat.ChatClient;
-import org.springframework.ai.chat.Generation;
-import org.springframework.ai.chat.StreamingChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.model.StreamingChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,12 +17,12 @@ import java.util.Optional;
  */
 public abstract class AbstractChatHandler implements ChatHandler {
 
-    protected final StreamingChatClient streamingChatClient;
-    protected final ChatClient chatClient;
+    protected final StreamingChatModel streamingChatClient;
+    protected final ChatModel chatModel;
 
-    public AbstractChatHandler(StreamingChatClient streamingChatClient, ChatClient chatClient) {
+    public AbstractChatHandler(StreamingChatModel streamingChatClient, ChatModel chatModel) {
         this.streamingChatClient = streamingChatClient;
-        this.chatClient = chatClient;
+        this.chatModel = chatModel;
     }
 
     protected Flux<String> streamChat(List<Message> history, Prompt prompt, String sources) {

@@ -2,9 +2,9 @@ package cn.dpc.ab.api.ai.bot;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.ai.chat.ChatClient;
-import org.springframework.ai.chat.StreamingChatClient;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.StreamingChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
@@ -33,25 +33,25 @@ public class QaChatHandler extends AbstractChatHandler {
     /**
      * Instantiates a new Qa chat handler.
      *
-     * @param streamingChatClient the streaming chat client
-     * @param chatClient          the chat client
+     * @param streamingChatModel the streaming chat client
+     * @param chatModel          the chat client
      * @param simpleVectorStore   the simple vector store
      * @param systemResource      the system resource
      * @param objectMapper        the object mapper
      */
-    public QaChatHandler(StreamingChatClient streamingChatClient,
-                         ChatClient chatClient,
+    public QaChatHandler(StreamingChatModel streamingChatModel,
+                         ChatModel chatModel,
                          SimpleVectorStore simpleVectorStore,
                          Resource systemResource,
                          ObjectMapper objectMapper) {
-        super(streamingChatClient, chatClient);
+        super(streamingChatModel, chatModel);
         this.simpleVectorStore = simpleVectorStore;
         this.systemResource = systemResource;
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public Flux<String> handle(String clientId, String message, List<Message> history) throws JsonProcessingException {
+    public Flux<String> handle(String clientId, String message, List<Message> history) {
         List<Document> similarDocs = simpleVectorStore.similaritySearch(SearchRequest.query(message).withSimilarityThreshold(0.8F)
                 .withTopK(5)
         );
