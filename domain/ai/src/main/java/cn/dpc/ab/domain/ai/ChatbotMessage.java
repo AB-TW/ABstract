@@ -1,4 +1,4 @@
-package cn.dpc.ab.api.ai.bot;
+package cn.dpc.ab.domain.ai;
 
 /**
  * A message from a chatBot.

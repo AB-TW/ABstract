@@ -1,10 +1,9 @@
 package cn.dpc.ab.api.ai.config;
 
-import cn.dpc.ab.api.ai.bot.Intention;
-import groovy.util.logging.Slf4j;
+import cn.dpc.ab.domain.ai.Intention;
+import cn.dpc.ab.domain.ai.MarkDownTextSplitter;
 import jakarta.annotation.PostConstruct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.TextReader;
 import org.springframework.ai.transformer.splitter.TextSplitter;
@@ -15,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static cn.dpc.ab.domain.ai.AiConsts.INTENTION;
+
 /**
  * Configuration for ETL module.
  */
@@ -22,9 +23,7 @@ import java.util.List;
 @Slf4j
 @ConditionalOnProperty(name = "ai.enabled", havingValue = "true")
 public class HistoryQaConfig {
-    private static final Logger log = LoggerFactory.getLogger(HistoryQaConfig.class);
     private final SimpleVectorStore historyVectorStore;
-    public static final String INTENTION = "intention";
 
     /**
      * Instantiates a new Etl config.

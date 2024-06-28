@@ -1,4 +1,4 @@
-package cn.dpc.ab.api.ai.bot;
+package cn.dpc.ab.domain.ai;
 
 import org.springframework.ai.chat.messages.Message;
 
@@ -29,7 +29,7 @@ public class ChatStore {
     }
 
     /**
-     * Restore Intention and Slots.
+     * Restore cn.dpc.ab.domain.ai.Intention and Slots.
      *
      * @param clientId the client id
      */

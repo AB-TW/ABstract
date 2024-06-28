@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Description;
 import reactor.core.publisher.Mono;
 
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -103,6 +104,12 @@ public class FunctionCallConfig {
      */
     public record Response(boolean success, Object result, String message) {
     }
+
+    @Bean
+    Set<String> functions() {
+        return Set.of("countFeature", "getFeatureByFeatureKey");
+    }
+
 }
 
 

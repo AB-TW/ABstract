@@ -1,28 +1,27 @@
-package cn.dpc.ab.api.ai.bot;
+package cn.dpc.ab.domain.ai;
 
 import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
-import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.StreamingChatModel;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static cn.dpc.ab.api.ai.bot.Intention.OTHER;
-import static cn.dpc.ab.api.ai.bot.Intention.QA;
+import static cn.dpc.ab.domain.ai.Intention.OTHER;
+import static cn.dpc.ab.domain.ai.Intention.QA;
+
 
 /**
  * The type Chat bot.
  */
-@Component
 public class ChatBot {
 
 
@@ -33,28 +32,31 @@ public class ChatBot {
     private final boolean enabled;
 
     /**
-     * Instantiates a new ChatBot.
+     * Instantiates a new cn.dpc.ab.domain.ai.ChatBot.
      *
      * @param systemResource     the system resource
-     * @param chatModel         the chat client
-     * @param simpleVectorStore  the simple vector store
+     * @param streamingChatModel the stream chat client
+     * @param chatModel          the chat client
+     * @param qaVectorStore      the qa vector store
      * @param objectMapper       the object mapper
      * @param historyVectorStore the history vector store
+     * @param features           the features
+     * @param chatOptions        the chat options
+     * @param enabled            the enabled
      */
-    public ChatBot(@Value("classpath:/prompts/system-message.st")
-                   Resource systemResource,
-                   OpenAiChatModel chatModel,
-                   @Qualifier("simpleVectorStore")
-                   SimpleVectorStore simpleVectorStore,
+    public ChatBot(Resource systemResource,
+                   StreamingChatModel streamingChatModel,
+                   ChatModel chatModel,
+                   SimpleVectorStore qaVectorStore,
                    ObjectMapper objectMapper,
-                   @Qualifier("historyVectorStore")
                    SimpleVectorStore historyVectorStore,
                    Features features,
-                   @Value("${ai.enabled}")
+                   ChatOptions chatOptions,
                    boolean enabled) {
         this.historyVectorStore = historyVectorStore;
-        this.addFeatureChatHandler = new AddFeatureChatHandler(chatModel, chatModel, objectMapper, features);
-        this.qaChatHandler = new QaChatHandler(chatModel, chatModel, simpleVectorStore, systemResource, objectMapper);
+        this.addFeatureChatHandler = new AddFeatureChatHandler(streamingChatModel, chatModel, objectMapper, features);
+        this.qaChatHandler = new QaChatHandler(streamingChatModel, chatModel, qaVectorStore, systemResource,
+                chatOptions, objectMapper);
         this.otherChatHandler = new OtherChatHandler();
         this.enabled = enabled;
     }
@@ -73,12 +75,12 @@ public class ChatBot {
         List<Message> history = getHistoryOfClient(clientId);
 
         var intention = Intention.getIntentionByMessage(message, historyVectorStore);
-        if (intention != Intention.OTHER && intention != QA) {
+        if (intention != OTHER && intention != QA) {
             ChatStore.globalIntention.put(clientId, intention);
         }
 
         if (intention == OTHER) {
-            intention = ChatStore.globalIntention.getOrDefault(clientId, Intention.OTHER);
+            intention = ChatStore.globalIntention.getOrDefault(clientId, OTHER);
         }
 
         switch (intention) {
