@@ -36,12 +36,12 @@ public class CustomerExperimentRepositoryTest {
 
     @Test
     public void should_find_all_success() {
-        String key = "key";
+        String key = "featureKey";
         template.insert(createExperimentDb(key, "111")).block();
         template.insert(createExperimentDb(key, "222")).block();
 
         repository.findAll(Experiments.FilterParams.builder()
-                        .key(key)
+                        .featureKey(key)
                         .status(Experiment.Status.DynamicStatus.COLLECTING)
                 .build())
                 .as(StepVerifier::create)
@@ -51,7 +51,7 @@ public class CustomerExperimentRepositoryTest {
 
     @Test
     public void should_find_all_with_page_success() {
-        String key = "key";
+        String key = "featureKey";
         template.insert(createExperimentDb(key, "111")).block();
         template.insert(createExperimentDb(key, "222")).block();
 
@@ -62,7 +62,7 @@ public class CustomerExperimentRepositoryTest {
         PageRequest pageRequest = PageRequest.of(0, 1).withSort(Sort.by("updatedAt").descending());
 
         repository.findAll(Experiments.FilterParams.builder()
-                        .key("key")
+                        .featureKey("featureKey")
                         .status(Experiment.Status.DynamicStatus.COLLECTING)
                         .build(), pageRequest)
                 .as(StepVerifier::create)
@@ -72,7 +72,7 @@ public class CustomerExperimentRepositoryTest {
 
     @Test
     public void should_count_success() {
-        String key = "key";
+        String key = "featureKey";
         template.insert(createExperimentDb(key, "111")).block();
         template.insert(createExperimentDb(key, "222")).block();
         ExperimentDb item3 = createExperimentDb(key, "333");
@@ -81,7 +81,7 @@ public class CustomerExperimentRepositoryTest {
 
         repository.count(Experiments.FilterParams.builder()
                         .status(Experiment.Status.DynamicStatus.COLLECTING)
-                        .key(key)
+                        .featureKey(key)
                 .build())
                 .as(StepVerifier::create)
                 .expectNext(3L)
@@ -89,7 +89,7 @@ public class CustomerExperimentRepositoryTest {
 
         repository.count(Experiments.FilterParams.builder()
                         .status(Experiment.Status.DynamicStatus.PAUSED)
-                        .key(key)
+                        .featureKey(key)
                 .build())
                 .as(StepVerifier::create)
                 .expectNext(0L)
@@ -98,11 +98,11 @@ public class CustomerExperimentRepositoryTest {
 
     @Test
     public void should_find_by_feature_key_success() {
-        template.insert(createExperimentDb("key", "111")).block();
-        template.insert(createExperimentDb("key", "222")).block();
+        template.insert(createExperimentDb("featureKey", "111")).block();
+        template.insert(createExperimentDb("featureKey", "222")).block();
         template.insert(createExperimentDb("key3", "333")).block();
 
-        repository.findByFeatureKey("key")
+        repository.findByFeatureKey("featureKey")
                 .as(StepVerifier::create)
                 .expectNextCount(2)
                 .verifyComplete();

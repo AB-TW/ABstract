@@ -1,6 +1,7 @@
 package cn.dpc.ab.api.ai.config;
 
 import cn.dpc.ab.api.feature.dto.FeatureRequest;
+import cn.dpc.ab.domain.experiment.Experiments;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Features;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.function.Function;
 public class FunctionCallConfig {
 
     private final Features features;
+    private final Experiments experiments;
 
     /**
      * Add a new feature.
@@ -33,7 +35,7 @@ public class FunctionCallConfig {
      */
     @Bean
     @Description("""
-            Add or create a new feature to the system, return the feature key if success, return error message when fail
+            Add or create a new feature to the system, return the feature featureKey if success, return error message when fail
             调用前请校验补充必要参数
             成功后可在feature管理模块查看结果
             """)
@@ -71,12 +73,12 @@ public class FunctionCallConfig {
     }
 
     /**
-     * Get the feature by feature key.
+     * Get the feature by feature featureKey.
      *
      * @return the getFeatureByFeatureKey function
      */
     @Bean
-    @Description("Get the feature by feature key")
+    @Description("Get the feature by feature featureKey")
     public Function<GetFeatureRequest, Response> getFeatureByFeatureKey() {
         return request -> {
             Mono<Response> mono = features.get(Feature.FeatureId.builder().featureKey(request.featureKey).build())
@@ -84,6 +86,43 @@ public class FunctionCallConfig {
             return handleResponse(mono);
         };
     }
+
+    /**
+     * Count the experiment by feature featureKey.
+     *
+     * @return the countExperiment function
+     */
+    @Bean
+    @Description("Count the number of experiments in the system with optional filter parameters")
+    public Function<Experiments.FilterParams, Response> countExperiment() {
+        return request -> {
+            Mono<Response> mono = experiments.size(request)
+                    .map(size -> new Response(true, size, "success"));
+            return handleResponse(mono);
+        };
+    }
+
+    /**
+     * Get the experiment by feature featureKey.
+     *
+     * @return the getExperimentByFeatureKey function
+     */
+    @Bean
+    @Description("Get the feature related experiment by feature featureKey")
+    public Function<GetExperimentRequest, Response> getExperimentByFeatureKey() {
+        return request -> {
+            Mono<Response> mono = experiments.getByFeatureKey(request.featureKey)
+                    .map(experiment -> new Response(true, experiment, "success"));
+            return handleResponse(mono);
+        };
+    }
+
+    /**
+     * GetFeatureRequest Param.
+     */
+    public record GetExperimentRequest(String featureKey) {
+    }
+
 
     private static Response handleResponse(Mono<Response> mono) {
         CompletableFuture<Response> future = new CompletableFuture<>();
@@ -107,7 +146,7 @@ public class FunctionCallConfig {
 
     @Bean
     Set<String> functions() {
-        return Set.of("countFeature", "getFeatureByFeatureKey");
+        return Set.of("countFeature", "getFeatureByFeatureKey", "getExperimentByFeatureKey", "countExperiment");
     }
 
 }

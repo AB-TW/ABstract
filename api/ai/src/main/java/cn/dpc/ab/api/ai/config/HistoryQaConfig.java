@@ -41,6 +41,7 @@ public class HistoryQaConfig {
     public void init() {
         this.initHistoryVectorStore("classpath:/docs/history.md", Intention.QA.name());
         this.initHistoryVectorStore("classpath:/docs/history-add-feature.md", Intention.ADD_FEATURE.name());
+        this.initHistoryVectorStore("classpath:/docs/history-query-with-function.md", Intention.QUERY_WITH_FUNCTION.name());
     }
 
     private void initHistoryVectorStore(String sourceLink, String intention) {

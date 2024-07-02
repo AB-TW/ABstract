@@ -41,7 +41,7 @@ public interface ExperimentDbRepository extends ReactiveCrudRepository<Experimen
         public static FilterParams from(Experiments.FilterParams filterParams) {
             String statusQuery = "";
             if (null == filterParams.status()) {
-                return new FilterParams(filterParams.key(), statusQuery);
+                return new FilterParams(filterParams.featureKey(), statusQuery);
             }
 
             switch (filterParams.status()) {
@@ -67,7 +67,7 @@ public interface ExperimentDbRepository extends ReactiveCrudRepository<Experimen
                 default -> {
                 }
             }
-            return new FilterParams(filterParams.key(), statusQuery);
+            return new FilterParams(filterParams.featureKey(), statusQuery);
         }
     }
 

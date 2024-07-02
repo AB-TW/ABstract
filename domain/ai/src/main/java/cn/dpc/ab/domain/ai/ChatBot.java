@@ -22,6 +22,7 @@ public class ChatBot {
     private final boolean enabled;
     private final Map<Intention, ChatHandler> chatHandlerMap;
     private final OtherChatHandler otherChatHandler = new OtherChatHandler();
+    private final IntentionHandler intentionHandler;
 
     /**
      * Instantiates a new cn.dpc.ab.domain.ai.ChatBot.
@@ -33,10 +34,11 @@ public class ChatBot {
     public ChatBot(
             SimpleVectorStore historyVectorStore,
             Map<Intention, ChatHandler> chatHandlerMap,
-            boolean enabled) {
+            boolean enabled, IntentionHandler intentionHandler) {
         this.historyVectorStore = historyVectorStore;
         this.chatHandlerMap = chatHandlerMap;
         this.enabled = enabled;
+        this.intentionHandler = intentionHandler;
     }
 
     /**
@@ -52,8 +54,8 @@ public class ChatBot {
             return otherChatHandler.handle(clientId, message, history);
         }
 
-        var intention = Intention.getIntentionByMessage(message, historyVectorStore);
-        if (intention != OTHER && intention != QA && intention != QUERY_FEATURE) {
+        var intention = intentionHandler.getIntentionByMessage(message, historyVectorStore);
+        if (intention != OTHER && intention != QA && intention != QUERY_WITH_FUNCTION) {
             ChatStore.globalIntention.put(clientId, intention);
         }
 
