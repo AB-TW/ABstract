@@ -5,6 +5,7 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static cn.dpc.ab.domain.ai.AiConsts.INTENTION;
@@ -16,7 +17,7 @@ import static cn.dpc.ab.domain.ai.AiConsts.INTENTION;
 @Getter
 public enum Intention {
     QA(),
-
+    QUERY_FEATURE(),
     ADD_FEATURE(
             List.of(Slot.builder()
                             .title("key")
@@ -179,17 +180,16 @@ public enum Intention {
     public static Intention getIntentionByMessage(String message, SimpleVectorStore historyVectorStore) {
         List<Document> intentions = historyVectorStore.similaritySearch(
                 SearchRequest.query(message)
-                        .withSimilarityThreshold(0.8F)
+                        .withSimilarityThreshold(0.85F)
                         .withTopK(1));
         if (intentions.isEmpty()) {
             return Intention.OTHER;
         }
 
-        if (intentions.get(0).getMetadata().get(INTENTION).equals(ADD_FEATURE.name())) {
-            return ADD_FEATURE;
-        }
-
-        return Intention.QA;
+        return Arrays.stream(Intention.values())
+                .filter(item -> item.name().equalsIgnoreCase(String.valueOf(intentions.get(0).getMetadata().get(INTENTION))))
+                .findFirst()
+                .orElse(Intention.QA);
     }
 
 }

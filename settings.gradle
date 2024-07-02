@@ -46,4 +46,6 @@ include 'api:ai'
 findProject(':api:ai')?.name = 'api-ai'
 include 'persistent:ai-openai'
 findProject(':persistent:ai-openai')?.name = 'ai-openai'
+include 'persistent:ai-zhipu'
+findProject(':persistent:ai-zhipu')?.name = 'ai-zhipu'
 
