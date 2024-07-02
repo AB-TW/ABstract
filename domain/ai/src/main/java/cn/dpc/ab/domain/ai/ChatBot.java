@@ -10,8 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static cn.dpc.ab.domain.ai.Intention.OTHER;
-import static cn.dpc.ab.domain.ai.Intention.QA;
+import static cn.dpc.ab.domain.ai.Intention.*;
 
 
 /**
@@ -54,7 +53,7 @@ public class ChatBot {
         }
 
         var intention = Intention.getIntentionByMessage(message, historyVectorStore);
-        if (intention != OTHER && intention != QA) {
+        if (intention != OTHER && intention != QA && intention != QUERY_FEATURE) {
             ChatStore.globalIntention.put(clientId, intention);
         }
 

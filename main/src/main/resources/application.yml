@@ -55,4 +55,20 @@ rsocket:
   custom-web-socket-enabled: true
 
 ai:
-  enabled: false
+  enabled: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: zhipu
+
+  ai:
+    zhipuai:
+      chat:
+        options:
+          model: GLM-4
+      api-key: ${ZHIPU_AI_APIKEY}
+      embedding:
+        options:
+          model: embedding-2
