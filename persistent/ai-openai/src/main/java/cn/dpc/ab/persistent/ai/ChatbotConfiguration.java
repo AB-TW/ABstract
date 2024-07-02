@@ -1,11 +1,9 @@
 package cn.dpc.ab.persistent.ai;
 
-import cn.dpc.ab.domain.ai.AddFeatureChatHandler;
-import cn.dpc.ab.domain.ai.ChatBot;
-import cn.dpc.ab.domain.ai.Intention;
-import cn.dpc.ab.domain.ai.QueryChatHandler;
+import cn.dpc.ab.domain.ai.*;
 import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
@@ -53,12 +51,17 @@ public class ChatbotConfiguration {
                            boolean enabled) {
         var qaChatHandler = new QueryChatHandler(openAiChatModel, openAiChatModel, qaVectorStore, systemResource,
                 OpenAiChatOptions.builder()
-                        .withFunctions(functions)
                         .build(), objectMapper);
         var addFeatureChatHandler = new AddFeatureChatHandler(openAiChatModel, openAiChatModel, objectMapper, features);
+        var queryWithFunctionChatHandler = new QueryWithFunctionChatHandler(openAiChatModel, openAiChatModel, OpenAiChatOptions.builder()
+                .withFunctions(functions)
+                .build());
+        var intentionHandler = new IntentionHandler(objectMapper, ChatClient.builder(openAiChatModel).build());
         return new ChatBot(historyVectorStore,
                 Map.of(Intention.QA, qaChatHandler,
-                        Intention.ADD_FEATURE, addFeatureChatHandler),
-                enabled);
+                        Intention.ADD_FEATURE, addFeatureChatHandler,
+                        Intention.QUERY_WITH_FUNCTION, queryWithFunctionChatHandler),
+                enabled,
+                intentionHandler);
     }
 }

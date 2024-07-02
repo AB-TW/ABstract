@@ -83,8 +83,8 @@ public class CustomerExperimentRepository {
     private CriteriaDefinition getCriteria(Experiments.FilterParams params) {
         Criteria criteria = Criteria.empty();
 
-        if (StringUtils.hasLength(params.key())) {
-            criteria = criteria.and("featureKey").like("%" + params.key() + "%");
+        if (StringUtils.hasLength(params.featureKey())) {
+            criteria = criteria.and("featureKey").like("%" + params.featureKey() + "%");
         }
 
         if (params.status() != null) {

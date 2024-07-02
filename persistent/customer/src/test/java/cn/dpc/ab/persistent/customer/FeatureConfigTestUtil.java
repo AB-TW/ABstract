@@ -30,7 +30,7 @@ public class FeatureConfigTestUtil {
                         .description("description")
                         .createdAt(LocalDateTime.now())
                         .updatedAt(LocalDateTime.now())
-                        .key("key")
+                        .key("featureKey")
                         .data(List.of(Map.of("key1", "key2")))
                         .saData(Map.of("key1", "key2"))
                         .status(FeatureConfig.Status.builder()

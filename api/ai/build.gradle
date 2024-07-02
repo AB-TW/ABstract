@@ -11,4 +11,5 @@ dependencies {
     implementation project(':api:api-feature')
     implementation project(':api:api-core')
     implementation project(':domain:ai')
+    implementation project (':domain:experiment')
 }

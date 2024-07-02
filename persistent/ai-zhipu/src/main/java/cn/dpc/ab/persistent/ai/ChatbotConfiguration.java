@@ -3,6 +3,7 @@ package cn.dpc.ab.persistent.ai;
 import cn.dpc.ab.domain.ai.*;
 import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.zhipuai.ZhiPuAiChatModel;
 import org.springframework.ai.zhipuai.ZhiPuAiChatOptions;
@@ -52,12 +53,15 @@ public class ChatbotConfiguration {
                 ZhiPuAiChatOptions.builder()
                         .build(), objectMapper);
         var addFeatureChatHandler = new AddFeatureChatHandler(zhiPuAiChatModel, zhiPuAiChatModel, objectMapper, features);
-        var functionCallingChatHandler = new FunctionCallingChatHandler(zhiPuAiChatModel, zhiPuAiChatModel,
-                ZhiPuAiChatOptions.builder().withFunctions(functions).build());
+        var queryWithFunctionChatHandler = new QueryWithFunctionChatHandler(zhiPuAiChatModel, zhiPuAiChatModel, ZhiPuAiChatOptions.builder()
+                .withFunctions(functions)
+                .build());
+        var intentionHandler = new IntentionHandler(objectMapper, ChatClient.builder(zhiPuAiChatModel).build());
         return new ChatBot(historyVectorStore,
                 Map.of(Intention.QA, qaChatHandler,
                         Intention.ADD_FEATURE, addFeatureChatHandler,
-                        Intention.QUERY_FEATURE, functionCallingChatHandler),
-                enabled);
+                        Intention.QUERY_WITH_FUNCTION, queryWithFunctionChatHandler),
+                enabled,
+                intentionHandler);
     }
 }

@@ -24,7 +24,7 @@ public class ExperimentPageRequest extends PageRequest {
      */
     public Experiments.FilterParams filterParams() {
         return Experiments.FilterParams.builder()
-                .key(key)
+                .featureKey(key)
                 .status(status)
                 .build();
     }

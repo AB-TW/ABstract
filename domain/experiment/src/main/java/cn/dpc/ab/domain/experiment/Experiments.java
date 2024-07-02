@@ -13,7 +13,7 @@ public interface Experiments {
      * FilterParams provides a set of parameters to filter experiments.
      */
     @Builder
-    record FilterParams(String key, Experiment.Status.DynamicStatus status) {}
+    record FilterParams(String featureKey, Experiment.Status.DynamicStatus status) {}
 
     /**
      * Get all experiments.

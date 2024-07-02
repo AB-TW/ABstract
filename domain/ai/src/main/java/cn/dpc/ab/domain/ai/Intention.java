@@ -1,14 +1,8 @@
 package cn.dpc.ab.domain.ai;
 
 import lombok.Getter;
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.SimpleVectorStore;
 
-import java.util.Arrays;
 import java.util.List;
-
-import static cn.dpc.ab.domain.ai.AiConsts.INTENTION;
 
 
 /**
@@ -17,7 +11,7 @@ import static cn.dpc.ab.domain.ai.AiConsts.INTENTION;
 @Getter
 public enum Intention {
     QA(),
-    QUERY_FEATURE(),
+    QUERY_WITH_FUNCTION(),
     ADD_FEATURE(
             List.of(Slot.builder()
                             .title("key")
@@ -102,7 +96,7 @@ public enum Intention {
                          }}
                     ]
                     ===Example End===
-                    
+                                        
                     SLOTS: {slots}
                     """,
 
@@ -168,28 +162,6 @@ public enum Intention {
         this.slots = slots;
         this.updatePrompt = updatePrompt;
         this.queryPrompt = queryPrompt;
-    }
-
-    /**
-     * Gets intention by message.
-     *
-     * @param message           the message
-     * @param historyVectorStore the history vector store
-     * @return the intention by message
-     */
-    public static Intention getIntentionByMessage(String message, SimpleVectorStore historyVectorStore) {
-        List<Document> intentions = historyVectorStore.similaritySearch(
-                SearchRequest.query(message)
-                        .withSimilarityThreshold(0.85F)
-                        .withTopK(1));
-        if (intentions.isEmpty()) {
-            return Intention.OTHER;
-        }
-
-        return Arrays.stream(Intention.values())
-                .filter(item -> item.name().equalsIgnoreCase(String.valueOf(intentions.get(0).getMetadata().get(INTENTION))))
-                .findFirst()
-                .orElse(Intention.QA);
     }
 
 }
