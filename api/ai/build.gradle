@@ -1,20 +1,15 @@
 plugins {
     id 'ai'
     id 'api'
-}
-
-repositories {
-    mavenCentral()
-    maven { url 'https://repo.spring.io/milestone' }
+    id 'domain'
 }
 
 dependencies {
-    implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
-    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
-//    implementation 'org.springframework.ai:spring-ai-chroma-store'
     implementation 'org.springframework.ai:spring-ai-tika-document-reader'
     implementation project(':domain:feature')
     implementation project(':domain:core')
     implementation project(':api:api-feature')
     implementation project(':api:api-core')
+    implementation project(':domain:ai')
+    implementation project (':domain:experiment')
 }

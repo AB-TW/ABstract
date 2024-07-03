@@ -1,0 +1,9 @@
+plugins {
+    id 'domain'
+    id 'ai'
+}
+
+dependencies {
+    implementation 'org.springframework.ai:spring-ai-core'
+    implementation project(':domain:feature')
+}

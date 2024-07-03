@@ -25,8 +25,7 @@ services:
       SPRING_APPLICATION_JSON: '{
           "spring.couchbase.connectionString": "couchbase://couchbase"
       }'
-      OPENAI_API_BASE: https://api.chatanywhere.com.cn/
-      OPENAI_API_KEY: sk-ehksizQsM6FbB6jICPKP4ExhJy6WPmvL5xZiCinHXmZdUxCd
-#      OPENAI_API_KEY: sk-EBTlziAb9HClAkWre0gr6avW3mSdMnxkJ4iixM0EFeEimasM
+      OPENAI_API_BASE: ${OPENAI_API_BASE}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
 networks:
   couchbase:

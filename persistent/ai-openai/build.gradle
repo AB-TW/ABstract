@@ -1,0 +1,11 @@
+plugins {
+    id 'ai'
+    id 'persistent'
+}
+
+dependencies {
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+    implementation project(':domain:ai')
+    implementation project(':domain:feature')
+    implementation project(':persistent:persistent-feature')
+}

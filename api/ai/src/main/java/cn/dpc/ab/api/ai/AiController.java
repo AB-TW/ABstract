@@ -1,8 +1,9 @@
 package cn.dpc.ab.api.ai;
 
-import cn.dpc.ab.api.ai.bot.ChatBot;
-import cn.dpc.ab.api.ai.bot.ChatbotMessage;
+import cn.dpc.ab.domain.ai.ChatBot;
+import cn.dpc.ab.domain.ai.ChatbotMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
@@ -12,13 +13,10 @@ import java.util.List;
  * Controller for AI module.
  */
 @RestController
+@RequiredArgsConstructor
 public class AiController {
 
     private final ChatBot chatBot;
-
-    public AiController(ChatBot chatBot) {
-        this.chatBot = chatBot;
-    }
 
     /**
      * Chat with AI.

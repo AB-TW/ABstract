@@ -22,7 +22,9 @@ dependencies {
     implementation project(':persistent:persistent-customer')
     implementation project(':persistent:persistent-experiment')
     implementation project(':persistent:persistent-filterCondition')
-    implementation project(':api:ai')
+    implementation project(':api:api-ai')
+    implementation project(':persistent:ai-openai')
+//    implementation project(':persistent:ai-zhipu')
 }
 
 bootRun {
