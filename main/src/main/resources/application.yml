@@ -56,6 +56,8 @@ rsocket:
 
 ai:
   enabled: true
+  intent-similarity-threshold: 0.7
+  qa-similarity-threshold: 0.7
 
 ---
 spring:
@@ -72,3 +74,27 @@ spring:
       embedding:
         options:
           model: embedding-2
+
+ai:
+  enabled: true
+  intent-similarity-threshold: 0.6
+  qa-similarity-threshold: 0.6
+---
+spring:
+  config:
+    activate:
+      on-profile: ollama
+
+  ai:
+    ollama:
+      chat:
+        options:
+          model: qwen2:latest
+      embedding:
+        options:
+          model: qwen2:latest
+
+ai:
+  enabled: true
+  intent-similarity-threshold: 0.5
+  qa-similarity-threshold: 0.5

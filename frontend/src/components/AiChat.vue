@@ -28,7 +28,7 @@ const messages = reactive([
   {
     sender: "bot",
     text: "您好，我是ABstract智能助理，有什么可以帮您的吗?",
-    questions: ["请简单介绍一下ABstract系统", "请问ABstract系统有哪些基本概念？", "当前系统有多少特性"]
+    questions: ["请简单介绍一下ABstract系统", "当前系统有多少特性", "当前系统有多少实验"]
   }
 ] as Message[])
 

@@ -32,7 +32,7 @@ public class ChatbotConfiguration {
      * @param historyVectorStore the history vector store
      * @param features           the features
      * @param functions          the functions
-     * @param enabled            the enabled
+     * @param aiProperties       ai properties
      * @return the chat bot
      */
     @Bean
@@ -47,21 +47,20 @@ public class ChatbotConfiguration {
                            Features features,
                            @Qualifier("functions")
                            Set<String> functions,
-                           @Value("${ai.enabled}")
-                           boolean enabled) {
+                           AiProperties aiProperties) {
         var qaChatHandler = new QueryChatHandler(zhiPuAiChatModel, zhiPuAiChatModel, qaVectorStore, systemResource,
                 ZhiPuAiChatOptions.builder()
-                        .build(), objectMapper);
+                        .build(), objectMapper, aiProperties);
         var addFeatureChatHandler = new AddFeatureChatHandler(zhiPuAiChatModel, zhiPuAiChatModel, objectMapper, features);
         var queryWithFunctionChatHandler = new QueryWithFunctionChatHandler(zhiPuAiChatModel, zhiPuAiChatModel, ZhiPuAiChatOptions.builder()
                 .withFunctions(functions)
                 .build());
-        var intentionHandler = new IntentionHandler(objectMapper, ChatClient.builder(zhiPuAiChatModel).build());
+        var intentionHandler = new IntentionHandler(objectMapper, ChatClient.builder(zhiPuAiChatModel).build(), aiProperties);
         return new ChatBot(historyVectorStore,
                 Map.of(Intention.QA, qaChatHandler,
                         Intention.ADD_FEATURE, addFeatureChatHandler,
                         Intention.QUERY_WITH_FUNCTION, queryWithFunctionChatHandler),
-                enabled,
+                aiProperties.isEnabled(),
                 intentionHandler);
     }
 }

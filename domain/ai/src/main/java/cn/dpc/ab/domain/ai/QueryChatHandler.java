@@ -29,6 +29,7 @@ public class QueryChatHandler extends AbstractChatHandler {
     private final Resource systemResource;
     private final ObjectMapper objectMapper;
     private final ChatOptions chatOptions;
+    private final AiProperties aiProperties;
 
     /**
      * Instantiates a new Qa chat handler.
@@ -45,17 +46,20 @@ public class QueryChatHandler extends AbstractChatHandler {
                             SimpleVectorStore simpleVectorStore,
                             Resource systemResource,
                             ChatOptions chatOptions,
-                            ObjectMapper objectMapper) {
+                            ObjectMapper objectMapper,
+                            AiProperties aiProperties) {
         super(streamingChatModel, chatModel);
         this.simpleVectorStore = simpleVectorStore;
         this.systemResource = systemResource;
         this.objectMapper = objectMapper;
         this.chatOptions = chatOptions;
+        this.aiProperties = aiProperties;
     }
 
     @Override
     public Flux<String> handle(String clientId, String message, List<Message> history) throws JsonProcessingException {
-        List<Document> similarDocs = simpleVectorStore.similaritySearch(SearchRequest.query(message).withSimilarityThreshold(0.8F)
+        List<Document> similarDocs = simpleVectorStore.similaritySearch(SearchRequest.query(message)
+                .withSimilarityThreshold(aiProperties.getQaSimilarityThreshold())
                 .withTopK(5)
         );
         String context = similarDocs.stream()
