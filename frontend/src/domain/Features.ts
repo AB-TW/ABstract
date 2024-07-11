@@ -77,7 +77,7 @@ export class Features {
 
   fetchAll(page: number, pageSize: number, featureKey?: string, enabled?: boolean): Promise<PageResponse<Feature>> {
     return http
-      .get(this.getUrl(`/features`), { page, pageSize, key: featureKey, enabled })
+      .get(this.getUrl(`/features`), { params: { page, pageSize, key: featureKey, enabled } })
       .then((res: any) => res?.data as PageResponse<Feature>)
   }
 

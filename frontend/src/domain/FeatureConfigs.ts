@@ -18,11 +18,13 @@ export class FeatureConfigs {
   ): Promise<PageResponse<FeatureConfig>> {
     return http
       .get(this.getUrl(`/${featureKey}/configs`), {
-        title,
-        page,
-        pageSize,
-        featureKey,
-        status: status == "ALL" ? null : status
+        params: {
+          title,
+          page,
+          pageSize,
+          featureKey,
+          status: status == "ALL" ? null : status
+        }
       })
       .then((res: any) => res?.data as PageResponse<FeatureConfig>)
   }
