@@ -52,6 +52,10 @@ export class FeatureConfigs {
   disable(featureKey: string, id: string): Promise<void> {
     return http.put(this.getUrl(`/${featureKey}/configs/${id}/disable`), {}).then()
   }
+
+  top(featureKey: any, id: string) {
+    return http.put(this.getUrl(`/${featureKey}/configs/${id}/top`), {}).then()
+  }
 }
 
 export interface FeatureConfig {

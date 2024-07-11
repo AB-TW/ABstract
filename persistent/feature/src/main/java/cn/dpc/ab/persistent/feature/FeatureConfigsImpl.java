@@ -108,6 +108,18 @@ public class FeatureConfigsImpl implements Feature.Configs {
                 .doOnSuccess(db -> clearCache());
     }
 
+    @Override
+    public Mono<Void> top(FeatureConfig.FeatureConfigId id) {
+        return repository.findById(id.configId())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("FeatureConfig not found.")))
+                .flatMap(featureConfigDB -> {
+                    featureConfigDB.updateDescription(featureConfigDB.toFeatureConfig().top().getDescription());
+                    return repository.save(featureConfigDB);
+                }).then()
+                .publishOn(Schedulers.boundedElastic())
+                .doOnSuccess(db -> clearCache());
+    }
+
     private void clearCache() {
         localCacheManager.clearCache(FEATURE_CONFIG_KEY_PREFIX + featureId.featureKey()).subscribe();
     }

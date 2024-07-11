@@ -123,6 +123,9 @@
             >
               查看
             </el-button>
+            <el-button v-if="scope.row?.status !== 'DISABLED'" type="primary" size="small" @click="top(scope.row.id)"
+              >置顶
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -241,6 +244,19 @@ const handleSizeChange = () => {
 const handleCurrentChange = (value: number) => {
   searchForm.page = value
   searchData()
+}
+
+const top = (id: string) => {
+  featureConfigs
+    .top(featureKey.value, id)
+    .then(() => {
+      ElMessage.success("操作成功")
+      searchData()
+    })
+    .catch((err) => {
+      console.log(err)
+      ElMessage.error("操作失败，请重试")
+    })
 }
 
 onMounted(() => {

@@ -155,5 +155,7 @@ public class Feature {
         Mono<Void> publish(FeatureConfig.FeatureConfigId id);
 
         Mono<Void> disable(FeatureConfig.FeatureConfigId id);
+
+        Mono<Void> top(FeatureConfig.FeatureConfigId build);
     }
 }
