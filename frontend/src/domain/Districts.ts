@@ -1,4 +1,5 @@
-import * as districtData from "./data/district.json";
+import * as districtData from "./data/district.json"
+
 export class Districts {
   getProvinceTree(): Tree[] {
     return districtData.districts.map((province: any) => {
@@ -9,16 +10,16 @@ export class Districts {
           return {
             value: city.adcode,
             label: city.name,
-            children: [],
-          };
-        }),
-      } as Tree;
-    });
+            children: []
+          }
+        })
+      } as Tree
+    })
   }
 }
 
 export interface Tree {
-  value: string;
-  label: string;
-  children?: Tree[];
+  value: string
+  label: string
+  children?: Tree[]
 }
