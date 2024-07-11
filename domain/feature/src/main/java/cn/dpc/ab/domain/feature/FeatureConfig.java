@@ -16,6 +16,8 @@ import java.util.Optional;
 @NoArgsConstructor
 public class FeatureConfig {
 
+    public static final int HIGHEST_PRIORITY = -1;
+
     private FeatureConfigId id;
 
     // description
@@ -172,6 +174,26 @@ public class FeatureConfig {
      */
     public FeatureConfig disable() {
         return updateStatus(Status.StaticStatus.DISABLED);
+    }
+
+    /**
+     * Disable a feature config.
+     *
+     * @return the feature config
+     */
+    public FeatureConfig top() {
+        this.description = Description.builder()
+                .title(this.description.title())
+                .description(this.description.description())
+                .data(this.description.data())
+                .saData(this.description.saData())
+                .status(this.description.status())
+                .createdAt(this.description.createdAt())
+                .priority(HIGHEST_PRIORITY)
+                .filterCondition(this.description.filterCondition())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        return this;
     }
 
     /**

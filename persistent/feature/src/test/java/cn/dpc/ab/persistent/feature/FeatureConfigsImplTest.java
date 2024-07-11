@@ -243,6 +243,51 @@ class FeatureConfigsImplTest {
     }
 
     @Test
+    public void should_top_success() {
+        when(repository.findById(any(String.class)))
+                .thenAnswer(invocation ->
+                        Mono.just(createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
+                );
+
+        when(repository.save(any(FeatureConfigDb.class)))
+                .thenAnswer(invocation -> {
+                    FeatureConfigDb featureConfigDb = invocation.getArgument(0);
+                    return Mono.just(featureConfigDb);
+                });
+
+        featureConfigs.top(new FeatureConfig.FeatureConfigId("id"))
+                .as(StepVerifier::create)
+                .verifyComplete();
+    }
+
+    @Test
+    public void should_top_return_IllegalArgumentException_when_record_not_exist() {
+        when(repository.findById(any(String.class)))
+                .thenReturn(Mono.empty());
+
+        featureConfigs.top(new FeatureConfig.FeatureConfigId("id"))
+                .as(StepVerifier::create)
+                .expectError(IllegalArgumentException.class)
+                .verify();
+    }
+
+    @Test
+    public void should_top_return_error_when_save_error() {
+        when(repository.findById(any(String.class)))
+                .thenAnswer(invocation ->
+                        Mono.just(createFeatureConfigDb(invocation.getArgument(0), "featureKey"))
+                );
+
+        when(repository.save(any(FeatureConfigDb.class)))
+                .thenReturn(Mono.error(new RuntimeException("save error")));
+
+        featureConfigs.top(new FeatureConfig.FeatureConfigId("id"))
+                .as(StepVerifier::create)
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
+    @Test
     public void should_all_success() {
         when(repository.findByFilterParams(any(String.class), any(FeatureConfigDbRepository.FilterParams.class)))
                 .thenReturn(Flux.just(createFeatureConfigDb("id2", "featureKey")));

@@ -116,6 +116,13 @@ public class FeatureApi {
                         .configId(configId).build()));
     }
 
+    @PutMapping("/{featureKey}/configs/{configId}/top")
+    Mono<Void> topConfig(@PathVariable String featureKey, @PathVariable String configId) {
+        return getFeature(featureKey)
+                .flatMap(feature -> feature.getConfigs().top(FeatureConfig.FeatureConfigId.builder()
+                        .configId(configId).build()));
+    }
+
     @DeleteMapping("/{featureKey}/configs/{configId}")
     Mono<Void> deleteConfig(@PathVariable String featureKey, @PathVariable String configId) {
         return getFeature(featureKey)
