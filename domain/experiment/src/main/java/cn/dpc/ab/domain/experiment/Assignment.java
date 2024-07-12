@@ -137,7 +137,7 @@ public class Assignment {
     /**
      * updateBucketKey modify bucketKey.
      *
-     * @param bucketKey the bucket featureKey
+     * @param bucketKey the bucket key
      * @return assignment
      */
     public Assignment updateBucketKey(Experiment experiment, String bucketKey) {

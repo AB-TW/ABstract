@@ -35,7 +35,7 @@ public class FunctionCallConfig {
      */
     @Bean
     @Description("""
-            Add or create a new feature to the system, return the feature featureKey if success, return error message when fail
+            Add or create a new feature to the system, return the feature key if success, return error message when fail
             调用前请校验补充必要参数
             成功后可在feature管理模块查看结果
             """)
@@ -73,12 +73,12 @@ public class FunctionCallConfig {
     }
 
     /**
-     * Get the feature by feature featureKey.
+     * Get the feature by feature key.
      *
      * @return the getFeatureByFeatureKey function
      */
     @Bean
-    @Description("Get the feature by feature featureKey")
+    @Description("Get the feature by feature key")
     public Function<GetFeatureRequest, Response> getFeatureByFeatureKey() {
         return request -> {
             Mono<Response> mono = features.get(Feature.FeatureId.builder().featureKey(request.featureKey).build())
@@ -88,7 +88,7 @@ public class FunctionCallConfig {
     }
 
     /**
-     * Count the experiment by feature featureKey.
+     * Count the experiment by feature key.
      *
      * @return the countExperiment function
      */
@@ -103,12 +103,12 @@ public class FunctionCallConfig {
     }
 
     /**
-     * Get the experiment by feature featureKey.
+     * Get the experiment by feature key.
      *
      * @return the getExperimentByFeatureKey function
      */
     @Bean
-    @Description("Get the feature related experiment by feature featureKey")
+    @Description("Get the feature related experiment by feature key")
     public Function<GetExperimentRequest, Response> getExperimentByFeatureKey() {
         return request -> {
             Mono<Response> mono = experiments.getByFeatureKey(request.featureKey)

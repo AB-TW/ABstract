@@ -198,7 +198,7 @@ const searchData = () => {
       searchForm.page > 1 ? searchForm.page - 1 : 0,
       searchForm.size,
       featureKey.value,
-      searchForm.status === "ALL" ? null : searchForm.status
+      searchForm.status === "ALL" ? [] : [searchForm.status]
     )
     .then((res) => {
       tableData.value = res.content

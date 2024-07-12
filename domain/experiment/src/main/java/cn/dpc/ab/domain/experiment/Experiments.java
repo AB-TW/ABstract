@@ -4,6 +4,9 @@ import lombok.Builder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * Experiments represents a collection of experiments.
  */
@@ -13,7 +16,7 @@ public interface Experiments {
      * FilterParams provides a set of parameters to filter experiments.
      */
     @Builder
-    record FilterParams(String featureKey, Experiment.Status.DynamicStatus status) {}
+    record FilterParams(String key, String featureKey, List<Experiment.Status.DynamicStatus> status) {}
 
     /**
      * Get all experiments.

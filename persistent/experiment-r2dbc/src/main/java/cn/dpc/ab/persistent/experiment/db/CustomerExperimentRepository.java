@@ -1,5 +1,6 @@
 package cn.dpc.ab.persistent.experiment.db;
 
+import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Experiments;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.CriteriaDefinition;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -48,21 +50,6 @@ public class CustomerExperimentRepository {
                 .sort(pageable.getSort()), ExperimentDb.class);
     }
 
-
-    /**
-     * count counts the number of experiments in the database.
-     *
-     * @param featureKey the filter params
-     * @return the number of experiments
-     */
-    public Flux<ExperimentDb> findByFeatureKey(String featureKey) {
-        return template.select(Query.query(Criteria
-                        .where("featureKey")
-                        .is(featureKey))
-                .sort(Sort.by(Sort.Order.desc("updatedAt"))), ExperimentDb.class);
-    }
-
-
     /**
      * count counts the number of experiments in the database.
      *
@@ -83,32 +70,48 @@ public class CustomerExperimentRepository {
     private CriteriaDefinition getCriteria(Experiments.FilterParams params) {
         Criteria criteria = Criteria.empty();
 
-        if (StringUtils.hasLength(params.featureKey())) {
-            criteria = criteria.and("featureKey").like("%" + params.featureKey() + "%");
+        if (StringUtils.hasLength(params.key())) {
+            criteria = criteria.and(Criteria.where("featureKey").like("%" + params.key() + "%")
+                    .or("name").like("%" + params.key() + "%"));
         }
 
-        if (params.status() != null) {
-            switch (params.status()) {
-                case DRAFT -> criteria = criteria.and("staticStatus").is("DRAFT");
-                case NOT_BEGIN -> criteria = criteria.and("staticStatus").is("PUBLISHED")
-                        .and("startTime").greaterThan(LocalDateTime.now());
-                case COLLECTING -> criteria = criteria.and("staticStatus").is("PUBLISHED")
-                        .and(Criteria.where("startTime").isNull()
-                                .or("startTime").lessThanOrEquals(LocalDateTime.now()))
-                        .and(Criteria.where("endCollectTime").isNull()
-                                .or("endCollectTime").greaterThan(LocalDateTime.now()));
-                case FINISH_COLLECT -> criteria = criteria.and("staticStatus").is("PUBLISHED")
-                        .and("endCollectTime").lessThanOrEquals(LocalDateTime.now());
-                case PAUSED -> criteria = criteria.and("staticStatus").is("PAUSED");
-                case STOPPED -> criteria = criteria.and("staticStatus").is("STOPPED")
-                        .or(Criteria.where("staticStatus").is("PUBLISHED")
-                                .and("endTime").lessThanOrEquals(LocalDateTime.now()));
-                default -> {
-                }
-            }
+        if (StringUtils.hasLength(params.featureKey())) {
+            criteria = criteria.and("featureKey").is(params.featureKey());
         }
+
+        if (CollectionUtils.isEmpty(params.status())) {
+            return criteria;
+        }
+
+        Criteria criteriaStatus = params.status()
+                .stream()
+                .map(this::getStatusCriteria)
+                .reduce(Criteria::or)
+                .orElse(Criteria.empty());
+
+        criteria = criteria.and(criteriaStatus);
 
         return criteria;
+    }
+
+    private Criteria getStatusCriteria(Experiment.Status.DynamicStatus status) {
+        return switch (status) {
+            case DRAFT -> Criteria.where("staticStatus").is("DRAFT");
+            case NOT_BEGIN -> Criteria.where("staticStatus").is("PUBLISHED")
+                    .and("startTime").greaterThan(LocalDateTime.now());
+            case COLLECTING -> Criteria.where("staticStatus").is("PUBLISHED")
+                    .and(Criteria.where("startTime").isNull()
+                            .or("startTime").lessThanOrEquals(LocalDateTime.now()))
+                    .and(Criteria.where("endCollectTime").isNull()
+                            .or("endCollectTime").greaterThan(LocalDateTime.now()));
+            case FINISH_COLLECT -> Criteria.where("staticStatus").is("PUBLISHED")
+                    .and("endCollectTime").lessThanOrEquals(LocalDateTime.now());
+            case PAUSED -> Criteria.where("staticStatus").is("PAUSED");
+            case STOPPED -> Criteria.where("staticStatus").is("STOPPED")
+                    .or(Criteria.where("staticStatus").is("PUBLISHED")
+                            .and("endTime").lessThanOrEquals(LocalDateTime.now()));
+            default -> Criteria.empty();
+        };
     }
 
 }

@@ -58,7 +58,7 @@ public class FeatureConfigResponse {
      * from converts Assignment to FeatureConfigResponse.
      *
      * @param assignment Assignment
-     * @param featureKey featureKey
+     * @param featureKey key
      * @return FeatureConfigResponse
      */
     public static FeatureConfigResponse from(Assignment assignment, String featureKey) {

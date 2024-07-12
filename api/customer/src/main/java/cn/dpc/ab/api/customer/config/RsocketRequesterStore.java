@@ -16,7 +16,7 @@ public class RsocketRequesterStore {
      * registerRequester.
      *
      * @param customerId             customerId
-     * @param featureKey             featureKey
+     * @param featureKey             key
      * @param requester              requester
      * @param rsocketConfigProperties rsocketConfigProperties
      */
@@ -30,7 +30,7 @@ public class RsocketRequesterStore {
         Map<String, RSocketRequester> customerRequesterMap = requesters.getOrDefault(customerId.clientId(), new HashMap<>());
         requesters.put(customerId.clientId(), customerRequesterMap);
         if (customerRequesterMap.get(featureKey) != requester) {
-            System.out.println("customerRequesterMap.get(featureKey) != requester");
+            System.out.println("customerRequesterMap.get(key) != requester");
             customerRequesterMap.put(featureKey, requester);
         }
     }

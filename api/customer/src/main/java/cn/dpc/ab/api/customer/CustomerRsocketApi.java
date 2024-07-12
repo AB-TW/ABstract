@@ -26,8 +26,8 @@ public class CustomerRsocketApi {
     private final Customers customers;
     private final RsocketConfigProperties rsocketConfigProperties;
 
-    @MessageMapping("customers.featureConfigs.{featureKey}")
-    Flux<FeatureConfigResponse> getFeatureConfigs(@DestinationVariable("featureKey") String featureKey,
+    @MessageMapping("customers.featureConfigs.{key}")
+    Flux<FeatureConfigResponse> getFeatureConfigs(@DestinationVariable("key") String featureKey,
                                                   @Header(CUSTOMER) CustomerId customerId,
                                                   RSocketRequester requester) {
         RsocketRequesterStore.registerRequester(customerId, featureKey, requester, rsocketConfigProperties);

@@ -1,6 +1,5 @@
 export enum Status {
   DRAFT = "DRAFT",
-  PUBLISHED = "PUBLISHED",
   PAUSED = "PAUSED",
   STOPPED = "STOPPED",
   COLLECTING = "COLLECTING",
