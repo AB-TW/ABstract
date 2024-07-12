@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 /**
  * Implement experiments.
  */
@@ -162,19 +164,19 @@ public class ExperimentsImpl implements Experiments {
 
 
     /**
-     * getByFeatureKey retrieves all experiments by featureKey from the database.
+     * getByFeatureKey retrieves all experiments by key from the database.
      *
      * @see Experiments#getByFeatureKey(String)
      */
     @Override
     public Mono<Experiment> getByFeatureKey(String featureKey) {
-        return customerExperimentRepository.findByFeatureKey(featureKey)
-                .next()
-                .map(experimentDb -> {
-                    Experiment experiment = experimentDb.to();
-                    experiment.setAssignments(new AssignmentsImpl(assignmentRepository, experiment));
-                    return experiment;
-                });
+        return this.subCollection(new FilterParams(null, featureKey,
+                        List.of(Experiment.Status.DynamicStatus.NOT_BEGIN,
+                                Experiment.Status.DynamicStatus.COLLECTING,
+                                Experiment.Status.DynamicStatus.FINISH_COLLECT,
+                                Experiment.Status.DynamicStatus.PAUSED
+                        )), 0, 1)
+                .next();
     }
 
     @Override

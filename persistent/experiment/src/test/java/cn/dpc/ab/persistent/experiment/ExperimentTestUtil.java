@@ -32,7 +32,7 @@ public class ExperimentTestUtil {
                         .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
                         .build())
                 .configVersion(0L)
-                .featureKey("featureKey")
+                .featureKey("key")
                 .description("description")
                 .build();
     }
@@ -56,7 +56,7 @@ public class ExperimentTestUtil {
                                 .endTime(null)
                                 .endCollectTime(null)
                                 .build())
-                        .featureKey("featureKey")
+                        .featureKey("key")
                         .filterCondition(FilterCondition.builder()
                                 .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
                                 .build())

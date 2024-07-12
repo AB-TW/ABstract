@@ -13,7 +13,7 @@
         </template>
       </el-input>
       <div class="operation-btn-group">
-        <el-radio-group v-model="pageSearchParams.status" @change="() => getExperiments()">
+        <el-radio-group v-model="status" @change="() => getExperiments()">
           <el-radio-button :label="undefined">全部</el-radio-button>
           <el-radio-button label="DRAFT">草稿</el-radio-button>
           <el-radio-button label="NOT_BEGIN">未生效</el-radio-button>
@@ -126,13 +126,14 @@ const totalExperiment = ref<number>(0)
 const pageSearchParams = reactive<ExperimentQueryRequest>({
   page: 0,
   pageSize: 10,
-  key: undefined,
-  status: undefined
+  key: undefined
 })
+
+const status = ref<string | undefined>(undefined)
 // about experiment function
 const getExperiments = () => {
   experimentsApi
-    .page(pageSearchParams)
+    .page({ ...pageSearchParams, status: status.value })
     .then((res: PageResponse<Experiment>) => {
       experiments.splice(0, experiments.length)
       experiments.push(...res.content)

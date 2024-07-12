@@ -27,7 +27,11 @@
             @change="getDataSource"
           />
         </el-form-item>
-
+        <el-collapse v-if="isViewModel">
+          <el-collapse-item title="配置时间线" name="1">
+            <feature-time-line :featureKey="route.query.featureKey.toString()" />
+          </el-collapse-item>
+        </el-collapse>
         <el-form-item v-if="!isViewModel">
           <el-button type="default" @click="resetForm()">重置</el-button>
           <el-button type="primary" @click="submitForm()">提交</el-button>
@@ -45,6 +49,7 @@ import { Feature, Features, FeatureTemplate, TemplateDataType } from "@/domain/F
 import FeatureTemplateItem from "../../components/FeatureTemplateItemNew.vue"
 import _ from "lodash"
 import { replaceChildrenWithItems, StatusMaps, translateDataToTemplateItems, transTempToTreeDataSource } from "@/utils"
+import FeatureTimeLine from "@/components/FeatureTimeLine.vue"
 
 const route = useRoute()
 const router = useRouter()

@@ -16,7 +16,7 @@ public class CustomerTestUtil {
      * createFeatureConfig creates a feature config.
      *
      * @param id         id
-     * @param featureKey featureKey
+     * @param featureKey key
      * @return FeatureConfig
      */
     public static FeatureConfig createFeatureConfig(String id, String featureKey) {
@@ -28,8 +28,8 @@ public class CustomerTestUtil {
                         .updatedAt(LocalDateTime.now())
                         .description("description")
                         .title("title")
-                        .data(Map.of("featureKey", "value"))
-                        .saData(Map.of("featureKey", "value"))
+                        .data(Map.of("key", "value"))
+                        .saData(Map.of("key", "value"))
                         .priority(0)
                         .status(FeatureConfig.Status.builder()
                                 .staticStatus(FeatureConfig.Status.StaticStatus.DRAFT)

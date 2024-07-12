@@ -55,7 +55,7 @@ public class AssignmentTest {
                         .endTime(null)
                         .endCollectTime(null)
                         .build())
-                .featureKey("featureKey")
+                .featureKey("key")
                 .filterCondition(FilterCondition.builder()
                         .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
                         .build())

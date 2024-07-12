@@ -14,7 +14,7 @@ export class FeatureConfigs {
     page: number,
     pageSize: number,
     featureKey: string,
-    status?: string
+    status?: string[]
   ): Promise<PageResponse<FeatureConfig>> {
     return http
       .get(this.getUrl(`/${featureKey}/configs`), {
@@ -23,7 +23,7 @@ export class FeatureConfigs {
           page,
           pageSize,
           featureKey,
-          status: status == "ALL" ? null : status
+          status: status
         }
       })
       .then((res: any) => res?.data as PageResponse<FeatureConfig>)

@@ -24,7 +24,7 @@ public class AssignmentTestUtil {
                 .description(Assignment.Description.builder()
                         .bucket(Experiment.Bucket.builder().key("bucketKey").build())
                         .experimentConfigVersion(1L)
-                        .extraInfo(Map.of("featureKey", "value"))
+                        .extraInfo(Map.of("key", "value"))
                         .build()
                 )
                 .build();

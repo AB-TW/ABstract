@@ -33,7 +33,7 @@ class CustomerRsocketApiTest extends RsocketBaseTest {
         when(customers.getById(Mockito.any()))
                 .thenReturn(Mono.empty());
 
-        requester.route("customers.featureConfigs.{featureKey}", "featureKey")
+        requester.route("customers.featureConfigs.{key}", "key")
                 .metadata(CustomerId.builder()
                         .customerId("customerId")
                         .clientId("clientId")
@@ -60,7 +60,7 @@ class CustomerRsocketApiTest extends RsocketBaseTest {
                 .thenReturn(Mono.empty());
 
 
-        requester.route("customers.featureConfigs.{featureKey}", "featureKey")
+        requester.route("customers.featureConfigs.{key}", "key")
                 .metadata(CustomerId.builder()
                         .customerId("customerId")
                         .clientId("clientId")
@@ -81,7 +81,7 @@ class CustomerRsocketApiTest extends RsocketBaseTest {
                     return Mono.just(customer);
                 });
 
-        String featureKey = "featureKey";
+        String featureKey = "key";
         when(configs.getByFeatureKey(Mockito.any()))
                 .thenReturn(Flux.just(createFeatureConfig("id1", featureKey),
                         createFeatureConfig("id2", featureKey)));
@@ -89,7 +89,7 @@ class CustomerRsocketApiTest extends RsocketBaseTest {
         when(assignments.getByFeatureKey(Mockito.any()))
                 .thenReturn(Mono.empty());
 
-        requester.route("customers.featureConfigs.{featureKey}", featureKey)
+        requester.route("customers.featureConfigs.{key}", featureKey)
                 .metadata(CustomerId.builder()
                         .customerId("customerId")
                         .clientId("clientId")

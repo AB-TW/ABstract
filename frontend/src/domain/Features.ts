@@ -1,5 +1,8 @@
 import http from "../utils/http/http"
-import { FeatureConfig } from "@/domain/FeatureConfigs"
+import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
+import { Experiments } from "@/domain/Experiments"
+import { Status } from "@/model/Status"
+import moment from "moment"
 
 export interface Feature {
   id?: string
@@ -26,6 +29,23 @@ export interface FeatureTemplate {
   defaultValue?: unknown | string | object
   validator?: any
   items?: FeatureTemplate[]
+}
+
+export interface FeatureTimeLine {
+  type: FeatureTimeType
+  title: string
+  id: string
+  description: string
+  timestamp: string
+  order: string
+}
+
+export enum FeatureTimeType {
+  CONFIG_BEGIN = "CONFIG_BEGIN",
+  CONFIG_END = "CONFIG_END",
+  EXPERIMENT_BEGIN = "EXPERIMENT_BEGIN",
+  EXPERIMENT_END = "EXPERIMENT_END",
+  CURRENT = "CURRENT"
 }
 
 export enum TemplateDataType {
@@ -69,6 +89,9 @@ export const getTemplateDefaultValue = (template: FeatureTemplate | undefined): 
 }
 
 export class Features {
+  private featureConfigs: FeatureConfigs = new FeatureConfigs()
+  private experiments: Experiments = new Experiments()
+
   constructor(private readonly baseUrl: string = "") {}
 
   private getUrl(path: string) {
@@ -94,10 +117,6 @@ export class Features {
     return http.put(this.getUrl(`/features/${feature.featureKey}`), feature).then()
   }
 
-  publish(featureKey: string): Promise<void> {
-    return http.put(this.getUrl(`/features/${featureKey}/publish`), null).then()
-  }
-
   disable(featureKey: string): Promise<void> {
     return http.put(this.getUrl(`/features/${featureKey}/disable`), null).then()
   }
@@ -106,7 +125,65 @@ export class Features {
     return http.put(this.getUrl(`/features/${featureKey}/enable`), null).then()
   }
 
-  updateConfig(featureKey: string, configId: string, featureConfig: FeatureConfig): Promise<void> {
-    return http.put(this.getUrl(`/features/${featureKey}/configs/${configId}`), featureConfig).then()
+  timeLine(featureKey: string): Promise<FeatureTimeLine[]> {
+    return Promise.all([
+      this.featureConfigs.fetchAll("", 0, 100, featureKey, ["RUNNING", "NOT_BEGIN"]),
+      this.experiments.page({
+        featureKey: featureKey,
+        status: [Status.NOT_BEGIN, Status.COLLECTING, Status.PAUSED, Status.FINISH_COLLECT],
+        page: 0,
+        pageSize: 100
+      })
+    ]).then(([configs, experiments]) => {
+      const result = [] as FeatureTimeLine[]
+      const LONG_TIME = "长期有效"
+      configs?.content?.forEach((config) => {
+        result.push({
+          type: FeatureTimeType.CONFIG_BEGIN,
+          title: config.title,
+          id: config.id,
+          description: config.description,
+          timestamp: config.startTime?.replace("T", " ") || LONG_TIME,
+          order: config.startTime || moment().subtract(100, "year").format("YYYY-MM-DDTHH:mm:ss")
+        })
+        result.push({
+          type: FeatureTimeType.CONFIG_END,
+          title: config.title,
+          id: config.id,
+          description: config.description,
+          timestamp: config.endTime?.replace("T", " ") || LONG_TIME,
+          order: config.startTime || moment().add(100, "year").format("YYYY-MM-DDTHH:mm:ss")
+        })
+      })
+
+      experiments?.content?.forEach((experiment) => {
+        result.push({
+          type: FeatureTimeType.EXPERIMENT_BEGIN,
+          title: experiment.name,
+          id: experiment.id,
+          description: experiment.description,
+          timestamp: experiment.status?.startTime?.replace("T", " ") || LONG_TIME,
+          order: experiment.status?.startTime || moment().subtract(100, "year").format("YYYY-MM-DDTHH:mm:ss")
+        })
+        result.push({
+          type: FeatureTimeType.EXPERIMENT_END,
+          title: experiment.name,
+          id: experiment.id,
+          description: experiment.description,
+          timestamp: experiment.status?.endTime?.replace("T", " ") || LONG_TIME,
+          order: experiment.status?.endTime || moment().add(100, "year").format("YYYY-MM-DDTHH:mm:ss")
+        })
+      })
+
+      result.push({
+        type: FeatureTimeType.CURRENT,
+        title: "",
+        id: "",
+        description: "当前时间",
+        timestamp: "",
+        order: moment().format("YYYY-MM-DDTHH:mm:ss")
+      })
+      return result.sort((a, b) => b.order.localeCompare(a.order))
+    })
   }
 }
