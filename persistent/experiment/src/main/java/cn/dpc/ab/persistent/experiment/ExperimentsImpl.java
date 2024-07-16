@@ -128,7 +128,11 @@ public class ExperimentsImpl implements Experiments {
                                 Experiment.Status.DynamicStatus.FINISH_COLLECT,
                                 Experiment.Status.DynamicStatus.PAUSED
                         )), 0, 1)
-                .next();
+                .next()
+                .map(experiment -> {
+                    experiment.setAssignments(new AssignmentsImpl(assignmentDbRepository, experiment));
+                    return experiment;
+                });
     }
 
     @Override
