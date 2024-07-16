@@ -1,5 +1,11 @@
 <template>
   <el-card>
+    <template #header>
+      <div class="card-header">
+        <span class="title">{{ title }}</span>
+        <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
+      </div>
+    </template>
     <el-form
       :model="experimentForm"
       ref="experimentFormRef"
@@ -213,6 +219,7 @@ import _ from "lodash"
 import {
   convertConfigObject,
   mapDataToTemplate,
+  StatusMaps,
   transTempToTreeDataSource,
   validateSelectDateLowerThanToday
 } from "@/utils"
@@ -249,6 +256,9 @@ const router = useRouter()
 // API
 const features = new Features()
 const experiments = new Experiments()
+
+const title = ref("Experiment")
+
 // View-Model
 const allFeatures = reactive<Feature[]>([])
 const selectedFeature = reactive<Feature>({} as Feature)
@@ -269,6 +279,9 @@ const isEditMode = ref<boolean>(!_.isEmpty(experimentId) && route.query.type ===
 const isCopyMode = ref<boolean>(!_.isEmpty(experimentId) && route.query.type === "copy")
 const isViewMode = ref<boolean>(route.query.type === "view")
 const isAddMode = computed(() => !isViewMode.value && !isEditMode.value)
+
+const model = isEditMode.value ? "edit" : isViewMode.value ? "view" : "add"
+title.value = StatusMaps[model] + "Experiment"
 
 // setup page
 const setup = async () => {

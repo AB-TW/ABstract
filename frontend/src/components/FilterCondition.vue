@@ -36,7 +36,7 @@
               <template #default>
                 <el-input
                   v-model="conditionItem.name"
-                  maxlength="10"
+                  maxlength="50"
                   placeholder="请输入条件名"
                   show-word-limit
                   type="text"
@@ -53,7 +53,7 @@
           </div>
           <el-input
             v-model="conditionItem.key"
-            maxlength="10"
+            maxlength="100"
             placeholder="请输入要过滤的键"
             show-word-limit
             type="text"
