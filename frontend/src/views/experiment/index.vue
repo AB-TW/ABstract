@@ -19,10 +19,9 @@
       <div class="operation-btn-group">
         <el-radio-group v-model="status" @change="() => getExperiments()">
           <el-radio-button :label="undefined">全部</el-radio-button>
-          <el-radio-button label="DRAFT">草稿</el-radio-button>
-          <el-radio-button label="NOT_BEGIN">未生效</el-radio-button>
-          <el-radio-button label="COLLECTING">生效中</el-radio-button>
-          <el-radio-button label="FINISH_COLLECT">已过期</el-radio-button>
+          <el-radio-button v-for="(value, key) in EXPERIMENT_STATUS_TEXT_MAPPING" :label="key">
+            {{ value }}
+          </el-radio-button>
         </el-radio-group>
       </div>
       <el-button type="primary" icon="Plus" @click="() => router.push({ path: '/experiment/edit' })">新增</el-button>
