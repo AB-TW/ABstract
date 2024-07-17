@@ -1,5 +1,5 @@
 import http from "../utils/http/http"
-import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
+import { FeatureConfigs } from "@/domain/FeatureConfigs"
 import { Experiments } from "@/domain/Experiments"
 import { Status } from "@/model/Status"
 import moment from "moment"
@@ -152,7 +152,7 @@ export class Features {
           id: config.id,
           description: config.description,
           timestamp: config.endTime?.replace("T", " ") || LONG_TIME,
-          order: config.startTime || moment().add(100, "year").format("YYYY-MM-DDTHH:mm:ss")
+          order: config.endTime || moment().add(100, "year").format("YYYY-MM-DDTHH:mm:ss")
         })
       })
 
