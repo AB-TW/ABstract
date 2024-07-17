@@ -159,7 +159,7 @@ const features = new Features()
 const featureKey = ref()
 const featureName = ref("")
 
-onBeforeMount(() => {
+onBeforeMount(async () => {
   featureKey.value = route.query.featureKey
   featureName.value = <string>route.query.featureName
   feature.value = await features.fetch(featureKey.value)
