@@ -2,7 +2,7 @@
   <div>
     <el-card class="box-card">
       <template #header>
-        <div class="card-header">
+        <div class="card-header" style="padding: 10px">
           <span class="title">{{ title }}</span>
           <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
         </div>
@@ -153,4 +153,10 @@ const resetForm = () => {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+span.title {
+  float: left;
+  font-size: 14px;
+  font-weight: bold;
+}
+</style>

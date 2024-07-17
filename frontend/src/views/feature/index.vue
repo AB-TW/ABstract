@@ -31,7 +31,7 @@
           新增
         </el-button>
       </div>
-      <el-table :data="tableData" border style="width: 100%; margin-top: 50px">
+      <el-table :data="tableData" border style="width: 100%; margin-top: 30px">
         <el-table-column label="Feature Key" width="200">
           <template #default="scope">
             <el-button

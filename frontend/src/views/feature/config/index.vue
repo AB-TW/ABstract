@@ -1,8 +1,8 @@
 <template>
   <div>
     <el-card>
-      <el-card-header style="padding: 5px">
-        <div class="card-header">
+      <el-card-header>
+        <div class="card-header" style="padding: 5px">
           <span class="title"> Feature: {{ featureName }}</span>
           <el-button size="small" style="float: right" @click="router.push({ path: '/feature/list' })">返回</el-button>
         </div>
@@ -52,7 +52,7 @@
           新增
         </el-button>
       </div>
-      <el-table :data="tableData" border style="width: 100%; margin-top: 50px">
+      <el-table :data="tableData" border style="width: 100%; margin-top: 30px">
         <!--        <el-table-column label="id" prop="id" width="320" />-->
         <!--        <el-table-column prop="featureKey" label="Feature Key" width="180" />-->
         <el-table-column prop="title" label="标题" width="230" />
@@ -159,7 +159,7 @@ const features = new Features()
 const featureKey = ref()
 const featureName = ref("")
 
-onBeforeMount(async () => {
+onBeforeMount(() => {
   featureKey.value = route.query.featureKey
   featureName.value = <string>route.query.featureName
   feature.value = await features.fetch(featureKey.value)

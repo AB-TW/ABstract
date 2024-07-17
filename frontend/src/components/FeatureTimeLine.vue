@@ -1,5 +1,5 @@
 <template>
-  <el-timeline style="max-width: 600px">
+  <el-timeline style="max-width: 600px" v-loading="loading">
     <el-timeline-item
       v-for="(activity, index) in activities"
       :key="index"
@@ -21,6 +21,8 @@ import { Features, FeatureTimeLine, FeatureTimeType } from "@/domain/Features"
 import { ref } from "vue"
 
 const features = new Features()
+
+const loading = ref(true)
 
 const props = defineProps({
   featureKey: {
@@ -47,14 +49,17 @@ function getIconOfTimeLint(item: FeatureTimeLine) {
     : ArrowUpBold
 }
 
-features.timeLine(props.featureKey).then((result) => {
-  activities.value = result.map((item) => {
-    return {
-      icon: getIconOfTimeLint(item),
-      content: getPrefixOfTimeLine(item) + item.title,
-      timestamp: item.timestamp,
-      color: item.type === FeatureTimeType.CURRENT ? "#0bbd87" : "#f56c6c"
-    }
+features
+  .timeLine(props.featureKey)
+  .then((result) => {
+    activities.value = result.map((item) => {
+      return {
+        icon: getIconOfTimeLint(item),
+        content: getPrefixOfTimeLine(item) + item.title,
+        timestamp: item.timestamp,
+        color: item.type === FeatureTimeType.CURRENT ? "#0bbd87" : "#f56c6c"
+      }
+    })
   })
-})
+  .finally(() => (loading.value = false))
 </script>

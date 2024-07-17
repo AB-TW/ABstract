@@ -1,58 +1,94 @@
 <template>
   <div>
-    <div>
-      <el-card>
-        HTTP Client Demo
-        <div class="header">
-          <el-input v-model="clientId" placeholder="请输入ClientId" class="search-input">
-            <template #append>
-              <el-button icon="Search" @click="fetchFeatureConfig" />
-            </template>
-          </el-input>
-        </div>
-
-        <el-card>
-          <el-form>
+    <el-card>
+      <el-card-header>
+        <el-form label-width="140px">
+          <el-form-item label="Feature Key">
+            <el-input v-model="featureKey" placeholder="请输入Feature Key" />
+          </el-form-item>
+          <el-form-item label="Client ID">
+            <el-input v-model="clientId" placeholder="请输入ClientId" />
+          </el-form-item>
+          <el-form-item label="Customer ID">
+            <el-input v-model="customerId" placeholder="请输入CustomerId" />
+          </el-form-item>
+          <el-form-item label="自定义属性" prop="trackingData">
+            <div class="track-cls">
+              <tracking-data-item
+                v-for="(item, index) in attributes"
+                :key="item.index"
+                :item="item"
+                :index="index"
+                @deleteItem="deleteAttribute(index)"
+              />
+              <div>
+                <el-button type="primary" @click="addAttribute">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
+            </div>
+          </el-form-item>
+        </el-form>
+      </el-card-header>
+      <el-divider />
+      <div class="example-container">
+        <el-card class="demo-card">
+          <el-card-header> HTTP Client Demo</el-card-header>
+          <el-divider />
+          <el-form label-width="140">
+            <el-form-item label="Effect Result">
+              <el-button :type="buttonType" :tip="tip">Effect Result</el-button>
+              {{ tip }}
+            </el-form-item>
+            <el-form-item label="Curl Command">
+              <el-input type="textarea" placeholder="" v-model="curl" autosize />
+            </el-form-item>
+            <el-form-item>
+              <el-button icon="Search" @click="fetchFeatureConfig" type="primary"> 查询</el-button>
+            </el-form-item>
+            <el-divider />
             <el-form-item label="Response">
               <el-input type="textarea" placeholder="" v-model="response" autosize />
-              <el-button :type="buttonType">Feature demo按钮</el-button>
             </el-form-item>
           </el-form>
         </el-card>
-      </el-card>
-    </div>
-    <div>
-      <el-card>
-        RSocket Client Demo
-        <div class="header">
-          <el-input v-model="clientId" placeholder="请输入ClientId" class="search-input">
-            <template #append>
-              <el-button icon="Search" @click="fetchFeatureConfigWithRsocket" />
-            </template>
-          </el-input>
-        </div>
-
-        <el-card>
-          <el-form>
+        <el-card class="demo-card">
+          <el-card-header> RSocket Client Demo</el-card-header>
+          <el-divider />
+          <el-form label-width="140">
+            <el-form-item label="Effect Result">
+              <el-button :type="rSocketButtonType" :tip="tip">Effect Result</el-button>
+              {{ tip }}
+            </el-form-item>
+            <el-form-item label="RSC Command">
+              <el-input type="textarea" placeholder="" v-model="rsc" autosize />
+            </el-form-item>
+            <el-form-item>
+              <el-button icon="Search" @click="fetchFeatureConfigWithRsocket" type="primary"> 查询</el-button>
+            </el-form-item>
+            <el-divider />
             <el-form-item label="Response">
               <el-input type="textarea" placeholder="" v-model="rSocketResponse" autosize />
-              <el-button :type="rSocketButtonType">Feature demo按钮</el-button>
             </el-form-item>
           </el-form>
         </el-card>
-      </el-card>
-    </div>
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
+import { computed, ref } from "vue"
 import { Customers } from "@/domain/Customers"
 import FingerprintJS from "@fingerprintjs/fingerprintjs"
 import { RSocket } from "rsocket-core"
-import { Cancellable, OnTerminalSubscriber, Payload } from "rsocket-core/dist/RSocket"
+import { Cancellable, Payload } from "rsocket-core/dist/RSocket"
 import { decodeCompositeMetadata, decodeRoutes, Entry, WellKnownMimeType } from "rsocket-composite-metadata"
 import MESSAGE_RSOCKET_ROUTING = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING
+import { ElButton, ElFormItem } from "element-plus"
+import TrackingDataItem from "@/components/TrackingDataItem.vue"
 
 const clientId = ref<string>("123456")
 const buttonType = ref<string>("primary")
@@ -61,16 +97,51 @@ buttonType.value = "success"
 const rSocketButtonType = ref<string>("primary")
 const rSocketResponse = ref<string>("")
 rSocketButtonType.value = "success"
+const featureKey = ref("demoFeature")
+const attributes = ref([] as any[])
+let attributesIndex = 0
+const customerId = ref("111111")
+
+const curl = computed(() => {
+  return `curl -X POST http(s)://{host}/customers/featureConfigs/${featureKey.value} \\
+-H 'Content-type: application/json' \\
+-d '{"customerId": "${customerId.value}", "clientId": "${clientId.value}","attributes": ${JSON.stringify(
+    getAttributesObject()
+  )}}'
+  `
+})
+
+const rsc = computed(() => {
+  return `rsc --route=customers.featureConfigs.${featureKey.value} --stream -m '{"customerId": "${
+    customerId.value
+  }","clientId":"${clientId.value}","attributes":${JSON.stringify(
+    getAttributesObject()
+  )}}' --mmt application/json   tcp://{host}:7001`
+})
+
+const tip = "【response.data==true？buttonType=Success : buttonType=Danger】"
+
+const deleteAttribute = (index) => {
+  attributes.value.splice(index, 1)
+}
+
+const addAttribute = () => {
+  attributes.value.push({
+    attributesIndex: attributesIndex++,
+    key: "",
+    value: ""
+  })
+}
 
 const invalidateFeature = (data) => {
   console.log(data)
-  if (data == "demoFeature") {
+  if (data == featureKey.value) {
     fetchFeatureConfigWithRsocket()
   }
 }
 
 const rSocket: Partial<RSocket> = {
-  fireAndForget(payload: Payload, responderStream: OnTerminalSubscriber): Cancellable {
+  fireAndForget(payload: Payload): Cancellable {
     const map: Generator<Entry, void, any> = decodeCompositeMetadata(payload?.metadata)
     const entry = map.next(MESSAGE_RSOCKET_ROUTING.string)?.value
     const route = entry ? decodeRoutes(entry.content).next().value || "" : ""
@@ -97,15 +168,25 @@ const getDeviceFingerprint = async () => {
   })
 }
 
+const getAttributesObject = (): any => {
+  return attributes.value.reduce((acc, cur) => {
+    if (cur.key) {
+      acc[cur.key] = cur.value
+    }
+    return acc
+  }, {} as any)
+}
+
 getDeviceFingerprint()
 const fetchFeatureConfig = () => {
   customers
     .getCustomerFeatureConfigs(
       {
-        customerId: "test",
-        clientId: clientId.value
+        customerId: customerId.value,
+        clientId: clientId.value,
+        attributes: getAttributesObject() || {}
       },
-      "demoFeature"
+      featureKey.value
     )
     .then((res) => {
       if (res.length > 0 && res[0]?.data === true) {
@@ -125,10 +206,11 @@ const fetchFeatureConfigWithRsocket = () => {
   customers
     .getCustomerFeatureConfigsWithRSocket(
       {
-        customerId: "test",
-        clientId: clientId.value
+        customerId: customerId.value,
+        clientId: clientId.value,
+        attributes: getAttributesObject() || {}
       },
-      "demoFeature"
+      featureKey.value
     )
     .then((res) => {
       if (res.length > 0 && res[0]?.data === true) {
@@ -154,5 +236,14 @@ const fetchFeatureConfigWithRsocket = () => {
   .search-input {
     width: 400px;
   }
+}
+
+.example-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.demo-card {
+  width: 49%;
 }
 </style>
