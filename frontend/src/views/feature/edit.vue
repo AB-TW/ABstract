@@ -5,6 +5,32 @@
         <div class="card-header" style="padding: 10px">
           <span class="title">{{ title }}</span>
           <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
+          <el-button
+            v-if="isViewModel || formType !== 'add'"
+            size="small"
+            style="float: right; margin-right: 10px"
+            @click="exportTemplate()"
+          >
+            <el-icon>
+              <Download />
+            </el-icon>
+            导出
+          </el-button>
+          <el-upload
+            v-if="!isViewModel && formType == 'add'"
+            style="float: right; margin-right: 10px"
+            action=""
+            :before-upload="importTemplate"
+            :show-file-list="false"
+            accept=".json"
+          >
+            <el-button size="small">
+              <el-icon>
+                <Upload />
+              </el-icon>
+              导入
+            </el-button>
+          </el-upload>
         </div>
       </template>
       <el-form :model="feature" :rules="formRules" ref="form" label-width="140px" :disabled="isViewModel">
@@ -68,7 +94,9 @@ onBeforeMount(async () => {
   title.value = StatusMaps[model] + "Feature"
   formType.value = route.query.type == "edit" ? "edit" : "add"
   feature.value = {
-    status: "PUBLISHED",
+    enabled: true,
+    featureKey: "",
+    name: "",
     template: {
       dataType: TemplateDataType.BOOLEAN,
       defaultValue: false,
@@ -150,6 +178,55 @@ const resetForm = () => {
   } else {
     feature.value = originalFeature.value
   }
+}
+
+const exportTemplate = () => {
+  // 将数据对象转换为 JSON 字符串
+  const jsonData = JSON.stringify(_.omit(feature.value, "dataSource"), null, 2)
+
+  // 创建一个 Blob 对象
+  const blob = new Blob([jsonData], { type: "application/json" })
+
+  // 创建一个链接元素
+  const link = document.createElement("a")
+  link.href = URL.createObjectURL(blob)
+  link.download = feature.value?.featureKey + ".json"
+
+  // 将链接元素添加到文档中
+  document.body.appendChild(link)
+
+  // 触发下载操作
+  link.click()
+
+  // 移除链接元素
+  document.body.removeChild(link)
+}
+
+const importTemplate = (file) => {
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    try {
+      const result = JSON.parse(event.target.result as string) as Feature
+      feature.value = {
+        ...result,
+        dataSource: [
+          transTempToTreeDataSource(
+            result.template || {
+              dataType: TemplateDataType.BOOLEAN,
+              defaultValue: false,
+              items: [] as FeatureTemplate[]
+            }
+          )
+        ]
+      }
+    } catch (error) {
+      ElMessage.error("文件解析失败，请上传正确的 JSON 文件")
+    }
+  }
+  reader.readAsText(file)
+
+  // 阻止文件自动上传
+  return false
 }
 </script>
 
