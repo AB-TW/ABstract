@@ -1,40 +1,59 @@
 <template>
   <el-card>
     <div class="header">
+      <el-select v-model="pageSearchParams.featureKey" @change="getExperiments" placeholder="特性" style="width: 240px">
+        <el-option key="000" label="全部特性" style="font-weight: bold" :value="null" />
+        <el-option v-for="item in featureList" :key="item.featureKey" :label="item.name" :value="item.featureKey" />
+      </el-select>
       <el-input
         v-model="pageSearchParams.key"
         clearable
         placeholder="请输入实验名称"
         class="search-input"
-        @clear="() => getExperiments()"
+        @clear="getExperiments"
       >
         <template #append>
           <el-button icon="Search" @click="() => getExperiments()" />
         </template>
       </el-input>
       <div class="operation-btn-group">
-        <el-radio-group v-model="pageSearchParams.status" @change="() => getExperiments()">
+        <el-radio-group v-model="status" @change="() => getExperiments()">
           <el-radio-button :label="undefined">全部</el-radio-button>
-          <el-radio-button label="DRAFT">草稿</el-radio-button>
-          <el-radio-button label="NOT_BEGIN">未生效</el-radio-button>
-          <el-radio-button label="COLLECTING">生效中</el-radio-button>
-          <el-radio-button label="FINISH_COLLECT">已过期</el-radio-button>
+          <el-radio-button v-for="(value, key) in EXPERIMENT_STATUS_TEXT_MAPPING" :label="key">
+            {{ value }}
+          </el-radio-button>
         </el-radio-group>
       </div>
       <el-button type="primary" icon="Plus" @click="() => router.push({ path: '/experiment/edit' })">新增</el-button>
     </div>
 
     <el-table :data="experiments" border style="width: 100%; margin-top: 30px">
-      <el-table-column align="center" prop="name" label="实验名称" />
-      <el-table-column align="center" prop="status.staticStatus" label="实验状态">
+      <el-table-column prop="name" label="实验名称" />
+      <el-table-column prop="featureKey" label="特性">
+        <template #default="scope">
+          {{ getFeatureName(scope.row?.featureKey) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="status.staticStatus" label="实验状态">
         <template #default="scope">
           <el-tag :type="EXPERIMENT_STATUS_TAG_STATUS_MAPPING[scope.row?.status?.status]">
             {{ EXPERIMENT_STATUS_TEXT_MAPPING[scope.row?.status?.status] }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="createdAt" label="创建时间" />
-      <el-table-column align="center" label="操作">
+      <el-table-column label="有效期" width="350">
+        <template #default="scope">
+          <span v-if="!scope.row?.status.startTime && !scope.row?.status.endTime">长期有效</span>
+          <span v-else-if="scope.row?.status.startTime && !scope.row?.status.endTime"
+            >{{ scope.row?.startTime }} ～ 不限</span
+          >
+          <span v-else-if="!scope.row?.status.startTime && scope.row?.status.endTime">
+            不限 ～ {{ scope.row?.endTime }}</span
+          >
+          <span v-else>{{ scope.row?.status.startTime }} ～ {{ scope.row?.status.endTime }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作">
         <template #default="scope">
           <div style="display: flex">
             <el-button
@@ -109,17 +128,28 @@
 
 <script setup lang="ts">
 import router from "@/router"
-import { reactive, ref } from "vue"
+import { onBeforeMount, reactive, ref } from "vue"
 import { EXPERIMENT_STATUS_TAG_STATUS_MAPPING, EXPERIMENT_STATUS_TEXT_MAPPING } from "@/constants/constants"
 import _ from "lodash"
 import { Status } from "@/model/Status"
 import { Experiment, Experiments } from "@/domain/Experiments"
-import { PageResponse } from "@/domain/Features"
+import { Features, PageResponse } from "@/domain/Features"
 import { ElMessage } from "element-plus"
 import { ExperimentQueryRequest } from "@/model/request/ExperimentQueryRequest"
 
 // API
 const experimentsApi = new Experiments()
+const features = new Features()
+const featureList = ref([] as any[])
+const featureNameMap = ref({})
+
+onBeforeMount(async () => {
+  featureList.value.push(...((await features.fetchAll(0, 100))?.content || []))
+  featureNameMap.value = featureList.value.reduce((acc, cur) => {
+    acc[cur.featureKey] = cur.name
+    return acc
+  }, {} as any)
+})
 // View-Model
 const experiments = reactive<Experiment[]>([])
 const totalExperiment = ref<number>(0)
@@ -127,12 +157,17 @@ const pageSearchParams = reactive<ExperimentQueryRequest>({
   page: 0,
   pageSize: 10,
   key: undefined,
-  status: undefined
+  featureKey: null
 })
+
+const getFeatureName = (featureKey) => {
+  return featureNameMap.value[featureKey] || ""
+}
+const status = ref<string | undefined>(undefined)
 // about experiment function
 const getExperiments = () => {
   experimentsApi
-    .page(pageSearchParams)
+    .page({ ...pageSearchParams, status: [status.value as Status] })
     .then((res: PageResponse<Experiment>) => {
       experiments.splice(0, experiments.length)
       experiments.push(...res.content)
@@ -184,7 +219,7 @@ const deleteExperiment = (id: string) => {
   gap: 20px;
 
   .search-input {
-    width: 400px;
+    width: 240px;
   }
 
   .operation-btn-group {

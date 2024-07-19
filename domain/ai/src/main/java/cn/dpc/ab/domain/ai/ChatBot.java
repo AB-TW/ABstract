@@ -59,8 +59,8 @@ public class ChatBot {
             ChatStore.globalIntention.put(clientId, intention);
         }
 
-        if (intention == OTHER) {
-            intention = ChatStore.globalIntention.getOrDefault(clientId, OTHER);
+        if (List.of(OTHER, QA, QUERY_WITH_FUNCTION).contains(intention)) {
+            intention = ChatStore.globalIntention.getOrDefault(clientId, intention);
         }
 
         return chatHandlerMap.containsKey(intention)

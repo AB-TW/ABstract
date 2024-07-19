@@ -16,7 +16,7 @@ public class FeatureConfigTestUtil {
     /**
      * Creates a FeatureConfig from a Feature.
      *
-     * @param featureKey the featureKey of the FeatureConfig
+     * @param featureKey the key of the FeatureConfig
      * @param staticStatus the staticStatus of the FeatureConfig
      * @return the FeatureConfig
      */
@@ -30,7 +30,7 @@ public class FeatureConfigTestUtil {
                         .description("description")
                         .createdAt(LocalDateTime.now())
                         .updatedAt(LocalDateTime.now())
-                        .key("featureKey")
+                        .key("key")
                         .data(List.of(Map.of("key1", "key2")))
                         .saData(Map.of("key1", "key2"))
                         .status(FeatureConfig.Status.builder()

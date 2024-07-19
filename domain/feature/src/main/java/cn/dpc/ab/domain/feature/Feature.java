@@ -135,7 +135,7 @@ public class Feature {
          * FilterParams represents the filter params of a feature.
          */
         @Builder
-        record FilterParams(String title, FeatureConfig.Status.DynamicStatus status) {
+        record FilterParams(String title, List<FeatureConfig.Status.DynamicStatus> status) {
         }
 
         Flux<FeatureConfig> all(FilterParams params);
@@ -155,5 +155,7 @@ public class Feature {
         Mono<Void> publish(FeatureConfig.FeatureConfigId id);
 
         Mono<Void> disable(FeatureConfig.FeatureConfigId id);
+
+        Mono<Void> top(FeatureConfig.FeatureConfigId build);
     }
 }

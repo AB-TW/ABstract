@@ -98,4 +98,14 @@ public class FeatureConfigsImpl implements Feature.Configs {
                     return repository.save(db);
                 }).then();
     }
+
+    @Override
+    public Mono<Void> top(FeatureConfig.FeatureConfigId id) {
+        return repository.findById(id.configId())
+                .switchIfEmpty(Mono.error(new RecordNotFoundException(id.configId())))
+                .flatMap(db -> {
+                    db.updateDescription(db.to().top().getDescription());
+                    return repository.save(db);
+                }).then();
+    }
 }

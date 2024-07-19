@@ -58,7 +58,7 @@ class ExperimentApiTest {
     void delete() {
         ExperimentDb experimentDb = ExperimentDb.builder()
                 .id("123")
-                .buckets(List.of(ExperimentDb.BucketDb.builder().key("featureKey").percentage(100).name("test").build()))
+                .buckets(List.of(ExperimentDb.BucketDb.builder().key("key").percentage(100).name("test").build()))
                 .build();
         Experiment experiment = experimentDb.toExperiment();
 

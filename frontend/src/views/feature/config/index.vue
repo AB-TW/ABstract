@@ -1,8 +1,8 @@
 <template>
   <div>
     <el-card>
-      <el-card-header style="padding: 5px">
-        <div class="card-header">
+      <el-card-header>
+        <div class="card-header" style="padding: 5px">
           <span class="title"> Feature: {{ featureName }}</span>
           <el-button size="small" style="float: right" @click="router.push({ path: '/feature/list' })">返回</el-button>
         </div>
@@ -52,7 +52,7 @@
           新增
         </el-button>
       </div>
-      <el-table :data="tableData" border style="width: 100%; margin-top: 50px">
+      <el-table :data="tableData" border style="width: 100%; margin-top: 30px">
         <!--        <el-table-column label="id" prop="id" width="320" />-->
         <!--        <el-table-column prop="featureKey" label="Feature Key" width="180" />-->
         <el-table-column prop="title" label="标题" width="230" />
@@ -123,6 +123,9 @@
             >
               查看
             </el-button>
+            <el-button v-if="scope.row?.status !== 'DISABLED'" type="primary" size="small" @click="top(scope.row.id)"
+              >置顶
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -160,6 +163,7 @@ onBeforeMount(async () => {
   featureKey.value = route.query.featureKey
   featureName.value = <string>route.query.featureName
   feature.value = await features.fetch(featureKey.value)
+  featureName.value = featureName.value || feature.value.name
 })
 
 const router = useRouter()
@@ -195,7 +199,7 @@ const searchData = () => {
       searchForm.page > 1 ? searchForm.page - 1 : 0,
       searchForm.size,
       featureKey.value,
-      searchForm.status === "ALL" ? null : searchForm.status
+      searchForm.status === "ALL" ? [] : [searchForm.status]
     )
     .then((res) => {
       tableData.value = res.content
@@ -241,6 +245,19 @@ const handleSizeChange = () => {
 const handleCurrentChange = (value: number) => {
   searchForm.page = value
   searchData()
+}
+
+const top = (id: string) => {
+  featureConfigs
+    .top(featureKey.value, id)
+    .then(() => {
+      ElMessage.success("操作成功")
+      searchData()
+    })
+    .catch((err) => {
+      console.log(err)
+      ElMessage.error("操作失败，请重试")
+    })
 }
 
 onMounted(() => {

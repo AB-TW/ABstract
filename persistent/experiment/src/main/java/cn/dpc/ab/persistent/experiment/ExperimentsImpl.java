@@ -14,6 +14,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
+
 import static cn.dpc.ab.domain.experiment.Experiment.Status.DynamicStatus.DRAFT;
 
 /**
@@ -120,10 +122,14 @@ public class ExperimentsImpl implements Experiments {
 
     @Override
     public Mono<Experiment> getByFeatureKey(String featureKey) {
-        return experimentDbRepository.findByFeatureKey(featureKey, Sort.by("description.updatedAt").descending())
+        return this.subCollection(new FilterParams(null, featureKey,
+                        List.of(Experiment.Status.DynamicStatus.NOT_BEGIN,
+                                Experiment.Status.DynamicStatus.COLLECTING,
+                                Experiment.Status.DynamicStatus.FINISH_COLLECT,
+                                Experiment.Status.DynamicStatus.PAUSED
+                        )), 0, 1)
                 .next()
-                .map(experimentDb -> {
-                    Experiment experiment = experimentDb.toExperiment();
+                .map(experiment -> {
                     experiment.setAssignments(new AssignmentsImpl(assignmentDbRepository, experiment));
                     return experiment;
                 });

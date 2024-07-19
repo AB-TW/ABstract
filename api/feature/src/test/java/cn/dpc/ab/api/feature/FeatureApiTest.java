@@ -292,9 +292,7 @@ class FeatureApiTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(FeatureConfigResponse.class)
-                .value(response -> {
-                    assertEquals(response.getFeatureKey(), featureConfigRequest.getFeatureKey());
-                });
+                .value(response -> assertEquals(response.getFeatureKey(), featureConfigRequest.getFeatureKey()));
     }
 
     @Test
@@ -412,9 +410,7 @@ class FeatureApiTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(FeatureConfigResponse.class)
-                .value(response -> {
-                    assertEquals(response.getFeatureKey(), featureKey);
-                });
+                .value(response -> assertEquals(response.getFeatureKey(), featureKey));
     }
 
     @Test
@@ -527,6 +523,50 @@ class FeatureApiTest {
 
         webClient.put()
                 .uri("/features/{featureKey}/configs/{configId}/disable", featureKey, configId)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+
+    @Test
+    public void should_top_success() {
+        String featureKey = "featureKey1";
+        when(features.get(any())).thenReturn(Mono.just(createFeature(featureKey, configs)));
+
+        String configId = "id";
+        when(configs.top(any())).thenReturn(Mono.empty());
+
+        webClient.put()
+                .uri("/features/{featureKey}/configs/{configId}/top", featureKey, configId)
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @Test
+    public void should_top_failed_when_feature_not_exist() {
+        String featureKey = "featureKey1";
+        when(features.get(any())).thenReturn(Mono.empty());
+
+        String configId = "id";
+
+        webClient.put()
+                .uri("/features/{featureKey}/configs/{configId}/top", featureKey, configId)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+
+    @Test
+    public void should_top_failed_when_config_top_fail() {
+        String featureKey = "featureKey1";
+        when(features.get(any())).thenReturn(Mono.just(createFeature(featureKey, configs)));
+
+        String configId = "id";
+        when(configs.top(any())).thenReturn(Mono.error(new IllegalArgumentException("")));
+
+        webClient.put()
+                .uri("/features/{featureKey}/configs/{configId}/top", featureKey, configId)
                 .exchange()
                 .expectStatus()
                 .isBadRequest();

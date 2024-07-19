@@ -23,6 +23,7 @@ import static cn.dpc.ab.domain.ai.AiConsts.INTENTION;
 public class IntentionHandler {
     private final ObjectMapper objectMapper;
     private final ChatClient chatClient;
+    private final AiProperties aiProperties;
 
     /**
      * Gets intention by message.
@@ -34,7 +35,7 @@ public class IntentionHandler {
     public Intention getIntentionByMessage(String message, SimpleVectorStore historyVectorStore) throws JsonProcessingException {
         List<Document> intentions = historyVectorStore.similaritySearch(
                 SearchRequest.query(message)
-                        .withSimilarityThreshold(0.75F)
+                        .withSimilarityThreshold(aiProperties.getIntentSimilarityThreshold())
                         .withTopK(5));
         if (intentions.isEmpty()) {
             return Intention.OTHER;

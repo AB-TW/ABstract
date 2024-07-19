@@ -1,206 +1,231 @@
 <template>
-  <el-card>
-    <el-form
-      :model="experimentForm"
-      ref="experimentFormRef"
-      label-width="140px"
-      :disabled="isViewMode"
-      :scroll-to-error="true"
-    >
-      <el-form-item
-        label="实验名称"
-        :rules="[{ required: true, message: '请输入实验名称', trigger: 'blur' }]"
-        prop="name"
-      >
-        <el-input
-          v-model="experimentForm.name"
-          maxlength="20"
-          placeholder="请输入实验名称"
-          show-word-limit
-          type="text"
-        />
-      </el-form-item>
-
-      <el-form-item label="实验描述" prop="description">
-        <el-input v-model="experimentForm.description" placeholder="请输入实验描述" type="text" />
-      </el-form-item>
-
-      <el-form-item
-        label="关联Feature"
-        prop="featureKey"
-        :rules="[{ required: true, message: '请选择一个关联的Feature', trigger: 'blur' }]"
-      >
-        <el-select
-          v-model="experimentForm.featureKey"
-          @change="selectFeature"
-          placeholder="请选择实验项"
-          :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
-        >
-          <el-option v-for="feature in allFeatures" :key="feature.id" :label="feature.name" :value="feature.featureKey">
-            <span style="float: left">{{ feature.name }}</span>
-            <span style="float: right; color: var(--el-text-color-secondary); font-size: 13px">
-              {{ feature.featureKey }}
-            </span>
-          </el-option>
-        </el-select>
-      </el-form-item>
-
-      <el-form-item label="实验分组">
-        <el-form-item style="width: 100%" :key="index" v-for="(bucket, index) in experimentForm.buckets">
-          <div class="bucket-item">
-            <p class="bucket-label" style="margin: 0">
-              分组
-              {{ index + 1 }}
-              <el-icon
-                class="delete-bucket-icon"
-                v-if="isAddMode || (isEditMode && experimentForm?.status?.status === Status.DRAFT)"
-                @click="() => experimentForm.buckets?.splice(index, 1)"
-              >
-                <Delete />
-              </el-icon>
-            </p>
-            <el-form-item
-              label="分组键"
-              :prop="`buckets.${index}.key`"
-              :rules="[
-                { required: true, message: '请输入分组键', trigger: 'blur' },
-                { validator: () => validBucketKey(bucket), message: '分组键不唯一', trigger: 'blur' }
-              ]"
-              class="level-2-form-item"
-            >
-              <el-input
-                :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
-                v-model="bucket.key"
-                maxlength="10"
-                placeholder="请输入分组键"
-                show-word-limit
-                type="text"
-              />
-            </el-form-item>
-            <el-form-item
-              label="分组名称"
-              :prop="`buckets.${index}.name`"
-              class="level-2-form-item"
-              validate-status="success"
-            >
-              <el-input
-                :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
-                v-model="bucket.name"
-                maxlength="10"
-                placeholder="请输入分组名称"
-                show-word-limit
-                type="text"
-              />
-            </el-form-item>
-            <el-form-item
-              label="分组描述"
-              :prop="`buckets.${index}.description`"
-              class="level-2-form-item"
-              validate-status="success"
-            >
-              <el-input
-                v-model="bucket.description"
-                maxlength="10"
-                :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
-                placeholder="请输入分组描述"
-                show-word-limit
-                type="text"
-              />
-            </el-form-item>
-            <el-form-item
-              label="分组比例"
-              required
-              class="level-2-form-item"
-              style="width: 300px"
-              :prop="`buckets.${index}.percentage`"
-              :rules="[
-                { required: true, message: '请输入分组比例', trigger: 'blur' },
-                { validator: () => validBucketPercentage(), message: '所有的分组比例和需为100', trigger: 'blur' }
-              ]"
-            >
-              <el-input-number v-model.number="bucket.percentage" style="width: 100%" :min="0" :max="100" :step="10" />
-            </el-form-item>
-            <el-form-item
-              class="level-2-form-item"
-              label="分组配置"
-              :prop="`buckets.${index}.config`"
-              v-if="!_.isEmpty(selectedFeature)"
-            >
-              <FeatureTemplateConfig :isViewModel="isViewMode" :dataSource="bucket.datasource" />
-            </el-form-item>
-          </div>
-        </el-form-item>
-        <el-button
-          class="add-bucket-button"
-          v-if="isAddMode || (isEditMode && experimentForm?.status?.status === Status.DRAFT)"
-          @click="addBucket"
-          plain
-          icon="Plus"
-        />
-      </el-form-item>
-
-      <el-form-item
-        label="实验开始时间"
-        :rules="[
-          { required: true, message: '请选择选择实验开始的时间', trigger: 'blur' },
-          { validator: () => validStartTime(), message: '开始时间需早于结束/收集时间', trigger: 'blur' }
-        ]"
-        prop="startTime"
-      >
-        <el-date-picker
-          v-model="experimentForm.startTime"
-          type="datetime"
-          placeholder="请选择选择实验开始的时间"
-          value-format="YYYY-MM-DDTHH:mm:ss"
-          :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validStartTime(time)"
-        />
-      </el-form-item>
-
-      <el-form-item
-        label="停止收集数据时间"
-        :rules="[
-          { required: true, message: '请选择选择停止收集数据的时间', trigger: 'blur' },
-          { validator: () => validEndCollectTime(), message: '收集时间需晚于开始/收集时间', trigger: 'blur' }
-        ]"
-        prop="endCollectTime"
-      >
-        <el-date-picker
-          v-model="experimentForm.endCollectTime"
-          type="datetime"
-          placeholder="选择停止收集数据时间"
-          value-format="YYYY-MM-DDTHH:mm:ss"
-          :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validEndCollectTime(time)"
-        />
-      </el-form-item>
-
-      <el-form-item
-        label="实验结束时间"
-        :rules="[
-          { required: true, message: '请选择选择实验结束的时间', trigger: 'blur' },
-          { validator: () => validEndTime(), message: '结束时间需晚于开始/停止收据时间且早于结束时间', trigger: 'blur' }
-        ]"
-        prop="endTime"
-      >
-        <el-date-picker
-          v-model="experimentForm.endTime"
-          type="datetime"
-          placeholder="请选择选择实验结束的时间"
-          value-format="YYYY-MM-DDTHH:mm:ss"
-          :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validEndTime(time)"
-        />
-      </el-form-item>
-
-      <FilterConditionComponent
-        ref="filterConditionRef"
-        v-model="experimentForm.filterCondition"
+  <div>
+    <el-card>
+      <template #header>
+        <div class="card-header" style="padding: 10px">
+          <span class="title">{{ title }}</span>
+          <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
+        </div>
+      </template>
+      <el-form
+        :model="experimentForm"
+        ref="experimentFormRef"
+        label-width="140px"
         :disabled="isViewMode"
-      />
-      <el-form-item v-if="!isViewMode">
-        <el-button type="default" @click="resetExperimentForm(experimentFormRef, filterConditionRef)">重置</el-button>
-        <el-button type="primary" @click="submitExperimentForm(experimentFormRef, filterConditionRef)">提交</el-button>
-      </el-form-item>
-    </el-form>
-  </el-card>
+        :scroll-to-error="true"
+      >
+        <el-form-item
+          label="实验名称"
+          :rules="[{ required: true, message: '请输入实验名称', trigger: 'blur' }]"
+          prop="name"
+        >
+          <el-input
+            v-model="experimentForm.name"
+            maxlength="20"
+            placeholder="请输入实验名称"
+            show-word-limit
+            type="text"
+          />
+        </el-form-item>
+
+        <el-form-item label="实验描述" prop="description">
+          <el-input v-model="experimentForm.description" placeholder="请输入实验描述" type="text" />
+        </el-form-item>
+
+        <el-form-item
+          label="关联Feature"
+          prop="featureKey"
+          :rules="[{ required: true, message: '请选择一个关联的Feature', trigger: 'blur' }]"
+        >
+          <el-select
+            v-model="experimentForm.featureKey"
+            @change="selectFeature"
+            placeholder="请选择实验项"
+            :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
+          >
+            <el-option
+              v-for="feature in allFeatures"
+              :key="feature.id"
+              :label="feature.name"
+              :value="feature.featureKey"
+            >
+              <span style="float: left">{{ feature.name }}</span>
+              <span style="float: right; color: var(--el-text-color-secondary); font-size: 13px">
+                {{ feature.featureKey }}
+              </span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="实验分组">
+          <el-form-item style="width: 100%" :key="index" v-for="(bucket, index) in experimentForm.buckets">
+            <div class="bucket-item">
+              <p class="bucket-label" style="margin: 0">
+                分组
+                {{ index + 1 }}
+                <el-icon
+                  class="delete-bucket-icon"
+                  v-if="isAddMode || (isEditMode && experimentForm?.status?.status === Status.DRAFT)"
+                  @click="() => experimentForm.buckets?.splice(index, 1)"
+                >
+                  <Delete />
+                </el-icon>
+              </p>
+              <el-form-item
+                label="分组键"
+                :prop="`buckets.${index}.key`"
+                :rules="[
+                  { required: true, message: '请输入分组键', trigger: 'blur' },
+                  { validator: () => validBucketKey(bucket), message: '分组键不唯一', trigger: 'blur' }
+                ]"
+                class="level-2-form-item"
+              >
+                <el-input
+                  :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
+                  v-model="bucket.key"
+                  maxlength="10"
+                  placeholder="请输入分组键"
+                  show-word-limit
+                  type="text"
+                />
+              </el-form-item>
+              <el-form-item
+                label="分组名称"
+                :prop="`buckets.${index}.name`"
+                class="level-2-form-item"
+                validate-status="success"
+              >
+                <el-input
+                  :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
+                  v-model="bucket.name"
+                  maxlength="10"
+                  placeholder="请输入分组名称"
+                  show-word-limit
+                  type="text"
+                />
+              </el-form-item>
+              <el-form-item
+                label="分组描述"
+                :prop="`buckets.${index}.description`"
+                class="level-2-form-item"
+                validate-status="success"
+              >
+                <el-input
+                  v-model="bucket.description"
+                  maxlength="10"
+                  :disabled="isViewMode || (isEditMode && experimentForm?.status?.status !== Status.DRAFT)"
+                  placeholder="请输入分组描述"
+                  show-word-limit
+                  type="text"
+                />
+              </el-form-item>
+              <el-form-item
+                label="分组比例"
+                required
+                class="level-2-form-item"
+                style="width: 300px"
+                :prop="`buckets.${index}.percentage`"
+                :rules="[
+                  { required: true, message: '请输入分组比例', trigger: 'blur' },
+                  { validator: () => validBucketPercentage(), message: '所有的分组比例和需为100', trigger: 'blur' }
+                ]"
+              >
+                <el-input-number
+                  v-model.number="bucket.percentage"
+                  style="width: 100%"
+                  :min="0"
+                  :max="100"
+                  :step="10"
+                />
+              </el-form-item>
+              <el-form-item
+                class="level-2-form-item"
+                label="分组配置"
+                :prop="`buckets.${index}.config`"
+                v-if="!_.isEmpty(selectedFeature)"
+              >
+                <FeatureTemplateConfig :isViewModel="isViewMode" :dataSource="bucket.datasource" />
+              </el-form-item>
+            </div>
+          </el-form-item>
+          <el-button
+            class="add-bucket-button"
+            v-if="isAddMode || (isEditMode && experimentForm?.status?.status === Status.DRAFT)"
+            @click="addBucket"
+            plain
+            icon="Plus"
+          />
+        </el-form-item>
+
+        <el-form-item
+          label="实验开始时间"
+          :rules="[
+            { required: true, message: '请选择选择实验开始的时间', trigger: 'blur' },
+            { validator: () => validStartTime(), message: '开始时间需早于结束/收集时间', trigger: 'blur' }
+          ]"
+          prop="startTime"
+        >
+          <el-date-picker
+            v-model="experimentForm.startTime"
+            type="datetime"
+            placeholder="请选择选择实验开始的时间"
+            value-format="YYYY-MM-DDTHH:mm:ss"
+            :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validStartTime(time)"
+          />
+        </el-form-item>
+
+        <el-form-item
+          label="停止收集数据时间"
+          :rules="[
+            { required: true, message: '请选择选择停止收集数据的时间', trigger: 'blur' },
+            { validator: () => validEndCollectTime(), message: '收集时间需晚于开始/收集时间', trigger: 'blur' }
+          ]"
+          prop="endCollectTime"
+        >
+          <el-date-picker
+            v-model="experimentForm.endCollectTime"
+            type="datetime"
+            placeholder="选择停止收集数据时间"
+            value-format="YYYY-MM-DDTHH:mm:ss"
+            :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validEndCollectTime(time)"
+          />
+        </el-form-item>
+
+        <el-form-item
+          label="实验结束时间"
+          :rules="[
+            { required: true, message: '请选择选择实验结束的时间', trigger: 'blur' },
+            {
+              validator: () => validEndTime(),
+              message: '结束时间需晚于开始/停止收据时间且早于结束时间',
+              trigger: 'blur'
+            }
+          ]"
+          prop="endTime"
+        >
+          <el-date-picker
+            v-model="experimentForm.endTime"
+            type="datetime"
+            placeholder="请选择选择实验结束的时间"
+            value-format="YYYY-MM-DDTHH:mm:ss"
+            :disabled-date="(time) => validateSelectDateLowerThanToday(time) || !validEndTime(time)"
+          />
+        </el-form-item>
+
+        <FilterConditionComponent
+          ref="filterConditionRef"
+          v-model="experimentForm.filterCondition"
+          :disabled="isViewMode"
+        />
+        <el-form-item v-if="!isViewMode">
+          <el-button type="default" @click="resetExperimentForm(experimentFormRef, filterConditionRef)">重置</el-button>
+          <el-button type="primary" @click="submitExperimentForm(experimentFormRef, filterConditionRef)"
+            >提交
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -213,6 +238,7 @@ import _ from "lodash"
 import {
   convertConfigObject,
   mapDataToTemplate,
+  StatusMaps,
   transTempToTreeDataSource,
   validateSelectDateLowerThanToday
 } from "@/utils"
@@ -249,6 +275,9 @@ const router = useRouter()
 // API
 const features = new Features()
 const experiments = new Experiments()
+
+const title = ref("Experiment")
+
 // View-Model
 const allFeatures = reactive<Feature[]>([])
 const selectedFeature = reactive<Feature>({} as Feature)
@@ -269,6 +298,9 @@ const isEditMode = ref<boolean>(!_.isEmpty(experimentId) && route.query.type ===
 const isCopyMode = ref<boolean>(!_.isEmpty(experimentId) && route.query.type === "copy")
 const isViewMode = ref<boolean>(route.query.type === "view")
 const isAddMode = computed(() => !isViewMode.value && !isEditMode.value)
+
+const model = isEditMode.value ? "edit" : isViewMode.value ? "view" : "add"
+title.value = StatusMaps[model] + "Experiment"
 
 // setup page
 const setup = async () => {
@@ -475,5 +507,11 @@ const submitExperimentForm = async (
     justify-content: center !important;
     width: 120px !important;
   }
+}
+
+span.title {
+  float: left;
+  font-size: 14px;
+  font-weight: bold;
 }
 </style>
