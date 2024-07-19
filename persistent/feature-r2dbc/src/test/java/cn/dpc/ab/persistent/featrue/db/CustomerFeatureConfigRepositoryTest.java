@@ -13,6 +13,8 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.test.StepVerifier;
 
+import java.util.List;
+
 import static cn.dpc.ab.persistent.featrue.db.FeatureTestUtil.generateFeatureConfig;
 
 @ExtendWith(SpringExtension.class)
@@ -36,7 +38,7 @@ class CustomerFeatureConfigRepositoryTest {
         template.insert(generateFeatureConfig(featureKey)).block();
 
         repository.findAll(featureKey, Feature.Configs.FilterParams.builder()
-                        .status(FeatureConfig.Status.DynamicStatus.RUNNING)
+                        .status(List.of(FeatureConfig.Status.DynamicStatus.RUNNING))
                         .title("tit")
                         .build())
                 .as(StepVerifier::create)
@@ -56,7 +58,7 @@ class CustomerFeatureConfigRepositoryTest {
         PageRequest pageRequest = PageRequest.of(0, 1).withSort(Sort.by("updatedAt").descending());
 
         repository.findAll(featureKey, Feature.Configs.FilterParams.builder()
-                        .status(FeatureConfig.Status.DynamicStatus.RUNNING)
+                        .status(List.of(FeatureConfig.Status.DynamicStatus.RUNNING))
                         .title("tit")
                         .build(), pageRequest)
                 .as(StepVerifier::create)
@@ -74,7 +76,7 @@ class CustomerFeatureConfigRepositoryTest {
         template.insert(item3).block();
 
         repository.count(featureKey, Feature.Configs.FilterParams.builder()
-                .status(FeatureConfig.Status.DynamicStatus.RUNNING)
+                .status(List.of(FeatureConfig.Status.DynamicStatus.RUNNING))
                 .title("tit")
                 .build())
                 .as(StepVerifier::create)

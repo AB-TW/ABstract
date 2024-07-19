@@ -1,6 +1,7 @@
 package cn.dpc.ab.api.customer.dto;
 
 import cn.dpc.ab.domain.experiment.Assignment;
+import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.feature.FeatureConfig;
 import lombok.*;
 
@@ -58,7 +59,7 @@ public class FeatureConfigResponse {
      * from converts Assignment to FeatureConfigResponse.
      *
      * @param assignment Assignment
-     * @param featureKey featureKey
+     * @param featureKey key
      * @return FeatureConfigResponse
      */
     public static FeatureConfigResponse from(Assignment assignment, String featureKey) {
@@ -70,7 +71,10 @@ public class FeatureConfigResponse {
                         .featureKey(featureKey)
                         .key(bucket.key())
                         .data(bucket.config())
-                        .saData(null)
+                        .saData(Map.of("experiment", Optional.ofNullable(assignment.getId())
+                                .map(Assignment.AssignmentId::experimentId)
+                                .map(Experiment.ExperimentId::id)
+                                .orElse(""), "bucket", bucket.key()))
                         .expiredAt(null)
                         .priority(0L)
                         .updatedAt(LocalDateTime.now())

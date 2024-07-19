@@ -6,6 +6,8 @@ import cn.dpc.ab.domain.feature.Feature.Configs.FilterParams;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * FeaturePageRequest represents a page of features in the API.
  */
@@ -13,7 +15,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class FeatureConfigPageRequest extends PageRequest {
     private String title;
-    private FeatureConfig.Status.DynamicStatus status;
+    private List<FeatureConfig.Status.DynamicStatus> status;
 
     /**
      * Creates a FilterParams from a FeaturePageRequest.

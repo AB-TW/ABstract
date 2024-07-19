@@ -6,6 +6,8 @@ import cn.dpc.ab.domain.experiment.Experiments;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * ExperimentPageRequest represents a page of experiments in the API.
  */
@@ -15,7 +17,8 @@ public class ExperimentPageRequest extends PageRequest {
 
 
     private String key;
-    private Experiment.Status.DynamicStatus status;
+    private String featureKey;
+    private List<Experiment.Status.DynamicStatus> status;
 
     /**
      * Creates a FilterParams from a FeaturePageRequest.
@@ -24,7 +27,8 @@ public class ExperimentPageRequest extends PageRequest {
      */
     public Experiments.FilterParams filterParams() {
         return Experiments.FilterParams.builder()
-                .featureKey(key)
+                .key(key)
+                .featureKey(featureKey)
                 .status(status)
                 .build();
     }

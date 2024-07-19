@@ -129,6 +129,20 @@ class FeatureConfigsImplTest {
     }
 
     @Test
+    public void should_top_success() {
+        FeatureConfigDb db = FeatureTestUtil.generateFeatureConfig(featureId.featureKey());
+        db.setId(1L);
+        when(repository.findById(String.valueOf(db.getId()))).thenReturn(Mono.just(db));
+        when(repository.save(any(FeatureConfigDb.class))).thenReturn(Mono.just(db));
+
+        configs.top(FeatureConfig.FeatureConfigId.builder().configId(String.valueOf(db.getId())).build())
+                .as(StepVerifier::create)
+                .verifyComplete();
+
+        assertEquals(db.getPriority(), FeatureConfig.HIGHEST_PRIORITY);
+    }
+
+    @Test
     public void should_size_success() {
         when(customerRepository.count(featureId.featureKey(), Feature.Configs.FilterParams.builder().build())).thenReturn(Mono.just(3L));
 

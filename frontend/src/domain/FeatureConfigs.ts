@@ -14,15 +14,17 @@ export class FeatureConfigs {
     page: number,
     pageSize: number,
     featureKey: string,
-    status?: string
+    status?: string[]
   ): Promise<PageResponse<FeatureConfig>> {
     return http
       .get(this.getUrl(`/${featureKey}/configs`), {
-        title,
-        page,
-        pageSize,
-        featureKey,
-        status: status == "ALL" ? null : status
+        params: {
+          title,
+          page,
+          pageSize,
+          featureKey,
+          status: status
+        }
       })
       .then((res: any) => res?.data as PageResponse<FeatureConfig>)
   }
@@ -49,6 +51,10 @@ export class FeatureConfigs {
 
   disable(featureKey: string, id: string): Promise<void> {
     return http.put(this.getUrl(`/${featureKey}/configs/${id}/disable`), {}).then()
+  }
+
+  top(featureKey: any, id: string) {
+    return http.put(this.getUrl(`/${featureKey}/configs/${id}/top`), {}).then()
   }
 }
 

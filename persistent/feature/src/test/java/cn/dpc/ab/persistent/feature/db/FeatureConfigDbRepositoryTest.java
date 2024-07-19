@@ -117,7 +117,7 @@ public class FeatureConfigDbRepositoryTest extends RepositoryTestBase {
 
         Feature.Configs.FilterParams params = Feature.Configs.FilterParams.builder()
                 .title("tit")
-                .status(FeatureConfig.Status.DynamicStatus.DRAFT)
+                .status(List.of(FeatureConfig.Status.DynamicStatus.DRAFT))
                 .build();
         repository.findByFilterParams(featureKey, FeatureConfigDbRepository.FilterParams.from(params))
                 .as(StepVerifier::create)
@@ -135,7 +135,7 @@ public class FeatureConfigDbRepositoryTest extends RepositoryTestBase {
 
         Feature.Configs.FilterParams params = Feature.Configs.FilterParams.builder()
                 .title("tit")
-                .status(FeatureConfig.Status.DynamicStatus.DRAFT)
+                .status(List.of(FeatureConfig.Status.DynamicStatus.DRAFT))
                 .build();
 
         repository.findByFilterParams(featureKey, FeatureConfigDbRepository.FilterParams.from(params), Pageable.ofSize(1))
@@ -154,7 +154,7 @@ public class FeatureConfigDbRepositoryTest extends RepositoryTestBase {
 
         Feature.Configs.FilterParams params = Feature.Configs.FilterParams.builder()
                 .title("tit")
-                .status(FeatureConfig.Status.DynamicStatus.DRAFT)
+                .status(List.of(FeatureConfig.Status.DynamicStatus.DRAFT))
                 .build();
 
         repository.countByFilterParams(featureKey, FeatureConfigDbRepository.FilterParams.from(params))

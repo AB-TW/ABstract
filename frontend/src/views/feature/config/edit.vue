@@ -2,7 +2,7 @@
   <div>
     <el-card class="box-card">
       <template #header>
-        <div class="card-header">
+        <div class="card-header" style="padding: 10px">
           <span class="title">{{ title }}</span>
           <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
         </div>
@@ -119,11 +119,10 @@ onBeforeMount(async () => {
       featureConfig.value.filterCondition = defaultFilterCondition()
     }
     if (!_.isNil(featureConfig.value.data)) {
-      let templateInfo
       // 如果返回的数据是一个对象：
       debugger
 
-      templateInfo = mapDataToTemplate("", featureConfig.value.data, feature.value.template)
+      const templateInfo = mapDataToTemplate("", featureConfig.value.data, feature.value.template)
 
       feature.value.dataSource = [templateInfo]
       debugger
@@ -260,5 +259,11 @@ const resetForm = () => {
 .track-cls {
   display: flex;
   flex-direction: column;
+}
+
+span.title {
+  float: left;
+  font-size: 14px;
+  font-weight: bold;
 }
 </style>

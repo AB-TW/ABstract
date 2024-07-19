@@ -39,13 +39,13 @@ class CustomerFeatureConfigsTest {
 
         configs = Mockito.mock(Feature.Configs.class);
         when(features.get(any(Feature.FeatureId.class)))
-                .thenReturn(Mono.just(Feature.builder().id(Feature.FeatureId.builder().featureKey("featureKey").build())
+                .thenReturn(Mono.just(Feature.builder().id(Feature.FeatureId.builder().featureKey("key").build())
                         .configs(configs).build()));
     }
 
     @Test
     void should_getByFeatureKey_return_empty_when_no_db_record() {
-        String featureKey = "featureKey";
+        String featureKey = "key";
         when(configs.all(any()))
                 .thenReturn(Flux.empty());
 
@@ -56,7 +56,7 @@ class CustomerFeatureConfigsTest {
 
     @Test
     void should_getByFeatureKey_success() {
-        String featureKey = "featureKey";
+        String featureKey = "key";
         when(configs.all(any()))
                 .thenReturn(Flux.just(FeatureConfigTestUtil.createFeatureConfig("id1", featureKey,
                                 FeatureConfig.Status.StaticStatus.DRAFT, 0),

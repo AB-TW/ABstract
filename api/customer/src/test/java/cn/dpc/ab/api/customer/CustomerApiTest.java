@@ -44,7 +44,7 @@ class CustomerApiTest {
                 .thenReturn(Mono.empty());
 
         webClient.post()
-                .uri("/customers/featureConfigs/{featureKey}", "featureKey")
+                .uri("/customers/featureConfigs/{featureKey}", "key")
                 .body(Mono.just(CustomerId.builder()
                         .customerId("customerId")
                         .clientId("clientId")
@@ -72,7 +72,7 @@ class CustomerApiTest {
 
 
         webClient.post()
-                .uri("/customers/featureConfigs/{featureKey}", "featureKey")
+                .uri("/customers/featureConfigs/{featureKey}", "key")
                 .body(Mono.just(CustomerId.builder()
                         .customerId("customerId")
                         .clientId("clientId")
@@ -93,7 +93,7 @@ class CustomerApiTest {
                     return Mono.just(customer);
                 });
 
-        String featureKey = "featureKey";
+        String featureKey = "key";
         when(configs.getByFeatureKey(Mockito.any()))
                 .thenReturn(Flux.just(createFeatureConfig("id1", featureKey),
                         createFeatureConfig("id2", featureKey)));

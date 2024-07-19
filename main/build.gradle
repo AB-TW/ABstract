@@ -25,6 +25,7 @@ dependencies {
     implementation project(':api:api-ai')
     implementation project(':persistent:ai-openai')
 //    implementation project(':persistent:ai-zhipu')
+//    implementation project(':persistent:ai-ollama')
 }
 
 bootRun {

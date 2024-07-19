@@ -129,5 +129,6 @@ public class FeatureConfigDb {
             this.key = description.key();
         }
         this.updatedAt = LocalDateTime.now();
+        this.priority = description.priority();
     }
 }

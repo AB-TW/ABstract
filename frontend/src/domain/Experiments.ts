@@ -29,7 +29,7 @@ export class Experiments {
   }
 
   async page(request: ExperimentQueryRequest): Promise<PageResponse<Experiment>> {
-    return await http.get(this.getUrl("/experiments"), request).then((res: any) => res?.data)
+    return await http.get(this.getUrl("/experiments"), { params: request }).then((res: any) => res?.data)
   }
 
   async getById(id: string): Promise<Experiment> {

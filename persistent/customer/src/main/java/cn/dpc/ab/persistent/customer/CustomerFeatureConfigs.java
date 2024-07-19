@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 import static cn.dpc.ab.persistent.cache.LocalCacheManager.FEATURE_CONFIG_KEY_PREFIX;
@@ -39,7 +40,7 @@ public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
 
     private Flux<FeatureConfig> getByFeatureKeyFromCache(Feature.FeatureId featureKey) {
         Feature.Configs.FilterParams params = Feature.Configs.FilterParams.builder()
-                .status(FeatureConfig.Status.DynamicStatus.RUNNING)
+                .status(List.of(FeatureConfig.Status.DynamicStatus.RUNNING))
                 .build();
 
         return localCacheManager.cacheFlux(FEATURE_CONFIG_KEY_PREFIX + featureKey.featureKey(),
