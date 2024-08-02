@@ -25,6 +25,7 @@ export interface FeatureTemplate {
   key?: string
   name?: string
   description?: string
+  keyParam: boolean
   dataType: TemplateDataType
   defaultValue?: unknown | string | object
   validator?: any

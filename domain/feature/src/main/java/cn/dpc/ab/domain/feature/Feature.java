@@ -107,9 +107,10 @@ public class Feature {
     public record FeatureTemplate(DataType dataType, String key, String name, String description,
                                   String defaultValue,
                                   Validator validator,
+                                  Boolean keyParam,
                                   List<FeatureTemplate> items) {
         public static final FeatureTemplate DEFAULT = new FeatureTemplate(DataType.BOOLEAN, null, null,
-                null, "false", null, null);
+                null, "false", null, false,  null);
 
         /**
          * DataType represents the data type of a feature.
