@@ -85,25 +85,14 @@ const getDataValue = (value) => {
 }
 const dataSource = ref(props.dataSource)
 debugger
-const emit = defineEmits(["change"])
+defineEmits(["change"])
 
 // 这个不起作用，用于查看数据是否正确的发送消息
 const showDelBtn = (node: any, data) => {
   const parentType = node?.parent?.data.dataType || null
   return parentType && parentType == "ARRAY" && node?.parent?.data.children?.length > 1
-  // if (parentType != "OBJECT" && ["NUMBER", "BOOLEAN", "STRING"].includes(data.dataType)) {
-  //   return true
-  // } else if (
-  //   parentType &&
-  //   data.dataType == "ARRAY" &&
-  //   data.children.every((item) => ["NUMBER", "BOOLEAN", "STRING"].includes(item.dataType))
-  // ) {
-  //   return true
-  // }
-  // return false
 }
 const showAddNextBtn = (node, child) => {
-  // const parentType = node?.parent?.data.dataType || null
   return ["ARRAY"].includes(child.dataType)
 }
 
@@ -111,8 +100,6 @@ interface Tree {
   id: number
   children?: Tree[]
 }
-
-const id = 1000
 
 const addChildNode = (node: any, data: Tree) => {
   count.value++
@@ -140,7 +127,7 @@ const remove = (node: Node, data: Tree) => {
 
 watch(
   () => props.dataSource,
-  (v1, v2) => {
+  (v1) => {
     dataSource.value = v1
   },
   {
@@ -200,7 +187,7 @@ watch(
 }
 
 .el-form-item__label-wrap {
-  margin-left: 0px !important;
+  margin-left: 0 !important;
 }
 
 .el-select {

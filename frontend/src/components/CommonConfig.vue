@@ -3,19 +3,15 @@
     <div class="label">{{ name || "" }}</div>
     <div>
       <div v-if="dataType == 'STRING'">
-        <el-input
-          v-model="value"
-          :disabled="props.isViewModel"
-          type="string"
-          :maxlength="maxLength"
-          @change="onInput"
-        />
+        <el-input v-model="value" :disabled="props.isViewModel" type="text" :maxlength="maxLength" @change="onInput" />
       </div>
       <div v-else-if="dataType == 'NUMBER'">
         <el-input-number
           v-model="value"
           :disabled="props.isViewModel"
           :placeholder="description"
+          :precision="4"
+          :step="1"
           :max="maxValue"
           :min="minValue"
           @change="onInput"
@@ -80,7 +76,7 @@ const onInput = (e) => {
 }
 watch(
   () => props.defaultValue,
-  (v1, v2) => {
+  (v1) => {
     value.value = v1
   },
   {

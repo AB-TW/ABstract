@@ -22,7 +22,7 @@
           </el-form-item>
           <el-form-item
             label="名称"
-            :prop="name"
+            prop="name"
             :rules="getNameRules(data.name)"
             label-width="auto"
             v-if="showKey(node, data)"
@@ -44,6 +44,9 @@
               @change="updateData"
             />
           </el-form-item>
+          <el-form-item label="是否主键字段" prop="keyParam" label-width="auto" v-if="showKeyParam(node, data)">
+            <el-switch v-model="data.keyParam" />
+          </el-form-item>
           <el-form-item
             label="校验"
             prop="validator"
@@ -62,13 +65,13 @@
                 <el-switch v-model="data.validator['required']" />
               </el-form-item>
               <el-form-item label="最大长度" prop="maxLength" label-width="auto" v-if="data.dataType == 'STRING'">
-                <el-input v-model="data.validator['maxLength']" type="number" />
+                <el-input-number v-model="data.validator['maxLength']" />
               </el-form-item>
               <el-form-item label="最小值" prop="min" label-width="auto" v-if="data.dataType == 'NUMBER'">
-                <el-input v-model="data.validator['min']" type="number" />
+                <el-input-number v-model="data.validator['min']" :precision="4" :step="1" />
               </el-form-item>
               <el-form-item label="最大值" prop="max" label-width="auto" v-if="data.dataType == 'NUMBER'">
-                <el-input v-model="data.validator['max']" type="number" />
+                <el-input-number v-model="data.validator['max']" :precision="4" :step="1" />
               </el-form-item>
               <el-form-item label="模式" prop="pattern" label-width="auto" v-if="data.dataType == 'STRING'">
                 <el-input v-model="data.validator['pattern']" />
@@ -258,8 +261,28 @@ const showKey = (node, child) => {
   console.log(parentType, child.dataType)
   return !!parentType && parentType == "OBJECT"
 }
+
 const showDefaultValue = (parent, child) => {
   return !["ARRAY", "OBJECT"].includes(child.dataType)
+}
+
+const keyParamCount = computed(() => {
+  return (
+    dataSource.value?.filter(
+      (item: any) => item?.keyParam || (item.children || []).filter((child: any) => child.keyParam).length > 0
+    )?.length || 0
+  )
+})
+
+const showKeyParam = (node, child) => {
+  const parentType = node?.parent?.data.dataType || null
+  const parentParentType = node?.parent?.parent?.data.dataType || null
+  return (
+    (!parentType || (parentType == "OBJECT" && !parentParentType)) &&
+    child.dataType != "ARRAY" &&
+    child.dataType != "OBJECT" &&
+    (keyParamCount.value < 1 || child.keyParam)
+  )
 }
 </script>
 <style lang="scss">
@@ -313,7 +336,7 @@ const showDefaultValue = (parent, child) => {
 }
 
 .el-form-item__label-wrap {
-  margin-left: 0px !important;
+  margin-left: 0 !important;
 }
 
 .el-select {

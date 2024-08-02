@@ -76,7 +76,7 @@ import { nextTick, onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance } from "element-plus"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
-import { Feature, Features, FeatureTemplate, getDefaultValue } from "@/domain/Features"
+import { Feature, Features, getDefaultValue } from "@/domain/Features"
 import { defaultFilterCondition } from "@/domain/FilterConditions"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
@@ -109,7 +109,7 @@ onBeforeMount(async () => {
   // featureKey 是点击feature 模块跳转过来的
   if (route.query.featureKey) {
     feature.value = await features.fetch(route.query.featureKey.toString())
-    feature.value.dataSource = [transTempToTreeDataSource(feature.value.template)] as Array<FeatureTemplate>
+    feature.value.dataSource = [transTempToTreeDataSource(feature.value.template)]
   }
 
   if (route.query.id) {
@@ -192,6 +192,16 @@ const addTrackingData = () => {
   })
 }
 
+const getKey = (): string => {
+  const keyParam = feature.value.template.keyParam
+    ? "data"
+    : (() => {
+        const keyItem = (feature.value.template.items || []).find((item: any) => item.keyParam)
+        return keyItem ? "data." + keyItem.key : ""
+      })()
+  return keyParam ? _.get(featureConfig.value, keyParam) || "" : featureConfig.value.key || ""
+}
+
 const submitForm = async () => {
   if (!featureKey.value) {
     ElMessage.error("featureKey 不能为空！")
@@ -211,6 +221,7 @@ const submitForm = async () => {
             // }
             featureConfig.value.featureKey = featureKey.value
             featureConfig.value.status = StaticStatus.DRAFT
+            featureConfig.value.key = getKey()
             debugger
             featureConfig.value.saData = saData.value.reduce((acc, cur) => {
               acc[cur.key] = cur.value
