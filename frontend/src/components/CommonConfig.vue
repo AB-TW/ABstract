@@ -20,12 +20,27 @@
       <div v-else-if="dataType == 'BOOLEAN'">
         <el-switch v-model="value" :disabled="props.isViewModel" @change="onInput" />
       </div>
+      <div v-else-if="dataType == 'SELECT'">
+        <el-select v-model="value" :loading="selectLoading" placeholder="Select" style="width: 240px" @change="onInput">
+          <el-option
+            v-for="item in choiceItems"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+            :disabled="props.isViewModel"
+          />
+        </el-select>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from "vue"
+import { ChoiceItem, ChoiceType } from "@/domain/Features"
+import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
+import { ElMessage } from "element-plus"
+import _ from "lodash"
 
 const props = defineProps({
   dataType: {
@@ -59,6 +74,10 @@ const props = defineProps({
   isViewModel: {
     type: Boolean,
     required: true
+  },
+  choice: {
+    type: Object,
+    required: false
   }
 })
 const emit = defineEmits(["update:modelValue"])
@@ -74,6 +93,42 @@ const onInput = (e) => {
   }
   emit("update:modelValue", tempValue)
 }
+
+const allFeatureConfigs = ref([] as FeatureConfig[])
+const featureConfigLoaded = ref(false)
+const selectLoading = ref(false)
+const featureConfigs = new FeatureConfigs()
+const choiceItems = ref([] as ChoiceItem[])
+
+const loadFeatureConfigs = async (featureKey: string) => {
+  if (featureConfigLoaded.value) {
+    return
+  }
+
+  try {
+    selectLoading.value = true
+    const response = await featureConfigs.fetchAll("", 0, 100, featureKey, ["RUNNING"])
+    allFeatureConfigs.value = response.content || []
+    choiceItems.value = allFeatureConfigs.value.map((item) => ({
+      value: _.get(item, props.choice.valueField || "data") || "",
+      label: _.get(item, props.choice.labelField || "data") || ""
+    }))
+    featureConfigLoaded.value = true
+    selectLoading.value = false
+  } catch (error) {
+    ElMessage.error("加载选项失败！")
+    selectLoading.value = false
+  }
+}
+
+if (props.choice?.type === ChoiceType.CONTENT) {
+  choiceItems.value = props.choice?.items || []
+} else if (props.choice?.type === ChoiceType.INTERFACE) {
+  if (!featureConfigLoaded.value) {
+    loadFeatureConfigs(props.choice?.featureKey)
+  }
+}
+
 watch(
   () => props.defaultValue,
   (v1) => {

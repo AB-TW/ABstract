@@ -2,6 +2,7 @@ import dayjs from "dayjs"
 import _ from "lodash"
 import lodash from "lodash"
 import moment from "moment"
+import { TemplateDataType } from "@/domain/Features"
 
 /** 格式化时间 */
 export const formatDateTime = (time: string | number | Date) => {
@@ -36,6 +37,7 @@ export const transTempToTreeDataSource = (temp: any) => {
     defaultValue: temp.dataType == "BOOLEAN" ? Boolean(temp.defaultValue) : temp.defaultValue,
     key: temp.key || "",
     description: temp.description || "",
+    choice: temp.choice,
     validator: {
       min: temp?.validator?.min || 0,
       max: temp?.validator?.max || 0,
@@ -101,14 +103,16 @@ export const translateDataToTemplateItems = (value) => {
 
 export function getValue(info) {
   debugger
-  if (info.dataType == "BOOLEAN") {
+  if (info.dataType == TemplateDataType.BOOLEAN) {
     if (_.hasIn(info, "value")) {
       return info.value
     } else {
       return Boolean(info.defaultValue)
     }
-  } else if (info.dataType == "NUMBER") {
+  } else if (info.dataType == TemplateDataType.NUMBER) {
     return Number(info.value || info.defaultValue)
+  } else if (info.dataType == TemplateDataType.SELECT) {
+    return info.value
   } else {
     return info.value || info.defaultValue
   }

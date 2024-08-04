@@ -20,6 +20,7 @@
               :min-value="data?.validator?.min || 0"
               :data-type="data.dataType"
               :name="data.name"
+              :choice="data.choice"
               :description="data.description"
               v-model="data.value"
             />
