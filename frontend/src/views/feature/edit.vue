@@ -71,7 +71,7 @@
 import { onBeforeMount, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElForm, ElFormItem, ElInput, ElButton, ElMessage } from "element-plus"
-import { Feature, Features, FeatureTemplate, TemplateDataType } from "@/domain/Features"
+import { ChoiceType, Feature, Features, FeatureTemplate, TemplateDataType } from "@/domain/Features"
 import FeatureTemplateItem from "../../components/FeatureTemplateItemNew.vue"
 import _ from "lodash"
 import { replaceChildrenWithItems, StatusMaps, translateDataToTemplateItems, transTempToTreeDataSource } from "@/utils"
@@ -100,7 +100,8 @@ onBeforeMount(async () => {
     template: {
       dataType: TemplateDataType.BOOLEAN,
       defaultValue: false,
-      items: [] as FeatureTemplate[]
+      items: [] as FeatureTemplate[],
+      choice: { type: ChoiceType.CONTENT, items: [], featureKey: "" }
     },
     dataSource: [
       transTempToTreeDataSource({

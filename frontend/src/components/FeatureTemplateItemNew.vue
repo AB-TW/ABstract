@@ -37,6 +37,11 @@
               <el-option v-for="item in Object.keys(TemplateDataType)" :key="item" :label="item" :value="item" />
             </el-select>
           </el-form-item>
+          <FeatureTemplateChoice
+            v-model="data.choice"
+            :disabled="isViewModel"
+            v-if="data.dataType == TemplateDataType.SELECT"
+          />
           <el-form-item label="初值" prop="defaultValue" label-width="auto" v-if="showDefaultValue(node, data)">
             <el-input
               v-model="data.defaultValue"
@@ -105,8 +110,9 @@
 <script lang="ts" setup>
 import { computed, h, ref } from "vue"
 import type Node from "element-plus/es/components/tree/src/model/node"
-import { TemplateDataType } from "@/domain/Features"
+import { ChoiceType, TemplateDataType } from "@/domain/Features"
 import { ElNotification } from "element-plus"
+import FeatureTemplateChoice from "@/components/FeatureTemplateChoice.vue"
 
 const props = defineProps({
   index: {
@@ -192,6 +198,9 @@ const handleDataTypeChange = (node: any, data: any) => {
     case TemplateDataType.BOOLEAN:
       data.defaultValue = false
       break
+    case TemplateDataType.SELECT:
+      data.choice = data.choice || { type: ChoiceType.CONTENT, featureKey: "", items: [] }
+      break
     default:
       data.defaultValue = ""
       break
@@ -223,6 +232,7 @@ const addChildNode = (node: any, data: Tree) => {
     key: "",
     dataType: "BOOLEAN",
     defaultValue: false,
+    choice: { type: ChoiceType.CONTENT, items: [], featureKey: "" },
     children: [],
     validator: {
       min: 0,
@@ -263,7 +273,7 @@ const showKey = (node, child) => {
 }
 
 const showDefaultValue = (parent, child) => {
-  return !["ARRAY", "OBJECT"].includes(child.dataType)
+  return !["ARRAY", "OBJECT", "SELECT"].includes(child.dataType)
 }
 
 const keyParamCount = computed(() => {
@@ -305,6 +315,7 @@ const showKeyParam = (node, child) => {
 
   .validator-container {
     width: 100% !important;
+
     .el-form-item__label {
       justify-content: flex-start !important;
       min-width: 80px !important;

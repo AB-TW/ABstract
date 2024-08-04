@@ -108,15 +108,16 @@ public class Feature {
                                   String defaultValue,
                                   Validator validator,
                                   Boolean keyParam,
+                                  Choice choice,
                                   List<FeatureTemplate> items) {
         public static final FeatureTemplate DEFAULT = new FeatureTemplate(DataType.BOOLEAN, null, null,
-                null, "false", null, false,  null);
+                null, "false", null, false, null, null);
 
         /**
          * DataType represents the data type of a feature.
          */
         public enum DataType {
-            BOOLEAN, STRING, NUMBER, OBJECT, ARRAY
+            BOOLEAN, STRING, NUMBER, OBJECT, ARRAY, SELECT
         }
 
         /**
@@ -124,6 +125,27 @@ public class Feature {
          */
         @Builder
         public record Validator(boolean required, Integer maxLength, Integer max, Integer min, String pattern) {
+        }
+
+        /**
+         * Choice config of Select.
+         */
+        @Builder
+        public record Choice(Type type, List<ChoiceItem> items, String featureKey, String valueField,
+                             String labelField) {
+            /**
+             * Type of Choice config.
+             * */
+            public enum Type {
+                CONTENT, INTERFACE
+            }
+        }
+
+        /**
+         * Choice item of Select.
+         */
+        @Builder
+        public record ChoiceItem(String value, String label) {
         }
     }
 
