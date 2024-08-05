@@ -2,10 +2,10 @@
   <div class="common-container">
     <div class="label">{{ name || "" }}</div>
     <div>
-      <div v-if="dataType == 'STRING'">
+      <div v-if="dataType == TemplateDataType.STRING">
         <el-input v-model="value" :disabled="props.isViewModel" type="text" :maxlength="maxLength" @change="onInput" />
       </div>
-      <div v-else-if="dataType == 'NUMBER'">
+      <div v-else-if="dataType == TemplateDataType.NUMBER">
         <el-input-number
           v-model="value"
           :disabled="props.isViewModel"
@@ -17,10 +17,10 @@
           @change="onInput"
         />
       </div>
-      <div v-else-if="dataType == 'BOOLEAN'">
+      <div v-else-if="dataType == TemplateDataType.BOOLEAN">
         <el-switch v-model="value" :disabled="props.isViewModel" @change="onInput" />
       </div>
-      <div v-else-if="dataType == 'SELECT'">
+      <div v-else-if="dataType == TemplateDataType.SELECT">
         <el-select v-model="value" :loading="selectLoading" placeholder="Select" style="width: 240px" @change="onInput">
           <el-option
             v-for="item in choiceItems"
@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue"
-import { ChoiceItem, ChoiceType } from "@/domain/Features"
+import { ChoiceItem, ChoiceType, TemplateDataType } from "@/domain/Features"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
 import { ElMessage } from "element-plus"
 import _ from "lodash"
@@ -86,9 +86,9 @@ const value = ref(props.defaultValue)
 debugger
 const onInput = (e) => {
   let tempValue = e
-  if (props.dataType == "NUMBER") {
+  if (props.dataType == TemplateDataType.NUMBER) {
     tempValue = Number(e)
-  } else if (props.dataType == "BOOLEAN") {
+  } else if (props.dataType == TemplateDataType.BOOLEAN) {
     tempValue = Boolean(e)
   }
   emit("update:modelValue", tempValue)
