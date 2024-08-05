@@ -34,7 +34,7 @@ export const transTempToTreeDataSource = (temp: any) => {
   const tree = {
     name: temp.name || "",
     dataType: temp.dataType || "",
-    defaultValue: temp.dataType == "BOOLEAN" ? Boolean(temp.defaultValue) : temp.defaultValue,
+    defaultValue: temp.dataType == TemplateDataType.BOOLEAN ? Boolean(temp.defaultValue) : temp.defaultValue,
     key: temp.key || "",
     description: temp.description || "",
     choice: temp.choice,
@@ -78,10 +78,10 @@ export function replaceChildrenWithItems(data) {
       } else {
         if (prop == "dataType") {
           switch (data[prop]) {
-            case "NUMBER":
+            case TemplateDataType.NUMBER:
               data["defaultValue"] = Number(data["defaultValue"])
               break
-            case "BOOLEAN":
+            case TemplateDataType.BOOLEAN:
               data["defaultValue"] = Boolean(data["defaultValue"])
               break
             default:
@@ -120,13 +120,13 @@ export function getValue(info) {
 
 // FeatureConfg data数据处理函数
 export function convertConfigObject(data) {
-  if (data.dataType === "OBJECT") {
+  if (data.dataType === TemplateDataType.OBJECT) {
     const obj = {}
     for (const child of data.children) {
       obj[child.key] = convertConfigObject(child)
     }
     return obj
-  } else if (data.dataType === "ARRAY") {
+  } else if (data.dataType === TemplateDataType.ARRAY) {
     const arr = []
     for (const child of data.children) {
       arr.push(convertConfigObject(child))
@@ -152,7 +152,7 @@ export function mapDataToTemplate(name, obj, model) {
   if (lodash.isObject(obj) && !lodash.isArray(obj)) {
     return {
       name,
-      dataType: "OBJECT",
+      dataType: TemplateDataType.OBJECT,
       ...lodash.omit(model, ["items"]),
       children: Object.entries(obj).map(([key, value]) => {
         return mapDataToTemplate(key, value, getModelByKey(key, model?.items || []))
@@ -162,7 +162,7 @@ export function mapDataToTemplate(name, obj, model) {
   if (typeof obj === "string") {
     return {
       name,
-      dataType: "STRING",
+      dataType: TemplateDataType.STRING,
       ...model,
       value: obj
     }
@@ -170,26 +170,26 @@ export function mapDataToTemplate(name, obj, model) {
   if (typeof obj === "number") {
     return {
       name,
-      dataType: "NUMBER",
+      dataType: TemplateDataType.NUMBER,
       ...model,
       value: obj
     }
   } else if (typeof obj === "boolean") {
     return {
       name,
-      dataType: "BOOLEAN",
+      dataType: TemplateDataType.BOOLEAN,
       ...model,
       value: obj
     }
   } else if (lodash.isArray(obj)) {
     let extentObj = {}
-    if (model.dataType == "ARRAY") {
+    if (model.dataType == TemplateDataType.ARRAY) {
       extentObj = lodash.omit(model, ["items"])
     }
     return {
       name,
       ...extentObj,
-      dataType: "ARRAY",
+      dataType: TemplateDataType.ARRAY,
       children: obj.map((it, index) => mapDataToTemplate("", it, model.items[index] || model.items[0]))
     }
   }

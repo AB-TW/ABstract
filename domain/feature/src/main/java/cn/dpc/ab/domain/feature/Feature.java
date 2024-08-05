@@ -135,7 +135,7 @@ public class Feature {
                              String labelField) {
             /**
              * Type of Choice config.
-             * */
+             */
             public enum Type {
                 CONTENT, INTERFACE
             }

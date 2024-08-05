@@ -45,7 +45,7 @@
           <el-form-item label="初值" prop="defaultValue" label-width="auto" v-if="showDefaultValue(node, data)">
             <el-input
               v-model="data.defaultValue"
-              :type="data.dataType == 'NUMBER' ? 'number' : 'string'"
+              :type="data.dataType == TemplateDataType.NUMBER ? 'number' : 'string'"
               @change="updateData"
             />
           </el-form-item>
@@ -56,7 +56,11 @@
             label="校验"
             prop="validator"
             label-width="auto"
-            v-if="data.dataType != 'ARRAY' && data.dataType != 'OBJECT' && data.dataType != 'BOOLEAN'"
+            v-if="
+              data.dataType != TemplateDataType.ARRAY &&
+              data.dataType != TemplateDataType.OBJECT &&
+              data.dataType != TemplateDataType.BOOLEAN
+            "
           >
             <el-form
               :model="data.validator"
@@ -69,16 +73,36 @@
               <el-form-item label="必选" prop="required" label-width="auto">
                 <el-switch v-model="data.validator['required']" />
               </el-form-item>
-              <el-form-item label="最大长度" prop="maxLength" label-width="auto" v-if="data.dataType == 'STRING'">
+              <el-form-item
+                label="最大长度"
+                prop="maxLength"
+                label-width="auto"
+                v-if="data.dataType == TemplateDataType.STRING"
+              >
                 <el-input-number v-model="data.validator['maxLength']" />
               </el-form-item>
-              <el-form-item label="最小值" prop="min" label-width="auto" v-if="data.dataType == 'NUMBER'">
+              <el-form-item
+                label="最小值"
+                prop="min"
+                label-width="auto"
+                v-if="data.dataType == TemplateDataType.NUMBER"
+              >
                 <el-input-number v-model="data.validator['min']" :precision="4" :step="1" />
               </el-form-item>
-              <el-form-item label="最大值" prop="max" label-width="auto" v-if="data.dataType == 'NUMBER'">
+              <el-form-item
+                label="最大值"
+                prop="max"
+                label-width="auto"
+                v-if="data.dataType == TemplateDataType.NUMBER"
+              >
                 <el-input-number v-model="data.validator['max']" :precision="4" :step="1" />
               </el-form-item>
-              <el-form-item label="模式" prop="pattern" label-width="auto" v-if="data.dataType == 'STRING'">
+              <el-form-item
+                label="模式"
+                prop="pattern"
+                label-width="auto"
+                v-if="data.dataType == TemplateDataType.STRING"
+              >
                 <el-input v-model="data.validator['pattern']" />
               </el-form-item>
             </el-form>
@@ -230,7 +254,7 @@ const addChildNode = (node: any, data: Tree) => {
     name: "",
     description: "",
     key: "",
-    dataType: "BOOLEAN",
+    dataType: TemplateDataType.BOOLEAN,
     defaultValue: false,
     choice: { type: ChoiceType.CONTENT, items: [], featureKey: "" },
     children: [],
@@ -263,17 +287,17 @@ const removeChildren = (node: any, data: any) => {
 }
 
 const showAddNextBtn = (node, child) => {
-  return child.dataType == "OBJECT"
+  return child.dataType == TemplateDataType.OBJECT
 }
 
 const showKey = (node, child) => {
   const parentType = node?.parent?.data.dataType || null
   console.log(parentType, child.dataType)
-  return !!parentType && parentType == "OBJECT"
+  return !!parentType && parentType == TemplateDataType.OBJECT
 }
 
 const showDefaultValue = (parent, child) => {
-  return !["ARRAY", "OBJECT", "SELECT"].includes(child.dataType)
+  return ![TemplateDataType.ARRAY, TemplateDataType.OBJECT, TemplateDataType.SELECT].includes(child.dataType)
 }
 
 const keyParamCount = computed(() => {
@@ -288,9 +312,9 @@ const showKeyParam = (node, child) => {
   const parentType = node?.parent?.data.dataType || null
   const parentParentType = node?.parent?.parent?.data.dataType || null
   return (
-    (!parentType || (parentType == "OBJECT" && !parentParentType)) &&
-    child.dataType != "ARRAY" &&
-    child.dataType != "OBJECT" &&
+    (!parentType || (parentType == TemplateDataType.OBJECT && !parentParentType)) &&
+    child.dataType != TemplateDataType.ARRAY &&
+    child.dataType != TemplateDataType.OBJECT &&
     (keyParamCount.value < 1 || child.keyParam)
   )
 }

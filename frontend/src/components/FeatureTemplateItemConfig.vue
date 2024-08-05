@@ -42,7 +42,7 @@
               @click="remove(node, data)"
               type="danger"
               icon="delete"
-              v-if="showDelBtn(node, data)"
+              v-if="showDelBtn(node)"
               :disabled="props.isViewModel"
             >
               删除
@@ -61,6 +61,7 @@ import { ElNotification } from "element-plus"
 import CommonConfig from "@/components/CommonConfig.vue"
 import _ from "lodash"
 import { getValue } from "@/utils"
+import { TemplateDataType } from "@/domain/Features"
 
 const props = defineProps({
   index: {
@@ -89,12 +90,12 @@ debugger
 defineEmits(["change"])
 
 // 这个不起作用，用于查看数据是否正确的发送消息
-const showDelBtn = (node: any, data) => {
+const showDelBtn = (node: any) => {
   const parentType = node?.parent?.data.dataType || null
-  return parentType && parentType == "ARRAY" && node?.parent?.data.children?.length > 1
+  return parentType && parentType == TemplateDataType.ARRAY && node?.parent?.data.children?.length > 1
 }
 const showAddNextBtn = (node, child) => {
-  return ["ARRAY"].includes(child.dataType)
+  return [TemplateDataType.ARRAY].includes(child.dataType)
 }
 
 interface Tree {

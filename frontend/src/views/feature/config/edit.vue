@@ -76,7 +76,7 @@ import { nextTick, onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance } from "element-plus"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
-import { Feature, Features, getDefaultValue } from "@/domain/Features"
+import { Feature, Features, getDefaultValue, TemplateDataType } from "@/domain/Features"
 import { defaultFilterCondition } from "@/domain/FilterConditions"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
 import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
@@ -146,7 +146,7 @@ onBeforeMount(async () => {
 })
 // 防止只有一个Boolean 值为false 或者NUMBER，并且数字为 0
 const isSimpleBooleanOrNumber = () => {
-  return ["NUMBER", "BOOLEAN"].includes(_.get(feature.value, "template.dataType", null))
+  return [TemplateDataType.NUMBER, TemplateDataType.BOOLEAN].includes(_.get(feature.value, "template.dataType", null))
 }
 nextTick(() => {
   if (form.value) {
