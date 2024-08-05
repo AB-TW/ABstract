@@ -74,7 +74,8 @@ export enum TemplateDataType {
   NUMBER = "NUMBER",
   OBJECT = "OBJECT",
   ARRAY = "ARRAY",
-  SELECT = "SELECT"
+  SELECT = "SELECT",
+  GENERATED = "GENERATED"
 }
 
 export const getDefaultValue = (feature: Feature): any => {

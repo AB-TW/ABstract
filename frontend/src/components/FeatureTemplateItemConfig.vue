@@ -3,6 +3,7 @@
     <el-tree
       v-if="!debugMode"
       :data="dataSource"
+      :key="treeKey"
       node-key="id"
       default-expand-all
       :expand-on-click-node="false"
@@ -22,6 +23,8 @@
               :name="data.name"
               :choice="data.choice"
               :description="data.description"
+              :brothers="node.parent?.data?.children"
+              @update:model-value="() => (treeKey += 1)"
               v-model="data.value"
             />
           </el-form-item>
@@ -86,7 +89,6 @@ const getDataValue = (value) => {
   return getValue(value)
 }
 const dataSource = ref(props.dataSource)
-debugger
 defineEmits(["change"])
 
 // 这个不起作用，用于查看数据是否正确的发送消息
@@ -136,6 +138,40 @@ watch(
     immediate: true // 必须要深度监听，否则初始值赋不进去
   }
 )
+
+const treeKey = ref(0)
+// const updateBrothers = (brothers: any[], key: string) => {
+//   treeKey.value +=1
+//   // console.log("updateBrothers:" + key)
+//   // // const brothers = (node.parent?.data?.children || []) as any[]
+//   // console.log("brothers:" + JSON.stringify(brothers))
+//   //
+//   // brothers = brothers || ([] as any[])
+//   // brothers.forEach((item: any) => {
+//   //   console.log("item.data: " + item.data)
+//   //   if (item.dataType == TemplateDataType.GENERATED && item.key != key) {
+//   //     const defaultValue = item.defaultValue
+//   //     const pattern = /\{.*?}/
+//   //     console.log("v1:" + defaultValue)
+//   //     if (pattern.test((defaultValue || "").toString())) {
+//   //       const variables = (defaultValue || "")
+//   //         .toString()
+//   //         .match(pattern)
+//   //         .map((item) => ({
+//   //           key: item,
+//   //           value: (brothers || []).find((bro: any) => bro.key === item.replace(/[{}]/g, ""))["value"] || ""
+//   //         }))
+//   //
+//   //       console.log("variables:" + JSON.stringify(variables))
+//   //       item.value = defaultValue
+//   //       variables.forEach((item: any) => {
+//   //         item.value = (item.value || "").toString().replace(item.key, (item.value as string) || "")
+//   //       })
+//   //       console.log("value.value:" + item.value)
+//   //     }
+//   //   }
+//   // })
+// }
 </script>
 <style lang="scss">
 .custom-tree-container {

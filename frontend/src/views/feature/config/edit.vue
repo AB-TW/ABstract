@@ -120,12 +120,10 @@ onBeforeMount(async () => {
     }
     if (!_.isNil(featureConfig.value.data)) {
       // 如果返回的数据是一个对象：
-      debugger
 
       const templateInfo = mapDataToTemplate("", featureConfig.value.data, feature.value.template)
 
       feature.value.dataSource = [templateInfo]
-      debugger
     }
   } else {
     featureConfig.value = {
@@ -222,12 +220,10 @@ const submitForm = async () => {
             featureConfig.value.featureKey = featureKey.value
             featureConfig.value.status = StaticStatus.DRAFT
             featureConfig.value.key = getKey()
-            debugger
             featureConfig.value.saData = saData.value.reduce((acc, cur) => {
               acc[cur.key] = cur.value
               return acc
             }, {} as any)
-            debugger
             if (formType.value.toLowerCase() == "add") {
               const response = await featureConfigs.create(featureKey.value, featureConfig.value)
               console.log("response = ", response)

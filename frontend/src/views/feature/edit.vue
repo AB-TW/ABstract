@@ -148,7 +148,6 @@ const submitForm = async () => {
     if (valid) {
       try {
         if (formType.value.toLowerCase() == "add") {
-          debugger
           await features.create(tempResult)
         } else {
           await features.update(tempResult)

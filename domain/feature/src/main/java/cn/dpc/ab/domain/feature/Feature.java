@@ -117,7 +117,7 @@ public class Feature {
          * DataType represents the data type of a feature.
          */
         public enum DataType {
-            BOOLEAN, STRING, NUMBER, OBJECT, ARRAY, SELECT
+            BOOLEAN, STRING, NUMBER, OBJECT, ARRAY, SELECT, GENERATED
         }
 
         /**
