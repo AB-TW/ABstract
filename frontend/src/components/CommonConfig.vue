@@ -6,7 +6,7 @@
         <el-input v-model="value" :disabled="props.isViewModel" type="text" :maxlength="maxLength" @change="onInput" />
       </div>
       <div v-if="dataType == TemplateDataType.GENERATED">
-        <el-input v-model="value" :readonly="true" type="text" />
+        <el-input v-model="value" :disabled="true" type="text" />
       </div>
       <div v-else-if="dataType == TemplateDataType.NUMBER">
         <el-input-number
@@ -159,24 +159,14 @@ const updateValue = () => {
     variables.forEach((item: any) => {
       value.value = (value.value || "").toString().replace(item.key, (item.value as string) || "")
     })
-    console.log("value.value:" + value.value)
   } else {
     value.value = v1
   }
+  console.log("value.value:" + value.value)
 }
 
 watch(
   () => props.defaultValue,
-  () => {
-    updateValue()
-  },
-  {
-    immediate: true // 必须要深度监听，否则初始值赋不进去
-  }
-)
-
-watch(
-  () => props.brothers,
   () => {
     updateValue()
   },
