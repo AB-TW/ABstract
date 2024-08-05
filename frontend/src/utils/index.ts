@@ -111,7 +111,7 @@ export function getValue(info) {
   } else if (info.dataType == TemplateDataType.NUMBER) {
     return Number(info.value || info.defaultValue)
   } else if (info.dataType == TemplateDataType.GENERATED) {
-    return info.defaultValue
+    return info.value || info.defaultValue
   } else if (info.dataType == TemplateDataType.SELECT) {
     return info.value
   } else {
