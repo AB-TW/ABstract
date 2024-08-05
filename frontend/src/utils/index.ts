@@ -102,7 +102,6 @@ export const translateDataToTemplateItems = (value) => {
 }
 
 export function getValue(info) {
-  debugger
   if (info.dataType == TemplateDataType.BOOLEAN) {
     if (_.hasIn(info, "value")) {
       return info.value
@@ -111,6 +110,8 @@ export function getValue(info) {
     }
   } else if (info.dataType == TemplateDataType.NUMBER) {
     return Number(info.value || info.defaultValue)
+  } else if (info.dataType == TemplateDataType.GENERATED) {
+    return info.defaultValue
   } else if (info.dataType == TemplateDataType.SELECT) {
     return info.value
   } else {

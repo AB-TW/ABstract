@@ -5,6 +5,9 @@
       <div v-if="dataType == TemplateDataType.STRING">
         <el-input v-model="value" :disabled="props.isViewModel" type="text" :maxlength="maxLength" @change="onInput" />
       </div>
+      <div v-if="dataType == TemplateDataType.GENERATED">
+        <el-input v-model="value" :readonly="true" type="text" />
+      </div>
       <div v-else-if="dataType == TemplateDataType.NUMBER">
         <el-input-number
           v-model="value"
@@ -78,12 +81,15 @@ const props = defineProps({
   choice: {
     type: Object,
     required: false
+  },
+  brothers: {
+    type: Array,
+    required: false
   }
 })
 const emit = defineEmits(["update:modelValue"])
 // 绑定控件的值
 const value = ref(props.defaultValue)
-debugger
 const onInput = (e) => {
   let tempValue = e
   if (props.dataType == TemplateDataType.NUMBER) {
@@ -129,10 +135,50 @@ if (props.choice?.type === ChoiceType.CONTENT) {
   }
 }
 
+const updateValue = () => {
+  const v1 = props.defaultValue
+  if (props.dataType != TemplateDataType.GENERATED) {
+    value.value = v1
+    return
+  }
+
+  const pattern = /\{.*?}/
+  console.log("v1:" + v1)
+  console.log(props.brothers)
+  if (pattern.test((v1 || "").toString())) {
+    const variables = (v1 || "")
+      .toString()
+      .match(pattern)
+      .map((item) => ({
+        key: item,
+        value: (props.brothers || []).find((bro: any) => bro.key === item.replace(/[{}]/g, ""))?.value || ""
+      }))
+
+    console.log("variables:" + JSON.stringify(variables))
+    value.value = v1
+    variables.forEach((item: any) => {
+      value.value = (value.value || "").toString().replace(item.key, (item.value as string) || "")
+    })
+    console.log("value.value:" + value.value)
+  } else {
+    value.value = v1
+  }
+}
+
 watch(
   () => props.defaultValue,
-  (v1) => {
-    value.value = v1
+  () => {
+    updateValue()
+  },
+  {
+    immediate: true // 必须要深度监听，否则初始值赋不进去
+  }
+)
+
+watch(
+  () => props.brothers,
+  () => {
+    updateValue()
   },
   {
     immediate: true // 必须要深度监听，否则初始值赋不进去

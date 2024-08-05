@@ -45,6 +45,7 @@
           <el-form-item label="初值" prop="defaultValue" label-width="auto" v-if="showDefaultValue(node, data)">
             <el-input
               v-model="data.defaultValue"
+              :placeholder="defaultValuePlaceholder(data.dataType)"
               :type="data.dataType == TemplateDataType.NUMBER ? 'number' : 'string'"
               @change="updateData"
             />
@@ -59,7 +60,8 @@
             v-if="
               data.dataType != TemplateDataType.ARRAY &&
               data.dataType != TemplateDataType.OBJECT &&
-              data.dataType != TemplateDataType.BOOLEAN
+              data.dataType != TemplateDataType.BOOLEAN &&
+              data.dataType != TemplateDataType.GENERATED
             "
           >
             <el-form
@@ -317,6 +319,13 @@ const showKeyParam = (node, child) => {
     child.dataType != TemplateDataType.OBJECT &&
     (keyParamCount.value < 1 || child.keyParam)
   )
+}
+
+const defaultValuePlaceholder = (dataType: string) => {
+  if (dataType == TemplateDataType.GENERATED) {
+    return "请输入生成规则，例如：'url={url}',使用{url}表示url对应的值"
+  }
+  return ""
 }
 </script>
 <style lang="scss">
