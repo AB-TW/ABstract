@@ -1,12 +1,11 @@
 <template>
   <div class="common-container">
-    <div class="label">{{ name || "" }}</div>
     <div>
       <div v-if="dataType == TemplateDataType.STRING">
         <el-input v-model="value" :disabled="props.isViewModel" type="text" :maxlength="maxLength" @change="onInput" />
       </div>
       <div v-if="dataType == TemplateDataType.GENERATED">
-        <el-input v-model="value" :disabled="true" type="text" />
+        <el-input v-model="value" :disabled="true" type="text" @change="onInput" />
       </div>
       <div v-else-if="dataType == TemplateDataType.NUMBER">
         <el-input-number
@@ -39,13 +38,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
+import { onBeforeMount, ref } from "vue"
 import { ChoiceItem, ChoiceType, TemplateDataType } from "@/domain/Features"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
 import { ElMessage } from "element-plus"
 import _ from "lodash"
 
 const props = defineProps({
+  modelValue: {
+    type: [String, Number, Boolean, null],
+    required: true
+  },
   dataType: {
     type: String,
     required: true
@@ -59,7 +62,7 @@ const props = defineProps({
     required: true
   },
   defaultValue: {
-    type: [String, Number, Boolean],
+    type: [String, Number, Boolean, null],
     required: true
   },
   maxLength: {
@@ -87,17 +90,28 @@ const props = defineProps({
     required: false
   }
 })
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits(["update:modelValue", "change"])
 // 绑定控件的值
-const value = ref(props.defaultValue)
+const value = ref(props.modelValue)
+const lastestValue = ref(props.modelValue)
+onBeforeMount(() => {
+  updateValue()
+})
+
 const onInput = (e) => {
-  let tempValue = e
-  if (props.dataType == TemplateDataType.NUMBER) {
-    tempValue = Number(e)
-  } else if (props.dataType == TemplateDataType.BOOLEAN) {
-    tempValue = Boolean(e)
+  console.log("onInput:" + e)
+  // let tempValue = e
+  // if (props.dataType == TemplateDataType.NUMBER) {
+  //   tempValue = Number(e)
+  // } else if (props.dataType == TemplateDataType.BOOLEAN) {
+  //   tempValue = Boolean(e)
+  // }
+  //
+  // value.value = tempValue
+  emit("update:modelValue", e)
+  if (JSON.stringify(lastestValue.value) != JSON.stringify(e) && props.dataType != TemplateDataType.GENERATED) {
+    emit("change", e)
   }
-  emit("update:modelValue", tempValue)
 }
 
 const allFeatureConfigs = ref([] as FeatureConfig[])
@@ -165,15 +179,19 @@ const updateValue = () => {
   console.log("value.value:" + value.value)
 }
 
-watch(
-  () => props.defaultValue,
-  () => {
-    updateValue()
-  },
-  {
-    immediate: true // 必须要深度监听，否则初始值赋不进去
-  }
-)
+// watch(
+//   () => props.modelValue,
+//   () => {
+//     updateValue()
+//   }
+// )
+
+// watch(
+//   () => value.value,
+//   (v1) => {
+//     emit("update:modelValue", v1)
+//   }
+// )
 </script>
 
 <style lang="scss" scoped>

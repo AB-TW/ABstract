@@ -22,8 +22,6 @@ public class ExperimentResponse {
 
     private String featureKey;
 
-    private Integer samplePercentage;
-
     private Experiment.Status status;
 
     private List<Experiment.Bucket> buckets;

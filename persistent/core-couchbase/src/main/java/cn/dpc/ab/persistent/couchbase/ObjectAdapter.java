@@ -36,7 +36,7 @@ public class ObjectAdapter {
         }
 
         if (data instanceof List) {
-            this.arrayData = (List<?>) data;
+            this.arrayData = ((List<?>) data).stream().map(ObjectAdapter::new).toList();
             return;
         }
 
@@ -64,7 +64,7 @@ public class ObjectAdapter {
         }
 
         if (null != this.arrayData) {
-            return arrayData;
+            return arrayData.stream().map(item -> ((ObjectAdapter) item).toObject());
         }
 
         if (null != numData) {

@@ -14,13 +14,13 @@
         <el-form-item label="描述" prop="description">
           <el-input v-model="featureConfig.description" autocomplete="off" :disabled="formType == 'view'" />
         </el-form-item>
-        <el-form-item label="配置内容" prop="data">
-          <FeatureConfigData
-            :key="feature?.dataSource?.toString()"
-            :isViewModel="isViewModel"
-            :dataSource="feature.dataSource"
-          />
-        </el-form-item>
+        <FeatureConfigData
+          :key="featureConfig.data"
+          v-model="featureConfig.data"
+          :label="'配置数据'"
+          :feature="feature"
+          :isViewModel="isViewModel"
+        />
         <el-form-item label="生效时间" prop="startTime">
           <el-date-picker
             v-model="featureConfig.startTime"
@@ -76,24 +76,23 @@ import { nextTick, onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance } from "element-plus"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
-import { Feature, Features, getDefaultValue, TemplateDataType } from "@/domain/Features"
+import { Feature, Features, getDefaultValue } from "@/domain/Features"
 import { defaultFilterCondition } from "@/domain/FilterConditions"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
 import FeatureConfigData from "@/components/FeatureConfigData.vue"
 import FilterConditionComponent from "@/components/FilterCondition.vue"
-import { convertConfigObject, mapDataToTemplate, transTempToTreeDataSource } from "@/utils"
 import { StaticStatus } from "@/constants/common"
 import _ from "lodash"
 
 const route = useRoute()
 const router = useRouter()
 const featureConfigs = new FeatureConfigs()
-const featureConfig = ref({} as FeatureConfig)
-const feature = ref({ dataSource: [] } as Feature)
+const featureConfig = ref({ data: null } as FeatureConfig)
+const feature = ref({} as Feature)
 const features = new Features()
 const title = ref("Feature Config")
 const formType = ref("add")
-const originalFeatureConfig = ref({} as FeatureConfig)
+const originalFeatureConfig = ref({ data: null } as FeatureConfig)
 const featureKey = ref("")
 const id = ref("")
 const saData = ref([] as any[])
@@ -109,7 +108,6 @@ onBeforeMount(async () => {
   // featureKey 是点击feature 模块跳转过来的
   if (route.query.featureKey) {
     feature.value = await features.fetch(route.query.featureKey.toString())
-    feature.value.dataSource = [transTempToTreeDataSource(feature.value.template)]
   }
 
   if (route.query.id) {
@@ -117,13 +115,6 @@ onBeforeMount(async () => {
     featureConfig.value = await featureConfigs.fetchById(featureKey.value, route.query.id as string)
     if (!featureConfig.value.filterCondition) {
       featureConfig.value.filterCondition = defaultFilterCondition()
-    }
-    if (!_.isNil(featureConfig.value.data)) {
-      // 如果返回的数据是一个对象：
-
-      const templateInfo = mapDataToTemplate("", featureConfig.value.data, feature.value.template)
-
-      feature.value.dataSource = [templateInfo]
     }
   } else {
     featureConfig.value = {
@@ -142,10 +133,7 @@ onBeforeMount(async () => {
       })
     : []
 })
-// 防止只有一个Boolean 值为false 或者NUMBER，并且数字为 0
-const isSimpleBooleanOrNumber = () => {
-  return [TemplateDataType.NUMBER, TemplateDataType.BOOLEAN].includes(_.get(feature.value, "template.dataType", null))
-}
+
 nextTick(() => {
   if (form.value) {
     form.value.clearValidate()
@@ -153,7 +141,7 @@ nextTick(() => {
 })
 const formRules = {
   title: [{ required: true, message: "Please enter title", trigger: "submit" }],
-  data: [{ required: isSimpleBooleanOrNumber(), message: "Please enter data", trigger: "submit" }],
+  // data: [{ required: isSimpleBooleanOrNumber(), message: "Please enter data", trigger: "submit" }],
   endTime: [
     {
       trigger: "blur",
@@ -215,7 +203,7 @@ const submitForm = async () => {
             // if (_.isObject(tempRet)) {
             //   featureConfig.value.data = JSON.stringify(tempRet)
             // } else {
-            featureConfig.value.data = convertConfigObject(feature.value.dataSource[0])
+            // featureConfig.value.data = convertConfigObject(feature.value.dataSource[0])
             // }
             featureConfig.value.featureKey = featureKey.value
             featureConfig.value.status = StaticStatus.DRAFT

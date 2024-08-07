@@ -2,7 +2,7 @@ import dayjs from "dayjs"
 import _ from "lodash"
 import lodash from "lodash"
 import moment from "moment"
-import { TemplateDataType } from "@/domain/Features"
+import { getDefaultValue, TemplateDataType } from "@/domain/Features"
 
 /** 格式化时间 */
 export const formatDateTime = (time: string | number | Date) => {
@@ -32,12 +32,13 @@ export const setCssVariableValue = (cssVariableName: string, cssVariableValue: s
 let localId = 0
 export const transTempToTreeDataSource = (temp: any) => {
   const tree = {
-    name: temp.name || "",
-    dataType: temp.dataType || "",
-    defaultValue: temp.dataType == TemplateDataType.BOOLEAN ? Boolean(temp.defaultValue) : temp.defaultValue,
-    key: temp.key || "",
-    description: temp.description || "",
-    choice: temp.choice,
+    name: temp?.name || "",
+    dataType: temp?.dataType || "",
+    defaultValue: temp?.dataType == TemplateDataType.BOOLEAN ? Boolean(temp?.defaultValue) : temp?.defaultValue,
+    key: temp?.key || "",
+    description: temp?.description || "",
+    choice: temp?.choice,
+    value: null,
     validator: {
       min: temp?.validator?.min || 0,
       max: temp?.validator?.max || 0,
@@ -49,9 +50,9 @@ export const transTempToTreeDataSource = (temp: any) => {
     children: []
   }
 
-  if (temp.items && temp.items.length) {
-    for (let i = 0; i < temp.items.length; i++) {
-      tree.children.push(transTempToTreeDataSource(temp.items[i]))
+  if (temp?.items && temp?.items?.length) {
+    for (let i = 0; i < temp?.items.length; i++) {
+      tree.children.push(transTempToTreeDataSource(temp?.items[i]))
     }
   }
   return tree
@@ -104,18 +105,18 @@ export const translateDataToTemplateItems = (value) => {
 export function getValue(info) {
   if (info.dataType == TemplateDataType.BOOLEAN) {
     if (_.hasIn(info, "value")) {
-      return info.value
+      return info.value || false
     } else {
-      return Boolean(info.defaultValue)
+      return Boolean(info.defaultValue) || false
     }
   } else if (info.dataType == TemplateDataType.NUMBER) {
-    return Number(info.value || info.defaultValue)
+    return Number(info.value || info.defaultValue) || 0
   } else if (info.dataType == TemplateDataType.GENERATED) {
     return info.value || info.defaultValue
   } else if (info.dataType == TemplateDataType.SELECT) {
-    return info.value
+    return info.value || ""
   } else {
-    return info.value || info.defaultValue
+    return info.value || info.defaultValue || null
   }
 }
 
@@ -123,7 +124,7 @@ export function getValue(info) {
 export function convertConfigObject(data) {
   if (data.dataType === TemplateDataType.OBJECT) {
     const obj = {}
-    for (const child of data.children) {
+    for (const child of data?.children || []) {
       obj[child.key] = convertConfigObject(child)
     }
     return obj
@@ -138,63 +139,45 @@ export function convertConfigObject(data) {
   }
 }
 
-function getModelByKey(key, items, defaultValue = null) {
-  if (!!items && items.length > 0) {
-    return lodash.find(items, (item) => {
-      return item.key == key
-    })
-  } else {
-    return defaultValue || {}
-  }
-}
-
 //数据转换为template对象
 export function mapDataToTemplate(name, obj, model) {
-  if (lodash.isObject(obj) && !lodash.isArray(obj)) {
-    return {
-      name,
-      dataType: TemplateDataType.OBJECT,
-      ...lodash.omit(model, ["items"]),
-      children: Object.entries(obj).map(([key, value]) => {
-        return mapDataToTemplate(key, value, getModelByKey(key, model?.items || []))
-      })
+  try {
+    if (model.dataType == TemplateDataType.OBJECT) {
+      if (!lodash.isObject(obj) || lodash.isArray(obj)) {
+        obj = getDefaultValue(model)
+      }
+      return {
+        ...lodash.omit(model, ["items"]),
+        children: (model?.items || []).map((item) => {
+          return mapDataToTemplate(item.name, obj[item.key], item)
+        })
+      }
     }
-  }
-  if (typeof obj === "string") {
+
+    if (model?.dataType == TemplateDataType.ARRAY) {
+      const extentObj = lodash.omit(model, ["items"])
+
+      return {
+        name,
+        ...extentObj,
+        dataType: TemplateDataType.ARRAY,
+        children: lodash.isArray(obj)
+          ? obj.map((it) => mapDataToTemplate("", it, model.items[0]))
+          : mapDataToTemplate("", null, model.items[0])
+      }
+    }
+
     return {
-      name,
-      dataType: TemplateDataType.STRING,
       ...model,
       value: obj
     }
-  }
-  if (typeof obj === "number") {
+  } catch (error) {
+    console.log(error)
     return {
-      name,
-      dataType: TemplateDataType.NUMBER,
       ...model,
-      value: obj
-    }
-  } else if (typeof obj === "boolean") {
-    return {
-      name,
-      dataType: TemplateDataType.BOOLEAN,
-      ...model,
-      value: obj
-    }
-  } else if (lodash.isArray(obj)) {
-    let extentObj = {}
-    if (model.dataType == TemplateDataType.ARRAY) {
-      extentObj = lodash.omit(model, ["items"])
-    }
-    return {
-      name,
-      ...extentObj,
-      dataType: TemplateDataType.ARRAY,
-      children: obj.map((it, index) => mapDataToTemplate("", it, model.items[index] || model.items[0]))
+      value: getDefaultValue(model)
     }
   }
-  throw new Error(name + obj)
 }
 
 export function validateSelectDateLowerThanToday(date: string) {

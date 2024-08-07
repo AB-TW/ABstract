@@ -138,14 +138,13 @@
                   :step="10"
                 />
               </el-form-item>
-              <el-form-item
-                class="level-2-form-item"
+              <FeatureTemplateConfig
+                :isViewModel="isViewMode"
+                :key="selectedFeature?.featureKey + bucket.config"
+                v-model="bucket.config"
                 label="分组配置"
-                :prop="`buckets.${index}.config`"
-                v-if="!_.isEmpty(selectedFeature)"
-              >
-                <FeatureTemplateConfig :isViewModel="isViewMode" :dataSource="bucket.datasource" />
-              </el-form-item>
+                :feature="selectedFeature"
+              />
             </div>
           </el-form-item>
           <el-button
@@ -235,15 +234,9 @@ import { computed, reactive, ref } from "vue"
 import { Delete } from "@element-plus/icons-vue"
 import { ExperimentBucket } from "@/model/ExperimentBucket"
 import _ from "lodash"
-import {
-  convertConfigObject,
-  mapDataToTemplate,
-  StatusMaps,
-  transTempToTreeDataSource,
-  validateSelectDateLowerThanToday
-} from "@/utils"
-import { Feature, Features, FeatureTemplate, PageResponse } from "@/domain/Features"
-import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
+import { StatusMaps, validateSelectDateLowerThanToday } from "@/utils"
+import { Feature, Features } from "@/domain/Features"
+import FeatureTemplateConfig from "@/components/FeatureConfigData.vue"
 import moment from "moment/moment"
 import { Experiment, Experiments } from "@/domain/Experiments"
 import { Status } from "@/model/Status"
@@ -280,7 +273,7 @@ const title = ref("Experiment")
 
 // View-Model
 const allFeatures = reactive<Feature[]>([])
-const selectedFeature = reactive<Feature>({} as Feature)
+const selectedFeature = ref({} as Feature)
 const experimentFormRef = ref<FormInstance>()
 const filterConditionRef = ref<FormInstance>()
 const experimentForm = reactive<AddExperiment>({
@@ -305,9 +298,7 @@ title.value = StatusMaps[model] + "Experiment"
 // setup page
 const setup = async () => {
   const needQueryExperiment = isViewMode.value || isEditMode.value || isCopyMode.value
-  const [featureResp, experimentResp]: [PageResponse<Feature>, Experiment] = await Promise.all<
-    PageResponse<Feature> | Experiment
-  >([
+  const [featureResp, experimentResp] = await Promise.all([
     features.fetchAll(0, 999, undefined, true),
     needQueryExperiment ? experiments.getById(experimentId as string) : Promise.resolve(undefined)
   ])
@@ -320,6 +311,9 @@ const setup = async () => {
       ..._.omit(experimentResp, ["filterCondition", "status.startTime", "status.endTime", "status.endCollectTime"]),
       filterCondition: {
         ...experimentResp.filterCondition,
+        grayReleaseCondition: {
+          releasePercentage: experimentResp.filterCondition?.grayReleaseCondition?.releasePercentage || 100
+        },
         attributeConditions: _.map(
           experimentResp.filterCondition?.attributeConditions ?? [],
           (attributeCondition: CustomAttributeCondition) => ({
@@ -344,21 +338,20 @@ const setup = async () => {
 setup()
 
 const selectFeature = (featureKey: string) => {
-  const currentSelectedFeature = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
-  _.assign(selectedFeature, currentSelectedFeature)
+  selectedFeature.value = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
   // 设置bucket的config为datasource
-  setBucketsConfigDataSource(currentSelectedFeature.template)
+  // setBucketsConfigDataSource(currentSelectedFeature.template)
 }
-const setBucketsConfigDataSource = (template: FeatureTemplate) => {
-  if (template) {
-    _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
-      bucket.datasource =
-        isViewMode.value || isEditMode.value || isCopyMode.value
-          ? [mapDataToTemplate("", bucket.config, template)]
-          : [transTempToTreeDataSource(template)]
-    })
-  }
-}
+// const setBucketsConfigDataSource = (template: FeatureTemplate) => {
+//   if (template) {
+//     _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
+//       bucket.datasource =
+//         isViewMode.value || isEditMode.value || isCopyMode.value
+//           ? [mapDataToTemplate("", bucket.config, template)]
+//           : [transTempToTreeDataSource(template)]
+//     })
+//   }
+// }
 
 const addBucket = () => {
   const currentRemainingPercentage = 100 - _.sumBy(experimentForm.buckets, (bucket) => bucket.percentage)
@@ -366,9 +359,10 @@ const addBucket = () => {
     key: "",
     name: "",
     description: "",
-    percentage: currentRemainingPercentage
+    percentage: currentRemainingPercentage,
+    config: null
   })
-  setBucketsConfigDataSource(selectedFeature.template)
+  // setBucketsConfigDataSource(selectedFeature.template)
 }
 
 // form validator
@@ -425,12 +419,11 @@ const submitExperimentForm = async (
   if (!experimentFormEl || !filterConditionRef) return
   try {
     await Promise.all([experimentFormEl.validate(), filterConditionRef.$refs.filterConditionFormRef.validate()])
+    console.log("experimentForm")
+    console.log(experimentForm)
     const requestBody = {
-      ..._.omit(experimentForm, ["filterCondition", "startTime", "endCollectTime", "endTime"]),
-      buckets: _.map(experimentForm.buckets, (bucket: ExperimentBucket) => ({
-        ..._.omit(bucket, ["datasource"]),
-        config: convertConfigObject(bucket.datasource[0])
-      })),
+      ..._.omit(experimentForm, ["startTime", "endCollectTime", "endTime"]),
+      buckets: experimentForm.buckets,
       status: {
         staticStatus: isEditMode.value ? experimentForm.status?.staticStatus : Status.DRAFT,
         startTime: experimentForm.startTime,
