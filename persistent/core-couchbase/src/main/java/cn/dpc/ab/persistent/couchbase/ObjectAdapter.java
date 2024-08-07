@@ -64,7 +64,7 @@ public class ObjectAdapter {
         }
 
         if (null != this.arrayData) {
-            return arrayData.stream().map(item -> ((ObjectAdapter) item).toObject());
+            return arrayData.stream().map(item -> ((ObjectAdapter) item).toObject()).toList();
         }
 
         if (null != numData) {
