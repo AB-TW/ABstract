@@ -111,13 +111,13 @@
           </el-form-item>
           <div class="operation-container">
             <div class="left">{{ data.children.length > 0 ? "├─" : "" }}</div>
-            <div class="right" v-if="showAddNextBtn(node, data)">
-              <el-button @click="addChildNode(node, data)" type="primary" icon="plus">
-                新增节点(层级:{{ node.level }})
+            <div class="right">
+              <el-button @click="addChildNode(node, data)" type="primary" icon="plus" v-if="showAddNextBtn(node, data)">
+                添加属性(层级:{{ node.level }})
               </el-button>
               <el-button
                 style="margin-left: 8px"
-                @click="remove(node, data)"
+                @click="remove(node)"
                 type="danger"
                 icon="delete"
                 v-if="showDelBtn(node)"
@@ -126,6 +126,7 @@
               </el-button>
             </div>
           </div>
+          <el-divider v-if="showDelBtn(node)" />
         </div>
       </template>
     </el-tree>
@@ -178,6 +179,7 @@ const getNameRules = (content: string) => [
 const getKeyRules = (content: any) => {
   return [
     {
+      required: true,
       validator: () => {
         if (!content) {
           return Promise.reject("请输入Key")
@@ -204,13 +206,17 @@ const updateData = () => {
   emit("change", dataSource.value)
 }
 const showDelBtn = (node: any) => {
-  return node.level > 1 || (node.level == 1 && node.parent.childNodes.length > 1)
+  return node.parent.childNodes.length > 1
 }
 const shouldShowSubItems = (data: any) => {
   return [TemplateDataType.OBJECT, TemplateDataType.ARRAY].includes(data.dataType)
 }
 const handleDataTypeChange = (node: any, data: any) => {
   if (shouldShowSubItems(data)) {
+    if (data.dataType == TemplateDataType.ARRAY) {
+      removeChildren(node, data)
+    }
+
     if (!data.children || data.children.length == 0) {
       addChildNode(node, data)
     }
@@ -275,11 +281,11 @@ const addChildNode = (node: any, data: Tree) => {
   dataSource.value = [...dataSource.value]
 }
 
-const remove = (node: Node, data: Tree) => {
-  const parent = node.parent
-  const children: Tree[] = parent.data.children || parent.data
-  const index = children.findIndex((d) => d.id === data.id)
-  children.splice(index, 1)
+const remove = (node: Node) => {
+  const children = node.parent?.childNodes || []
+  const datas = node.parent?.data?.children || []
+  const index = children.findIndex((d) => d.id === node.id)
+  datas.splice(index, 1)
   dataSource.value = [...dataSource.value]
 }
 

@@ -2,12 +2,12 @@
   <div class="track-container">
     <el-row :gutter="20">
       <el-col :span="10">
-        <el-form-item label="Key" prop="key">
+        <el-form-item label="Key" required prop="key">
           <el-input v-model="item.key" autocomplete="off" :disabled="disabled" />
         </el-form-item>
       </el-col>
       <el-col :span="10">
-        <el-form-item label="Value" prop="key">
+        <el-form-item label="Value" required prop="key">
           <el-input v-model="item.value" autocomplete="off" :disabled="disabled" />
         </el-form-item>
       </el-col>

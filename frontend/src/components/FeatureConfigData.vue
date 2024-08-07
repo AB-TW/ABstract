@@ -12,7 +12,7 @@
     >
       <template #default="{ node, data }">
         <div class="custom-tree-node">
-          <el-form-item label-width="auto">
+          <el-form-item label-width="auto" :rules="dataItemRule(data)">
             <CommonConfig
               :isViewModel="props.isViewModel"
               :default-value="getDefaultValue(data)"
@@ -144,6 +144,20 @@ watch(
 )
 
 const treeKey = ref(0)
+
+const dataItemRule = (data: any) => {
+  return [
+    {
+      required: data?.validator?.required || false,
+      validator: () => {
+        if (data?.validator?.required && !data.value) {
+          return Promise.reject("该字段为必填字段")
+        }
+      },
+      trigger: "blur"
+    }
+  ]
+}
 </script>
 <style lang="scss">
 .custom-tree-container {

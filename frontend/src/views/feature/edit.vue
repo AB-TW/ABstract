@@ -45,7 +45,7 @@
         </el-form-item>
 
         <el-form-item label="配置模版" prop="template">
-          <feature-template-item
+          <feature-template-component
             :key="feature.dataSource"
             :index="0"
             :isViewModel="isViewModel"
@@ -72,7 +72,7 @@ import { onBeforeMount, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElForm, ElFormItem, ElInput, ElButton, ElMessage } from "element-plus"
 import { ChoiceType, Feature, Features, FeatureTemplate, TemplateDataType } from "@/domain/Features"
-import FeatureTemplateItem from "../../components/FeatureTemplateItemNew.vue"
+import FeatureTemplateComponent from "../../components/FeatureTemplate.vue"
 import _ from "lodash"
 import { replaceChildrenWithItems, StatusMaps, translateDataToTemplateItems, transTempToTreeDataSource } from "@/utils"
 import FeatureTimeLine from "@/components/FeatureTimeLine.vue"
