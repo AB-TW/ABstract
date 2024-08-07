@@ -15,7 +15,7 @@
           <el-input v-model="featureConfig.description" autocomplete="off" :disabled="formType == 'view'" />
         </el-form-item>
         <el-form-item label="配置内容" prop="data">
-          <FeatureTemplateConfig
+          <FeatureConfigData
             :key="feature?.dataSource?.toString()"
             :isViewModel="isViewModel"
             :dataSource="feature.dataSource"
@@ -79,7 +79,7 @@ import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
 import { Feature, Features, getDefaultValue, TemplateDataType } from "@/domain/Features"
 import { defaultFilterCondition } from "@/domain/FilterConditions"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
-import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
+import FeatureConfigData from "@/components/FeatureConfigData.vue"
 import FilterConditionComponent from "@/components/FilterCondition.vue"
 import { convertConfigObject, mapDataToTemplate, transTempToTreeDataSource } from "@/utils"
 import { StaticStatus } from "@/constants/common"
