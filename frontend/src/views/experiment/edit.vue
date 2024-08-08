@@ -240,7 +240,7 @@ import FeatureTemplateConfig from "@/components/FeatureConfigData.vue"
 import moment from "moment/moment"
 import { Experiment, Experiments } from "@/domain/Experiments"
 import { Status } from "@/model/Status"
-import { CompareOperator, CustomAttributeCondition, FilterCondition } from "@/domain/FilterConditions"
+import { FilterCondition } from "@/domain/FilterConditions"
 import { useRoute, useRouter } from "vue-router"
 
 interface AddExperiment {
@@ -308,22 +308,7 @@ const setup = async () => {
       startTime: experimentResp.status?.startTime,
       endTime: experimentResp.status?.endTime,
       endCollectTime: experimentResp.status?.endCollectTime,
-      ..._.omit(experimentResp, ["filterCondition", "status.startTime", "status.endTime", "status.endCollectTime"]),
-      filterCondition: {
-        ...experimentResp.filterCondition,
-        grayReleaseCondition: {
-          releasePercentage: experimentResp.filterCondition?.grayReleaseCondition?.releasePercentage || 100
-        },
-        attributeConditions: _.map(
-          experimentResp.filterCondition?.attributeConditions ?? [],
-          (attributeCondition: CustomAttributeCondition) => ({
-            ...attributeCondition,
-            value: _.includes([CompareOperator.IN, CompareOperator.NOT_IN], attributeCondition.operator)
-              ? _.split(attributeCondition.value as string, ",")
-              : attributeCondition.value
-          })
-        )
-      }
+      ..._.omit(experimentResp, ["status.startTime", "status.endTime", "status.endCollectTime"])
     })
     if (isCopyMode.value) {
       experimentForm.name += "-复制"
@@ -339,19 +324,7 @@ setup()
 
 const selectFeature = (featureKey: string) => {
   selectedFeature.value = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
-  // 设置bucket的config为datasource
-  // setBucketsConfigDataSource(currentSelectedFeature.template)
 }
-// const setBucketsConfigDataSource = (template: FeatureTemplate) => {
-//   if (template) {
-//     _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
-//       bucket.datasource =
-//         isViewMode.value || isEditMode.value || isCopyMode.value
-//           ? [mapDataToTemplate("", bucket.config, template)]
-//           : [transTempToTreeDataSource(template)]
-//     })
-//   }
-// }
 
 const addBucket = () => {
   const currentRemainingPercentage = 100 - _.sumBy(experimentForm.buckets, (bucket) => bucket.percentage)
@@ -362,7 +335,6 @@ const addBucket = () => {
     percentage: currentRemainingPercentage,
     config: null
   })
-  // setBucketsConfigDataSource(selectedFeature.template)
 }
 
 // form validator
@@ -429,18 +401,6 @@ const submitExperimentForm = async (
         startTime: experimentForm.startTime,
         endCollectTime: experimentForm.endCollectTime,
         endTime: experimentForm.endTime
-      },
-      filterCondition: {
-        ...experimentForm.filterCondition,
-        attributeConditions: _.map(
-          experimentForm.filterCondition?.attributeConditions ?? [],
-          (attributeCondition: CustomAttributeCondition) => ({
-            ...attributeCondition,
-            value: _.isArray(attributeCondition.value)
-              ? _.join(attributeCondition.value, ",")
-              : attributeCondition.value
-          })
-        )
       }
     }
     const operationFunc = () =>
@@ -449,7 +409,7 @@ const submitExperimentForm = async (
       ElMessage.success("操作成功！")
       router.push("/experiment/list")
     })
-  } catch (e: Error) {
+  } catch (e: any) {
     console.error(e)
     ElMessage.error("请检查表单项是否填写符合规范～")
   }
