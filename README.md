@@ -1,3 +1,5 @@
+![logo.png](resource/ABstractLogo.png)
+
 [![ci](https://github.com/AB-TW/ABstract/actions/workflows/gradle.yml/badge.svg)](https://github.com/pc-dong/ABstract/actions/gradle.yml)
 
 # ABstract
