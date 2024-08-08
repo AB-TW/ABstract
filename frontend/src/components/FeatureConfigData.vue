@@ -1,72 +1,84 @@
 <template>
-  <div class="custom-tree-container">
-    <el-tree
-      v-if="!debugMode"
-      :data="dataSource"
-      :key="treeKey"
-      node-key="id"
-      default-expand-all
-      :expand-on-click-node="false"
-      :highlight-current="true"
-      :indent="50"
-    >
-      <template #default="{ node, data }">
-        <div class="custom-tree-node">
-          <el-form-item
-            label-width="auto"
-            :label="node.level == 1 ? props.label || '配置' : data.name"
-            :rules="dataItemRule(data)"
-          >
-            <CommonConfig
+  <div class="custom-tree-container" v-if="featureConfigData != undefined">
+    <div class="custom-tree-node">
+      <el-form-item
+        :key="key"
+        :label-width="props.parent ? '80px' : '140px'"
+        :label="props.label || template.name"
+        :prop="template.key ? props.parentProp + '.' + template.key : props.parentProp"
+        :rules="dataItemRule(template)"
+      >
+        <div v-if="template?.dataType == TemplateDataType.OBJECT">
+          <div v-for="item in template.items" :key="item.key">
+            <FeatureConfigData
+              v-model="featureConfigData[item.key]"
+              :template="item"
+              :parent="featureConfigData"
+              :parent-prop="props.parentProp"
+              :index="0"
               :isViewModel="props.isViewModel"
-              :default-value="getDefaultValue(data)"
-              :max-length="data?.validator?.maxLength || Number.MAX_SAFE_INTEGER"
-              :max-value="data?.validator?.max || Number.MAX_SAFE_INTEGER"
-              :min-value="data?.validator?.min || 0"
-              :data-type="data.dataType"
-              :name="data.name"
-              :choice="data.choice"
-              :description="data.description"
-              :brothers="node.parent?.data?.children"
-              v-model="data.value"
-              @change="(value) => updateTree(value, data)"
-            />
-          </el-form-item>
-        </div>
-        <div class="operation-container">
-          <div class="right">
-            <el-button
-              :disabled="props.isViewModel"
-              @click="addChildNode(node, data)"
-              type="primary"
-              icon="plus"
-              v-if="showAddNextBtn(node, data)"
-            >
-              新增
-            </el-button>
-            <el-button
-              style="margin-left: 8px"
-              @click="remove(node)"
-              type="warning"
-              icon="delete"
-              v-if="showDelBtn(node)"
-              :disabled="props.isViewModel"
+              :debug-mode="props.debugMode"
+              @update:modelValue="updateData"
             />
           </div>
         </div>
-      </template>
-    </el-tree>
+        <div v-else-if="template?.dataType == TemplateDataType.ARRAY">
+          <div v-for="(item, index) in featureConfigData" :key="template.key + index">
+            <FeatureConfigData
+              :key="count++"
+              v-model="featureConfigData[index]"
+              :template="template.items[0]"
+              :index="index"
+              :parent-prop="(props.parentProp || 'data') + '.' + index"
+              :parent="item"
+              :isViewModel="props.isViewModel"
+              :debug-mode="props.debugMode"
+              @update:modelValue="updateData"
+            />
+            <div class="operation-container">
+              <div class="right">
+                <el-button
+                  style="margin-left: 8px"
+                  @click="remove(index)"
+                  type="warning"
+                  icon="delete"
+                  v-if="(featureConfigData as any[])?.length > 1 "
+                  :disabled="props.isViewModel"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="operation-container">
+            <div class="right">
+              <el-button :disabled="props.isViewModel" @click="addChildNode()" type="primary" icon="plus" />
+            </div>
+          </div>
+        </div>
+        <div v-else>
+          <CommonConfig
+            :isViewModel="props.isViewModel"
+            :default-value="getDefaultValue(template)"
+            :max-length="template?.validator?.maxLength || Number.MAX_SAFE_INTEGER"
+            :max-value="template?.validator?.max || Number.MAX_SAFE_INTEGER"
+            :min-value="template?.validator?.min || 0"
+            :data-type="template.dataType"
+            :choice="template.choice"
+            :description="template.description"
+            :parent="props.parent"
+            v-model="featureConfigData"
+            @update:modelValue="updateData"
+          />
+        </div>
+      </el-form-item>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, h, ref, watch } from "vue"
-import type Node from "element-plus/es/components/tree/src/model/node"
-import { ElNotification } from "element-plus"
+import { computed, ref, watch } from "vue"
 import CommonConfig from "@/components/CommonConfig.vue"
 import _ from "lodash"
-import { convertConfigObject, getValue, mapDataToTemplate, transTempToTreeDataSource } from "@/utils"
-import { Feature, TemplateDataType } from "@/domain/Features"
+import { TemplateDataType, FeatureTemplate, getTemplateDefaultValue } from "@/domain/Features"
 
 const props = defineProps({
   modelValue: {
@@ -74,13 +86,23 @@ const props = defineProps({
     required: true,
     defaultValue: null
   },
-  feature: {
+  parent: {
+    type: [Object, Array, String, Number, Boolean, null],
+    required: true,
+    defaultValue: null
+  },
+  template: {
     type: Object,
     required: true
   },
   label: {
     type: String,
     required: false
+  },
+  parentProp: {
+    type: String,
+    required: false,
+    defaultValue: "data"
   },
   index: {
     type: Number,
@@ -96,118 +118,73 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(["update:modelValue", "change"])
-
-const featureConfigData = ref(props.modelValue)
-featureConfigData.value = featureConfigData.value || null
-const feature = ref(props.feature as Feature)
-
-const dataSource = computed({
-  get() {
-    const result = [transTempToTreeDataSource(feature.value?.template)]
-    if (!_.isNil(featureConfigData.value)) {
-      // 如果返回的数据是一个对象：
-      const templateInfo = mapDataToTemplate("", featureConfigData.value, feature.value?.template)
-      return [templateInfo]
-    }
-    return result
-  },
-  set(dataSource) {
-    featureConfigData.value = convertConfigObject(dataSource[0])
-    emit("update:modelValue", featureConfigData.value)
-  }
-})
 const count = ref(1)
-const getDefaultValue = (value) => {
-  if (value.dataType == TemplateDataType.GENERATED) {
-    return value.defaultValue
-  }
+const emit = defineEmits(["update:modelValue", "change"])
+const featureConfigData = ref(props.modelValue)
+const template = ref(props.template as FeatureTemplate)
 
-  return getValue(value)
-}
-
-const lastDataSource = ref(JSON.stringify(featureConfigData.value))
-
-const updateTree = (value, data) => {
-  console.log("updateTree")
-  console.log(value)
-  console.log(data)
-  // data.value = value || null
-  dataSource.value = [...dataSource.value]
-  // featureConfigData.value = convertConfigObject(dataSource.value[0])
-  console.log("JSON.stringify(featureConfigData.value)")
-  console.log(JSON.stringify(featureConfigData.value))
-  if (lastDataSource.value !== JSON.stringify(featureConfigData.value)) {
-    treeKey.value += 1
-    lastDataSource.value = JSON.stringify(featureConfigData.value)
-  }
-  console.log("lastDataSource.value")
-  console.log(lastDataSource.value)
-  console.log(treeKey.value)
-}
-
-// 这个不起作用，用于查看数据是否正确的发送消息
-const showDelBtn = (node: any) => {
-  const parentType = node?.parent?.data.dataType || null
-  return parentType && parentType == TemplateDataType.ARRAY && node?.parent?.data.children?.length > 1
-}
-const showAddNextBtn = (node, child) => {
-  return [TemplateDataType.ARRAY].includes(child.dataType)
-}
-
-interface Tree {
-  id: number
-  children?: Tree[]
-}
-
-const addChildNode = (node: any, data: Tree) => {
-  console.log(node)
-  console.log(data)
-  count.value++
-  if (node.level >= 5) {
-    ElNotification({
-      title: "提示",
-      message: h("i", { style: "color: red" }, "层级最大支持5级")
-    })
-    return
-  }
-  const tempCloneObj = _.cloneDeep(node.data.children[0])
-  tempCloneObj.id = count.value
-  tempCloneObj.index = node.data.children.length - 1
-  data.children.push(tempCloneObj)
-  console.log(data)
-}
-
-const remove = (node: Node) => {
-  console.log("node")
-  console.log(node)
-  console.log("node.parent?.childNodes")
-  console.log(node.parent?.childNodes)
-  const children = node.parent?.childNodes || []
-  const datas = node.parent?.data?.children || []
-  const index = children.findIndex((d) => d.id === node.id)
-  datas.splice(index, 1)
-}
-
-const treeKey = ref(0)
-const featureKey = ref("")
-
-// watch(
-//   () => treeKey.value,
-//   () => {
-//     featureConfigData.value = convertConfigObject(dataSource.value[0])
-//     emit("update:modelValue", featureConfigData.value)
-//   },
-//   {
-//     immediate: true // 必须要深度监听，否则初始值赋不进去
-//   }
-// )
+console.log("featureConfigData.value:")
+console.log(template.value)
+console.log(featureConfigData.value)
 
 watch(
-  () => props.feature,
+  () => featureConfigData.value,
+  (curVal) => {
+    emit("update:modelValue", curVal)
+    console.log('emit("update:modelValue", curVal)')
+    console.log(curVal)
+  },
+  {
+    // immediate: true
+  }
+)
+
+watch(
+  () => props.modelValue,
+  (cur, _) => (featureConfigData.value = cur)
+)
+
+const key = computed(() => {
+  if (template.value.dataType == TemplateDataType.OBJECT) {
+    return (template.value.items || [])
+      .map((item) => {
+        if (item.dataType != TemplateDataType.GENERATED) {
+          return _.get(featureConfigData.value, item.key, "") || ""
+        }
+        return ""
+      })
+      .join(",")
+  }
+  return template.value.key || ""
+})
+
+const getDefaultValue = (template) => {
+  return template.defaultValue
+}
+
+const addChildNode = () => {
+  if (!featureConfigData.value || !_.isArray(featureConfigData.value)) {
+    featureConfigData.value = []
+  }
+  featureConfigData.value.push(getTemplateDefaultValue(props.template.items[0]))
+}
+
+const remove = (index: number) => {
+  console.log("index:" + index)
+  console.log(featureConfigData.value)
+  ;(featureConfigData.value as any[]).splice(index, 1)
+}
+
+const updateData = (v1) => {
+  console.log("updateData")
+  console.log(v1)
+  emit("update:modelValue", featureConfigData.value)
+}
+
+watch(
+  () => props.template,
   (v1) => {
-    feature.value = v1 as Feature
-    featureKey.value = feature.value?.featureKey
+    template.value = v1 as FeatureTemplate
   },
   {
     immediate: true // 必须要深度监听，否则初始值赋不进去
@@ -218,11 +195,7 @@ const dataItemRule = (data: any) => {
   return [
     {
       required: data?.validator?.required || false,
-      validator: () => {
-        if (data?.validator?.required && !data.value) {
-          return Promise.reject("该字段为必填字段")
-        }
-      },
+      // message: "该字段为必填字段",
       trigger: "submit"
     }
   ]
@@ -276,7 +249,7 @@ const dataItemRule = (data: any) => {
 }
 
 .el-form-item {
-  margin-bottom: 5px !important;
+  margin-bottom: 10px !important;
 }
 
 .el-form-item__label-wrap {

@@ -82,7 +82,7 @@ import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
 import { defaultFeatureTemplate, Feature, Features, getDefaultValue, getTemplateDefaultValue } from "@/domain/Features"
 import { defaultFilterCondition } from "@/domain/FilterConditions"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
-import FeatureConfigData from "@/components/FeatureConfigDataNew.vue"
+import FeatureConfigData from "@/components/FeatureConfigData.vue"
 import FilterConditionComponent from "@/components/FilterCondition.vue"
 import { StaticStatus } from "@/constants/common"
 import _ from "lodash"
@@ -215,13 +215,6 @@ const submitForm = async () => {
       await filterConditionRef?.value?.$refs?.filterConditionFormRef?.validate(async (valid: boolean) => {
         if (valid) {
           try {
-            // featureConfig.value.templateData = JSON.stringify(feature.value.dataSource)
-            // debugger
-            // if (_.isObject(tempRet)) {
-            //   featureConfig.value.data = JSON.stringify(tempRet)
-            // } else {
-            // featureConfig.value.data = convertConfigObject(feature.value.dataSource[0])
-            // }
             featureConfig.value.featureKey = featureKey.value
             featureConfig.value.status = StaticStatus.DRAFT
             featureConfig.value.key = getKey()
@@ -232,8 +225,6 @@ const submitForm = async () => {
             if (formType.value.toLowerCase() == "add") {
               const response = await featureConfigs.create(featureKey.value, featureConfig.value)
               console.log("response = ", response)
-              // const ret = await features.updateConfig(featureKey.value, response.id, response)
-              // console.log(ret)
             } else {
               await featureConfigs.update(featureKey.value, id.value, featureConfig.value)
             }
