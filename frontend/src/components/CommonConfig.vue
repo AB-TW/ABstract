@@ -2,10 +2,10 @@
   <div class="common-container">
     <div>
       <div v-if="dataType == TemplateDataType.STRING">
-        <el-input v-model="value" :disabled="props.isViewModel" type="text" :maxlength="maxLength" @change="onInput" />
+        <el-input v-model="value" :disabled="props.isViewModel" type="text" :maxlength="maxLength" @blur="onInput" />
       </div>
       <div v-if="dataType == TemplateDataType.GENERATED">
-        <el-input v-model="value" :disabled="true" type="text" @change="onInput" />
+        <el-input v-model="value" :disabled="true" type="text" @blur="onInput" />
       </div>
       <div v-else-if="dataType == TemplateDataType.NUMBER">
         <el-input-number
@@ -23,7 +23,7 @@
         <el-switch v-model="value" :disabled="props.isViewModel" @change="onInput" />
       </div>
       <div v-else-if="dataType == TemplateDataType.SELECT">
-        <el-select v-model="value" :loading="selectLoading" placeholder="Select" style="width: 240px" @change="onInput">
+        <el-select v-model="value" :loading="selectLoading" placeholder="Select" style="width: 240px" @blur="onInput">
           <el-option
             v-for="item in choiceItems"
             :key="item.value"
@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref } from "vue"
+import { ref, watch } from "vue"
 import { ChoiceItem, ChoiceType, TemplateDataType } from "@/domain/Features"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
 import { ElMessage } from "element-plus"
@@ -56,10 +56,6 @@ const props = defineProps({
   description: {
     type: String,
     required: false
-  },
-  name: {
-    type: String,
-    required: true
   },
   defaultValue: {
     type: [String, Number, Boolean, null],
@@ -85,33 +81,19 @@ const props = defineProps({
     type: Object,
     required: false
   },
-  brothers: {
-    type: Array,
+  parent: {
+    type: [Object, Array, String, Number, Boolean, null],
     required: false
   }
 })
 const emit = defineEmits(["update:modelValue", "change"])
 // 绑定控件的值
 const value = ref(props.modelValue)
-const lastestValue = ref(props.modelValue)
-onBeforeMount(() => {
-  updateValue()
-})
+const defaultValue = ref(props.defaultValue)
+// const latestValue = ref(props.modelValue)
 
-const onInput = (e) => {
-  console.log("onInput:" + e)
-  // let tempValue = e
-  // if (props.dataType == TemplateDataType.NUMBER) {
-  //   tempValue = Number(e)
-  // } else if (props.dataType == TemplateDataType.BOOLEAN) {
-  //   tempValue = Boolean(e)
-  // }
-  //
-  // value.value = tempValue
-  emit("update:modelValue", e)
-  if (JSON.stringify(lastestValue.value) != JSON.stringify(e) && props.dataType != TemplateDataType.GENERATED) {
-    emit("change", e)
-  }
+const onInput = () => {
+  emit("update:modelValue", value.value)
 }
 
 const allFeatureConfigs = ref([] as FeatureConfig[])
@@ -141,35 +123,34 @@ const loadFeatureConfigs = async (featureKey: string) => {
   }
 }
 
-if (props.choice?.type === ChoiceType.CONTENT) {
-  choiceItems.value = props.choice?.items || []
-} else if (props.choice?.type === ChoiceType.INTERFACE) {
-  if (!featureConfigLoaded.value) {
-    loadFeatureConfigs(props.choice?.featureKey)
+if (props.dataType == TemplateDataType.SELECT) {
+  if (props.choice?.type === ChoiceType.CONTENT) {
+    choiceItems.value = props.choice?.items || []
+  } else if (props.choice?.type === ChoiceType.INTERFACE) {
+    if (!featureConfigLoaded.value) {
+      loadFeatureConfigs(props.choice?.featureKey)
+    }
   }
 }
 
-const updateValue = () => {
-  const v1 = props.defaultValue
+const updateValue = (v1) => {
   if (props.dataType != TemplateDataType.GENERATED) {
     value.value = v1
     return
   }
 
   const pattern = /\{.*?}/
-  console.log("v1:" + v1)
-  console.log(props.brothers)
-  if (pattern.test((v1 || "").toString())) {
-    const variables = (v1 || "")
+  if (pattern.test((defaultValue.value || "").toString())) {
+    const variables = (defaultValue.value || "")
       .toString()
       .match(pattern)
       .map((item) => ({
         key: item,
-        value: (props.brothers || []).find((bro: any) => bro.key === item.replace(/[{}]/g, ""))?.value || ""
+        value: _.isObject(props.parent) && props.parent ? _.get(props.parent, item.replace(/[{}]/g, "")) : ""
       }))
 
     console.log("variables:" + JSON.stringify(variables))
-    value.value = v1
+    value.value = defaultValue.value
     variables.forEach((item: any) => {
       value.value = (value.value || "").toString().replace(item.key, (item.value as string) || "")
     })
@@ -178,20 +159,41 @@ const updateValue = () => {
   }
   console.log("value.value:" + value.value)
 }
-
+updateValue(value.value)
 // watch(
 //   () => props.modelValue,
-//   () => {
-//     updateValue()
+//   (v1) => {
+//     updateValue(v1)
 //   }
 // )
 
 // watch(
 //   () => value.value,
-//   (v1) => {
-//     emit("update:modelValue", v1)
+//   (curValue, lastValue) => {
+//     console.log("watch value.value")
+//     console.log(curValue)
+//     console.log(lastValue)
+//     if (curValue != lastValue) {
+//       emit("update:modelValue", curValue)
+//       emit("change", curValue)
+//     }
 //   }
 // )
+
+watch(
+  () => props.defaultValue,
+  (v1) => {
+    defaultValue.value = v1
+    updateValue(value.value)
+  }
+)
+
+watch(
+  () => props.parent,
+  () => {
+    updateValue(value.value)
+  }
+)
 </script>
 
 <style lang="scss" scoped>

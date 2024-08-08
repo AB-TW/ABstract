@@ -7,7 +7,7 @@
           <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
         </div>
       </template>
-      <el-form :model="featureConfig" :rules="formRules" ref="form" label-width="140px">
+      <el-form :model="featureConfig" :rules="formRules" ref="form" :loading="loading" label-width="140px">
         <el-form-item label="标题" prop="title">
           <el-input v-model="featureConfig.title" autocomplete="off" :disabled="formType == 'view'" />
         </el-form-item>
@@ -15,10 +15,12 @@
           <el-input v-model="featureConfig.description" autocomplete="off" :disabled="formType == 'view'" />
         </el-form-item>
         <FeatureConfigData
-          :key="featureConfig.data"
+          :key="dataKey"
+          :parent="null"
           v-model="featureConfig.data"
           :label="'配置数据'"
-          :feature="feature"
+          parentProp="data"
+          :template="template"
           :isViewModel="isViewModel"
         />
         <el-form-item label="生效时间" prop="startTime">
@@ -45,6 +47,7 @@
               :item="item"
               :index="index"
               :disabled="formType == 'view'"
+              parent-prop="trackingData"
               @deleteItem="deleteTrackingData(index)"
             />
             <div>
@@ -72,14 +75,14 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onBeforeMount, ref } from "vue"
+import { computed, nextTick, onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance } from "element-plus"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
-import { Feature, Features, getDefaultValue } from "@/domain/Features"
+import { defaultFeatureTemplate, Feature, Features, getDefaultValue, getTemplateDefaultValue } from "@/domain/Features"
 import { defaultFilterCondition } from "@/domain/FilterConditions"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
-import FeatureConfigData from "@/components/FeatureConfigData.vue"
+import FeatureConfigData from "@/components/FeatureConfigDataNew.vue"
 import FilterConditionComponent from "@/components/FilterCondition.vue"
 import { StaticStatus } from "@/constants/common"
 import _ from "lodash"
@@ -87,8 +90,10 @@ import _ from "lodash"
 const route = useRoute()
 const router = useRouter()
 const featureConfigs = new FeatureConfigs()
-const featureConfig = ref({ data: null } as FeatureConfig)
+
 const feature = ref({} as Feature)
+const template = ref(defaultFeatureTemplate)
+const featureConfig = ref(getTemplateDefaultValue(template) as FeatureConfig)
 const features = new Features()
 const title = ref("Feature Config")
 const formType = ref("add")
@@ -98,6 +103,7 @@ const id = ref("")
 const saData = ref([] as any[])
 const isViewModel = ref(false)
 let trackingDataIndex = 0
+const loading = ref(true)
 onBeforeMount(async () => {
   title.value =
     (route.query.type == "edit" ? "编辑" : route.query.type == "view" ? "查看" : "新增") +
@@ -108,11 +114,15 @@ onBeforeMount(async () => {
   // featureKey 是点击feature 模块跳转过来的
   if (route.query.featureKey) {
     feature.value = await features.fetch(route.query.featureKey.toString())
+    template.value = feature.value.template
   }
 
   if (route.query.id) {
     id.value = route.query.id as string
     featureConfig.value = await featureConfigs.fetchById(featureKey.value, route.query.id as string)
+    if (!featureConfig.value.data) {
+      featureConfig.value.data = getDefaultValue(feature.value)
+    }
     if (!featureConfig.value.filterCondition) {
       featureConfig.value.filterCondition = defaultFilterCondition()
     }
@@ -132,6 +142,8 @@ onBeforeMount(async () => {
         }
       })
     : []
+
+  loading.value = false
 })
 
 nextTick(() => {
@@ -139,6 +151,11 @@ nextTick(() => {
     form.value.clearValidate()
   }
 })
+
+const dataKey = computed(() => {
+  return JSON.stringify(featureConfig.value.data) || "0"
+})
+
 const formRules = {
   title: [{ required: true, message: "Please enter title", trigger: "submit" }],
   // data: [{ required: isSimpleBooleanOrNumber(), message: "Please enter data", trigger: "submit" }],
