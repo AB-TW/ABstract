@@ -74,7 +74,7 @@
           </el-select>
 
           <el-input
-            v-show="_.isString(conditionItem.value)"
+            v-show="![CompareOperator.IN, CompareOperator.NOT_IN].includes(conditionItem.operator)"
             v-model="conditionItem.value"
             maxlength="10"
             placeholder="请输入要匹配的值"
@@ -82,11 +82,11 @@
             type="text"
           />
 
-          <div v-show="_.isArray(conditionItem.value)">
-            <div class="tags" :style="conditionItem.value.length > 0 ? 'height:35px' : ''">
+          <div v-show="[CompareOperator.IN, CompareOperator.NOT_IN].includes(conditionItem.operator)">
+            <div class="tags" :style="conditionItem.items?.length > 0 ? 'height:35px' : ''">
               <el-tag
                 class="tag"
-                v-for="(tag, index) in conditionItem.value"
+                v-for="(tag, index) in conditionItem.items"
                 :key="index"
                 closable
                 :disable-transitions="false"
@@ -174,18 +174,15 @@ const addCustomAttributeItem = () => {
     name: "条件" + (filterCondition.attributeConditions.length + 1),
     key: "",
     operator: CompareOperator.EQUALS,
-    value: ""
+    value: "",
+    items: []
   })
 }
 const conditionOperatorChanged = (val: CompareOperator, customAttribute: CustomAttributeCondition) => {
   if (_.includes([CompareOperator.IN, CompareOperator.NOT_IN], val)) {
-    if (!_.isArray(customAttribute.value)) {
-      customAttribute.value = []
-    }
+    customAttribute.items = []
   } else {
-    if (!_.isString(customAttribute.value)) {
-      customAttribute.value = ""
-    }
+    customAttribute.value = ""
   }
 }
 
@@ -195,19 +192,23 @@ const tagInputValue = ref<string>("")
 const changeInputVisible = (showOrHidden: boolean) => {
   tagInputVisible.value = showOrHidden
 }
+
 const addTagValue = (customAttribute: CustomAttributeCondition) => {
+  console.log("addTagValue")
+  console.log(customAttribute.items)
+  console.log(tagInputValue.value)
   if (_.isEmpty(tagInputValue.value)) {
     changeInputVisible(false)
     return
   }
-  if (_.isArray(customAttribute.value)) {
-    customAttribute.value?.push(tagInputValue.value)
-  }
+  customAttribute.items = customAttribute.items || []
+  customAttribute.items.push(tagInputValue.value)
   tagInputValue.value = ""
 }
+
 const removeTagValue = (customAttribute: CustomAttributeCondition, index: number) => {
-  if (_.isArray(customAttribute.value) && customAttribute.value.length >= index + 1) {
-    customAttribute.value.splice(index, 1)
+  if (_.isArray(customAttribute.items) && customAttribute.items.length >= index + 1) {
+    customAttribute.items.splice(index, 1)
   }
 }
 </script>
