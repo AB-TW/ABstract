@@ -27,7 +27,7 @@ export interface FeatureTemplate {
   description?: string
   keyParam: boolean
   dataType: TemplateDataType
-  defaultValue?: unknown | string | object
+  defaultValue?: unknown | string | object | boolean
   validator?: any
   items?: FeatureTemplate[]
   choice?: Choice
@@ -77,6 +77,14 @@ export enum TemplateDataType {
   SELECT = "SELECT",
   GENERATED = "GENERATED"
 }
+
+export const defaultFeatureTemplate = {
+  dataType: TemplateDataType.BOOLEAN,
+  required: false,
+  defaultValue: false,
+  keyParam: false,
+  items: []
+} as FeatureTemplate
 
 export const getDefaultValue = (feature: Feature): any => {
   return getTemplateDefaultValue(feature.template)
