@@ -140,10 +140,12 @@
               </el-form-item>
               <FeatureTemplateConfig
                 :isViewModel="isViewMode"
-                :key="selectedFeature?.featureKey + bucket.config"
+                :key="configKey[index]"
                 v-model="bucket.config"
                 label="分组配置"
-                :feature="selectedFeature"
+                :parent="null"
+                :parentProp="`buckets.${index}.config`"
+                :template="selectedTemplate"
               />
             </div>
           </el-form-item>
@@ -235,7 +237,7 @@ import { Delete } from "@element-plus/icons-vue"
 import { ExperimentBucket } from "@/model/ExperimentBucket"
 import _ from "lodash"
 import { StatusMaps, validateSelectDateLowerThanToday } from "@/utils"
-import { Feature, Features } from "@/domain/Features"
+import { defaultFeatureTemplate, Feature, Features, getTemplateDefaultValue } from "@/domain/Features"
 import FeatureTemplateConfig from "@/components/FeatureConfigData.vue"
 import moment from "moment/moment"
 import { Experiment, Experiments } from "@/domain/Experiments"
@@ -274,6 +276,7 @@ const title = ref("Experiment")
 // View-Model
 const allFeatures = reactive<Feature[]>([])
 const selectedFeature = ref({} as Feature)
+const selectedTemplate = ref(defaultFeatureTemplate)
 const experimentFormRef = ref<FormInstance>()
 const filterConditionRef = ref<FormInstance>()
 const experimentForm = reactive<AddExperiment>({
@@ -324,6 +327,10 @@ setup()
 
 const selectFeature = (featureKey: string) => {
   selectedFeature.value = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
+  selectedTemplate.value = selectedFeature.value?.template
+  experimentForm.buckets.forEach(
+    (item) => (item.config = item.config ? item.config : getTemplateDefaultValue(selectedTemplate.value))
+  )
 }
 
 const addBucket = () => {
@@ -333,7 +340,7 @@ const addBucket = () => {
     name: "",
     description: "",
     percentage: currentRemainingPercentage,
-    config: null
+    config: getTemplateDefaultValue(selectedTemplate.value)
   })
 }
 
@@ -414,6 +421,11 @@ const submitExperimentForm = async (
     ElMessage.error("请检查表单项是否填写符合规范～")
   }
 }
+
+const count = ref(0)
+const configKey = computed(() => {
+  return experimentForm.buckets.map((item) => JSON.stringify(item.config) || count.value++)
+})
 </script>
 
 <style scoped lang="scss">
