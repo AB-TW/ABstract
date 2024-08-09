@@ -2,6 +2,7 @@ import dayjs from "dayjs"
 import _ from "lodash"
 import lodash from "lodash"
 import moment from "moment"
+import { getDefaultValue, TemplateDataType } from "@/domain/Features"
 
 /** 格式化时间 */
 export const formatDateTime = (time: string | number | Date) => {
@@ -31,11 +32,14 @@ export const setCssVariableValue = (cssVariableName: string, cssVariableValue: s
 let localId = 0
 export const transTempToTreeDataSource = (temp: any) => {
   const tree = {
-    name: temp.name || "",
-    dataType: temp.dataType || "",
-    defaultValue: temp.dataType == "BOOLEAN" ? Boolean(temp.defaultValue) : temp.defaultValue,
-    key: temp.key || "",
-    description: temp.description || "",
+    name: temp?.name || "",
+    dataType: temp?.dataType || "",
+    defaultValue: temp?.dataType == TemplateDataType.BOOLEAN ? Boolean(temp?.defaultValue) : temp?.defaultValue,
+    key: temp?.key || "",
+    description: temp?.description || "",
+    choice: temp?.choice,
+    value: null,
+    keyParam: temp.keyParam,
     validator: {
       min: temp?.validator?.min || 0,
       max: temp?.validator?.max || 0,
@@ -47,9 +51,9 @@ export const transTempToTreeDataSource = (temp: any) => {
     children: []
   }
 
-  if (temp.items && temp.items.length) {
-    for (let i = 0; i < temp.items.length; i++) {
-      tree.children.push(transTempToTreeDataSource(temp.items[i]))
+  if (temp?.items && temp?.items?.length) {
+    for (let i = 0; i < temp?.items.length; i++) {
+      tree.children.push(transTempToTreeDataSource(temp?.items[i]))
     }
   }
   return tree
@@ -76,10 +80,10 @@ export function replaceChildrenWithItems(data) {
       } else {
         if (prop == "dataType") {
           switch (data[prop]) {
-            case "NUMBER":
+            case TemplateDataType.NUMBER:
               data["defaultValue"] = Number(data["defaultValue"])
               break
-            case "BOOLEAN":
+            case TemplateDataType.BOOLEAN:
               data["defaultValue"] = Boolean(data["defaultValue"])
               break
             default:
@@ -100,29 +104,32 @@ export const translateDataToTemplateItems = (value) => {
 }
 
 export function getValue(info) {
-  debugger
-  if (info.dataType == "BOOLEAN") {
+  if (info.dataType == TemplateDataType.BOOLEAN) {
     if (_.hasIn(info, "value")) {
-      return info.value
+      return info.value || false
     } else {
-      return Boolean(info.defaultValue)
+      return Boolean(info.defaultValue) || false
     }
-  } else if (info.dataType == "NUMBER") {
-    return Number(info.value || info.defaultValue)
-  } else {
+  } else if (info.dataType == TemplateDataType.NUMBER) {
+    return Number(info.value || info.defaultValue) || 0
+  } else if (info.dataType == TemplateDataType.GENERATED) {
     return info.value || info.defaultValue
+  } else if (info.dataType == TemplateDataType.SELECT) {
+    return info.value || ""
+  } else {
+    return info.value || info.defaultValue || null
   }
 }
 
 // FeatureConfg data数据处理函数
 export function convertConfigObject(data) {
-  if (data.dataType === "OBJECT") {
+  if (data.dataType === TemplateDataType.OBJECT) {
     const obj = {}
-    for (const child of data.children) {
+    for (const child of data?.children || []) {
       obj[child.key] = convertConfigObject(child)
     }
     return obj
-  } else if (data.dataType === "ARRAY") {
+  } else if (data.dataType === TemplateDataType.ARRAY) {
     const arr = []
     for (const child of data.children) {
       arr.push(convertConfigObject(child))
@@ -133,63 +140,45 @@ export function convertConfigObject(data) {
   }
 }
 
-function getModelByKey(key, items, defaultValue = null) {
-  if (!!items && items.length > 0) {
-    return lodash.find(items, (item) => {
-      return item.key == key
-    })
-  } else {
-    return defaultValue || {}
-  }
-}
-
 //数据转换为template对象
 export function mapDataToTemplate(name, obj, model) {
-  if (lodash.isObject(obj) && !lodash.isArray(obj)) {
-    return {
-      name,
-      dataType: "OBJECT",
-      ...lodash.omit(model, ["items"]),
-      children: Object.entries(obj).map(([key, value]) => {
-        return mapDataToTemplate(key, value, getModelByKey(key, model?.items || []))
-      })
+  try {
+    if (model.dataType == TemplateDataType.OBJECT) {
+      if (!lodash.isObject(obj) || lodash.isArray(obj)) {
+        obj = getDefaultValue(model)
+      }
+      return {
+        ...lodash.omit(model, ["items"]),
+        children: (model?.items || []).map((item) => {
+          return mapDataToTemplate(item.name, obj[item.key], item)
+        })
+      }
     }
-  }
-  if (typeof obj === "string") {
+
+    if (model?.dataType == TemplateDataType.ARRAY) {
+      const extentObj = lodash.omit(model, ["items"])
+
+      return {
+        name,
+        ...extentObj,
+        dataType: TemplateDataType.ARRAY,
+        children: lodash.isArray(obj)
+          ? obj.map((it) => mapDataToTemplate("", it, model.items[0]))
+          : mapDataToTemplate("", null, model.items[0])
+      }
+    }
+
     return {
-      name,
-      dataType: "STRING",
       ...model,
       value: obj
     }
-  }
-  if (typeof obj === "number") {
+  } catch (error) {
+    console.log(error)
     return {
-      name,
-      dataType: "NUMBER",
       ...model,
-      value: obj
-    }
-  } else if (typeof obj === "boolean") {
-    return {
-      name,
-      dataType: "BOOLEAN",
-      ...model,
-      value: obj
-    }
-  } else if (lodash.isArray(obj)) {
-    let extentObj = {}
-    if (model.dataType == "ARRAY") {
-      extentObj = lodash.omit(model, ["items"])
-    }
-    return {
-      name,
-      ...extentObj,
-      dataType: "ARRAY",
-      children: obj.map((it, index) => mapDataToTemplate("", it, model.items[index] || model.items[0]))
+      value: getDefaultValue(model)
     }
   }
-  throw new Error(name + obj)
 }
 
 export function validateSelectDateLowerThanToday(date: string) {

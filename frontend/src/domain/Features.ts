@@ -25,10 +25,30 @@ export interface FeatureTemplate {
   key?: string
   name?: string
   description?: string
+  keyParam: boolean
   dataType: TemplateDataType
-  defaultValue?: unknown | string | object
+  defaultValue?: unknown | string | object | boolean
   validator?: any
   items?: FeatureTemplate[]
+  choice?: Choice
+}
+
+export interface Choice {
+  type: ChoiceType
+  items?: ChoiceItem[]
+  featureKey?: string
+  valueField?: string
+  labelField?: string
+}
+
+export enum ChoiceType {
+  CONTENT = "CONTENT",
+  INTERFACE = "INTERFACE"
+}
+
+export interface ChoiceItem {
+  value: string
+  label: string
 }
 
 export interface FeatureTimeLine {
@@ -53,8 +73,17 @@ export enum TemplateDataType {
   STRING = "STRING",
   NUMBER = "NUMBER",
   OBJECT = "OBJECT",
-  ARRAY = "ARRAY"
+  ARRAY = "ARRAY",
+  SELECT = "SELECT",
+  GENERATED = "GENERATED"
 }
+
+export const defaultFeatureTemplate = {
+  dataType: TemplateDataType.BOOLEAN,
+  required: false,
+  defaultValue: false,
+  items: []
+} as FeatureTemplate
 
 export const getDefaultValue = (feature: Feature): any => {
   return getTemplateDefaultValue(feature.template)
@@ -83,6 +112,8 @@ export const getTemplateDefaultValue = (template: FeatureTemplate | undefined): 
     return template.defaultValue || ""
   } else if (template.dataType === TemplateDataType.NUMBER) {
     return Number(template.defaultValue) || 0
+  } else if (template.dataType === TemplateDataType.SELECT) {
+    return null
   }
 
   return template.defaultValue || ""

@@ -14,7 +14,7 @@ spring:
       baseUrl: ${OPENAI_API_BASE}
       chat:
         options:
-          model: gpt-3.5-turbo
+          model: gpt-4o-mini
       embedding:
         options:
           model: text-embedding-ada-002

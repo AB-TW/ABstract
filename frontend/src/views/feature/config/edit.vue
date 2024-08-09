@@ -7,20 +7,22 @@
           <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
         </div>
       </template>
-      <el-form :model="featureConfig" :rules="formRules" ref="form" label-width="140px">
+      <el-form :model="featureConfig" :rules="formRules" ref="form" :loading="loading" label-width="140px">
         <el-form-item label="标题" prop="title">
           <el-input v-model="featureConfig.title" autocomplete="off" :disabled="formType == 'view'" />
         </el-form-item>
         <el-form-item label="描述" prop="description">
           <el-input v-model="featureConfig.description" autocomplete="off" :disabled="formType == 'view'" />
         </el-form-item>
-        <el-form-item label="配置内容" prop="data">
-          <FeatureTemplateConfig
-            :key="feature?.dataSource?.toString()"
-            :isViewModel="isViewModel"
-            :dataSource="feature.dataSource"
-          />
-        </el-form-item>
+        <FeatureConfigData
+          :key="dataKey"
+          :parent="null"
+          v-model="featureConfig.data"
+          :label="'配置数据'"
+          parentProp="data"
+          :template="template"
+          :isViewModel="isViewModel"
+        />
         <el-form-item label="生效时间" prop="startTime">
           <el-date-picker
             v-model="featureConfig.startTime"
@@ -45,6 +47,7 @@
               :item="item"
               :index="index"
               :disabled="formType == 'view'"
+              parent-prop="trackingData"
               @deleteItem="deleteTrackingData(index)"
             />
             <div>
@@ -72,33 +75,35 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onBeforeMount, ref } from "vue"
+import { computed, nextTick, onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance } from "element-plus"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
-import { Feature, Features, FeatureTemplate, getDefaultValue } from "@/domain/Features"
+import { defaultFeatureTemplate, Feature, Features, getDefaultValue, getTemplateDefaultValue } from "@/domain/Features"
 import { defaultFilterCondition } from "@/domain/FilterConditions"
 import TrackingDataItem from "@/components/TrackingDataItem.vue"
-import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
+import FeatureConfigData from "@/components/FeatureConfigData.vue"
 import FilterConditionComponent from "@/components/FilterCondition.vue"
-import { convertConfigObject, mapDataToTemplate, transTempToTreeDataSource } from "@/utils"
 import { StaticStatus } from "@/constants/common"
 import _ from "lodash"
 
 const route = useRoute()
 const router = useRouter()
 const featureConfigs = new FeatureConfigs()
-const featureConfig = ref({} as FeatureConfig)
-const feature = ref({ dataSource: [] } as Feature)
+
+const feature = ref({} as Feature)
+const template = ref(defaultFeatureTemplate)
+const featureConfig = ref(getTemplateDefaultValue(template) as FeatureConfig)
 const features = new Features()
 const title = ref("Feature Config")
 const formType = ref("add")
-const originalFeatureConfig = ref({} as FeatureConfig)
+const originalFeatureConfig = ref({ data: null } as FeatureConfig)
 const featureKey = ref("")
 const id = ref("")
 const saData = ref([] as any[])
 const isViewModel = ref(false)
 let trackingDataIndex = 0
+const loading = ref(true)
 onBeforeMount(async () => {
   title.value =
     (route.query.type == "edit" ? "编辑" : route.query.type == "view" ? "查看" : "新增") +
@@ -109,23 +114,17 @@ onBeforeMount(async () => {
   // featureKey 是点击feature 模块跳转过来的
   if (route.query.featureKey) {
     feature.value = await features.fetch(route.query.featureKey.toString())
-    feature.value.dataSource = [transTempToTreeDataSource(feature.value.template)] as Array<FeatureTemplate>
+    template.value = feature.value.template
   }
 
   if (route.query.id) {
     id.value = route.query.id as string
     featureConfig.value = await featureConfigs.fetchById(featureKey.value, route.query.id as string)
+    if (!featureConfig.value.data) {
+      featureConfig.value.data = getDefaultValue(feature.value)
+    }
     if (!featureConfig.value.filterCondition) {
       featureConfig.value.filterCondition = defaultFilterCondition()
-    }
-    if (!_.isNil(featureConfig.value.data)) {
-      // 如果返回的数据是一个对象：
-      debugger
-
-      const templateInfo = mapDataToTemplate("", featureConfig.value.data, feature.value.template)
-
-      feature.value.dataSource = [templateInfo]
-      debugger
     }
   } else {
     featureConfig.value = {
@@ -143,19 +142,23 @@ onBeforeMount(async () => {
         }
       })
     : []
+
+  loading.value = false
 })
-// 防止只有一个Boolean 值为false 或者NUMBER，并且数字为 0
-const isSimpleBooleanOrNumber = () => {
-  return ["NUMBER", "BOOLEAN"].includes(_.get(feature.value, "template.dataType", null))
-}
+
 nextTick(() => {
   if (form.value) {
     form.value.clearValidate()
   }
 })
+
+const dataKey = computed(() => {
+  return JSON.stringify(featureConfig.value.data) || "0"
+})
+
 const formRules = {
   title: [{ required: true, message: "Please enter title", trigger: "submit" }],
-  data: [{ required: isSimpleBooleanOrNumber(), message: "Please enter data", trigger: "submit" }],
+  // data: [{ required: isSimpleBooleanOrNumber(), message: "Please enter data", trigger: "submit" }],
   endTime: [
     {
       trigger: "blur",
@@ -192,6 +195,16 @@ const addTrackingData = () => {
   })
 }
 
+const getKey = (): string => {
+  const keyParam = feature.value.template.keyParam
+    ? "data"
+    : (() => {
+        const keyItem = (feature.value.template.items || []).find((item: any) => item.keyParam)
+        return keyItem ? "data." + keyItem.key : ""
+      })()
+  return keyParam ? _.get(featureConfig.value, keyParam) || "" : featureConfig.value.key || ""
+}
+
 const submitForm = async () => {
   if (!featureKey.value) {
     ElMessage.error("featureKey 不能为空！")
@@ -202,26 +215,16 @@ const submitForm = async () => {
       await filterConditionRef?.value?.$refs?.filterConditionFormRef?.validate(async (valid: boolean) => {
         if (valid) {
           try {
-            // featureConfig.value.templateData = JSON.stringify(feature.value.dataSource)
-            // debugger
-            // if (_.isObject(tempRet)) {
-            //   featureConfig.value.data = JSON.stringify(tempRet)
-            // } else {
-            featureConfig.value.data = convertConfigObject(feature.value.dataSource[0])
-            // }
             featureConfig.value.featureKey = featureKey.value
             featureConfig.value.status = StaticStatus.DRAFT
-            debugger
+            featureConfig.value.key = getKey()
             featureConfig.value.saData = saData.value.reduce((acc, cur) => {
               acc[cur.key] = cur.value
               return acc
             }, {} as any)
-            debugger
             if (formType.value.toLowerCase() == "add") {
               const response = await featureConfigs.create(featureKey.value, featureConfig.value)
               console.log("response = ", response)
-              // const ret = await features.updateConfig(featureKey.value, response.id, response)
-              // console.log(ret)
             } else {
               await featureConfigs.update(featureKey.value, id.value, featureConfig.value)
             }

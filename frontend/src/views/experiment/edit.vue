@@ -138,14 +138,15 @@
                   :step="10"
                 />
               </el-form-item>
-              <el-form-item
-                class="level-2-form-item"
+              <FeatureTemplateConfig
+                :isViewModel="isViewMode"
+                :key="configKey[index]"
+                v-model="bucket.config"
                 label="分组配置"
-                :prop="`buckets.${index}.config`"
-                v-if="!_.isEmpty(selectedFeature)"
-              >
-                <FeatureTemplateConfig :isViewModel="isViewMode" :dataSource="bucket.datasource" />
-              </el-form-item>
+                :parent="null"
+                :parentProp="`buckets.${index}.config`"
+                :template="selectedTemplate"
+              />
             </div>
           </el-form-item>
           <el-button
@@ -235,19 +236,13 @@ import { computed, reactive, ref } from "vue"
 import { Delete } from "@element-plus/icons-vue"
 import { ExperimentBucket } from "@/model/ExperimentBucket"
 import _ from "lodash"
-import {
-  convertConfigObject,
-  mapDataToTemplate,
-  StatusMaps,
-  transTempToTreeDataSource,
-  validateSelectDateLowerThanToday
-} from "@/utils"
-import { Feature, Features, FeatureTemplate, PageResponse } from "@/domain/Features"
-import FeatureTemplateConfig from "@/components/FeatureTemplateItemConfig.vue"
+import { StatusMaps, validateSelectDateLowerThanToday } from "@/utils"
+import { defaultFeatureTemplate, Feature, Features, getTemplateDefaultValue } from "@/domain/Features"
+import FeatureTemplateConfig from "@/components/FeatureConfigData.vue"
 import moment from "moment/moment"
 import { Experiment, Experiments } from "@/domain/Experiments"
 import { Status } from "@/model/Status"
-import { CompareOperator, CustomAttributeCondition, FilterCondition } from "@/domain/FilterConditions"
+import { FilterCondition } from "@/domain/FilterConditions"
 import { useRoute, useRouter } from "vue-router"
 
 interface AddExperiment {
@@ -280,7 +275,8 @@ const title = ref("Experiment")
 
 // View-Model
 const allFeatures = reactive<Feature[]>([])
-const selectedFeature = reactive<Feature>({} as Feature)
+const selectedFeature = ref({} as Feature)
+const selectedTemplate = ref(defaultFeatureTemplate)
 const experimentFormRef = ref<FormInstance>()
 const filterConditionRef = ref<FormInstance>()
 const experimentForm = reactive<AddExperiment>({
@@ -305,9 +301,7 @@ title.value = StatusMaps[model] + "Experiment"
 // setup page
 const setup = async () => {
   const needQueryExperiment = isViewMode.value || isEditMode.value || isCopyMode.value
-  const [featureResp, experimentResp]: [PageResponse<Feature>, Experiment] = await Promise.all<
-    PageResponse<Feature> | Experiment
-  >([
+  const [featureResp, experimentResp] = await Promise.all([
     features.fetchAll(0, 999, undefined, true),
     needQueryExperiment ? experiments.getById(experimentId as string) : Promise.resolve(undefined)
   ])
@@ -317,19 +311,7 @@ const setup = async () => {
       startTime: experimentResp.status?.startTime,
       endTime: experimentResp.status?.endTime,
       endCollectTime: experimentResp.status?.endCollectTime,
-      ..._.omit(experimentResp, ["filterCondition", "status.startTime", "status.endTime", "status.endCollectTime"]),
-      filterCondition: {
-        ...experimentResp.filterCondition,
-        attributeConditions: _.map(
-          experimentResp.filterCondition?.attributeConditions ?? [],
-          (attributeCondition: CustomAttributeCondition) => ({
-            ...attributeCondition,
-            value: _.includes([CompareOperator.IN, CompareOperator.NOT_IN], attributeCondition.operator)
-              ? _.split(attributeCondition.value as string, ",")
-              : attributeCondition.value
-          })
-        )
-      }
+      ..._.omit(experimentResp, ["status.startTime", "status.endTime", "status.endCollectTime"])
     })
     if (isCopyMode.value) {
       experimentForm.name += "-复制"
@@ -344,20 +326,11 @@ const setup = async () => {
 setup()
 
 const selectFeature = (featureKey: string) => {
-  const currentSelectedFeature = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
-  _.assign(selectedFeature, currentSelectedFeature)
-  // 设置bucket的config为datasource
-  setBucketsConfigDataSource(currentSelectedFeature.template)
-}
-const setBucketsConfigDataSource = (template: FeatureTemplate) => {
-  if (template) {
-    _.each(experimentForm.buckets, (bucket: ExperimentBucket) => {
-      bucket.datasource =
-        isViewMode.value || isEditMode.value || isCopyMode.value
-          ? [mapDataToTemplate("", bucket.config, template)]
-          : [transTempToTreeDataSource(template)]
-    })
-  }
+  selectedFeature.value = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
+  selectedTemplate.value = selectedFeature.value?.template
+  experimentForm.buckets.forEach(
+    (item) => (item.config = item.config ? item.config : getTemplateDefaultValue(selectedTemplate.value))
+  )
 }
 
 const addBucket = () => {
@@ -366,9 +339,9 @@ const addBucket = () => {
     key: "",
     name: "",
     description: "",
-    percentage: currentRemainingPercentage
+    percentage: currentRemainingPercentage,
+    config: getTemplateDefaultValue(selectedTemplate.value)
   })
-  setBucketsConfigDataSource(selectedFeature.template)
 }
 
 // form validator
@@ -425,29 +398,16 @@ const submitExperimentForm = async (
   if (!experimentFormEl || !filterConditionRef) return
   try {
     await Promise.all([experimentFormEl.validate(), filterConditionRef.$refs.filterConditionFormRef.validate()])
+    console.log("experimentForm")
+    console.log(experimentForm)
     const requestBody = {
-      ..._.omit(experimentForm, ["filterCondition", "startTime", "endCollectTime", "endTime"]),
-      buckets: _.map(experimentForm.buckets, (bucket: ExperimentBucket) => ({
-        ..._.omit(bucket, ["datasource"]),
-        config: convertConfigObject(bucket.datasource[0])
-      })),
+      ..._.omit(experimentForm, ["startTime", "endCollectTime", "endTime"]),
+      buckets: experimentForm.buckets,
       status: {
         staticStatus: isEditMode.value ? experimentForm.status?.staticStatus : Status.DRAFT,
         startTime: experimentForm.startTime,
         endCollectTime: experimentForm.endCollectTime,
         endTime: experimentForm.endTime
-      },
-      filterCondition: {
-        ...experimentForm.filterCondition,
-        attributeConditions: _.map(
-          experimentForm.filterCondition?.attributeConditions ?? [],
-          (attributeCondition: CustomAttributeCondition) => ({
-            ...attributeCondition,
-            value: _.isArray(attributeCondition.value)
-              ? _.join(attributeCondition.value, ",")
-              : attributeCondition.value
-          })
-        )
       }
     }
     const operationFunc = () =>
@@ -456,11 +416,16 @@ const submitExperimentForm = async (
       ElMessage.success("操作成功！")
       router.push("/experiment/list")
     })
-  } catch (e: Error) {
+  } catch (e: any) {
     console.error(e)
     ElMessage.error("请检查表单项是否填写符合规范～")
   }
 }
+
+const count = ref(0)
+const configKey = computed(() => {
+  return experimentForm.buckets.map((item) => JSON.stringify(item.config) || count.value++)
+})
 </script>
 
 <style scoped lang="scss">

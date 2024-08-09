@@ -2,20 +2,22 @@
   <div class="track-container">
     <el-row :gutter="20">
       <el-col :span="10">
-        <el-form-item label="Key" prop="key">
+        <el-form-item label="Key" required :prop="getProp('key')">
           <el-input v-model="item.key" autocomplete="off" :disabled="disabled" />
         </el-form-item>
       </el-col>
       <el-col :span="10">
-        <el-form-item label="Value" prop="key">
+        <el-form-item label="Value" required :prop="getProp('value')">
           <el-input v-model="item.value" autocomplete="off" :disabled="disabled" />
         </el-form-item>
       </el-col>
       <el-col :span="4">
         <el-form-item v-if="!disabled">
-          <el-button type="warning" @click="deleteItem()"
-            ><el-icon> <Delete /> </el-icon
-          ></el-button>
+          <el-button type="warning" @click="deleteItem()">
+            <el-icon>
+              <Delete />
+            </el-icon>
+          </el-button>
         </el-form-item>
       </el-col>
     </el-row>
@@ -34,11 +36,22 @@ const props = defineProps({
     type: Object,
     required: true
   },
+  parentProp: {
+    type: String,
+    required: false,
+    defaultValue: "trackingData"
+  },
   disabled: {
     type: Boolean,
     required: false
   }
 })
+
+const getProp = (prop) => {
+  const parentPro = props.parentProp ? props.parentProp + "." : ""
+  const indexPro = props.index ? props.index + "." : ""
+  return parentPro + indexPro + prop
+}
 
 const emit = defineEmits(["deleteItem"])
 const deleteItem = () => {
@@ -52,6 +65,7 @@ const item = ref(props.item)
 .track-container {
   display: block;
   margin-bottom: 10px;
+
   .el-form-item__label {
     width: 40px !important;
   }

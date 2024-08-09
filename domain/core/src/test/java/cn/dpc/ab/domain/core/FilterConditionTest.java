@@ -1,24 +1,26 @@
 package cn.dpc.ab.domain.core;
 
+import cn.dpc.ab.domain.core.FilterCondition.CustomAttributeCondition;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static cn.dpc.ab.domain.core.FilterCondition.CustomAttributeCondition.Operator.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FilterConditionTest {
 
 
     @Test
     void version_match() {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("app_version", "9.1.1");
+        Map<String, String> map = Map.of("app_version", "9.1.1");
         CustomerId customerId = CustomerId.builder().customerId("111").clientId("222").attributes(map).build();
         FilterCondition filterCondition = FilterCondition.builder()
-                .attributeConditions(List.of(new FilterCondition.CustomAttributeCondition("test", "app_version",
-                        VERSION_GREATER_THAN, "9.0.0")))
+                .attributeConditions(List.of(new CustomAttributeCondition("test", "app_version",
+                        VERSION_GREATER_THAN, "9.0.0", null)))
                 .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
                 .build();
         assertTrue(filterCondition.match(customerId));
@@ -26,22 +28,150 @@ class FilterConditionTest {
 
     @Test
     void number_compare_match() {
+        Map<String, String> attributes = Map.of("key1", "20", "key2", "30", "key3", "60");
+        CustomerId customerId = CustomerId.builder().customerId("111").clientId("222").attributes(attributes).build();
 
-        HashMap<String, String> map = new HashMap<>();
-        map.put("key1", "20");
-        map.put("key2", "30");
-        map.put("key3", "60");
-        CustomerId customerId = CustomerId.builder().customerId("111").clientId("222").attributes(map).build();
         FilterCondition filterCondition = FilterCondition.builder()
-                .attributeConditions(List.of(new FilterCondition.CustomAttributeCondition("test1", "key1", GREATER_THAN,
-                                "18"),
-                        new FilterCondition.CustomAttributeCondition("test2", "key2", LESS_THAN, "50"),
-                        new FilterCondition.CustomAttributeCondition("test3", "key3", EQUALS, "60")))
+                .attributeConditions(List.of(new CustomAttributeCondition("test1", "key1", GREATER_THAN,
+                                "18", null),
+                        new CustomAttributeCondition("test2", "key2", LESS_THAN, "50", null),
+                        new CustomAttributeCondition("test3", "key3", EQUALS, "60", null)))
                 .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
                 .build();
         assertTrue(filterCondition.match(customerId));
 
-        map.put("key1", "not a number");
-        assertFalse(filterCondition.match(customerId));
+
+        assertFalse(filterCondition.match(CustomerId.builder()
+                .customerId("111")
+                .clientId("222")
+                .attributes(Map.of("key1", "not a number"))
+                .build()));
     }
+
+    @Nested
+    class InMatchTest {
+        @Test
+        void should_in_match_return_true_when_attributes_match() {
+            CustomerId customerId = CustomerId.builder()
+                    .customerId("1-222")
+                    .clientId("1-2223")
+                    .attributes(Map.of("key1", "2222")).build();
+            FilterCondition filterCondition = FilterCondition.builder()
+                    .attributeConditions(List.of(
+                            new CustomAttributeCondition("IN_TEST", "key1", IN,
+                                    null, List.of("111", "2222"))
+                    )).build();
+
+            assertTrue(filterCondition.match(customerId));
+        }
+
+        @Test
+        public void should_in_match_return_false_when_attributes_not_match() {
+            CustomerId customerId = CustomerId.builder()
+                    .customerId("1-222")
+                    .clientId("1-2223")
+                    .attributes(Map.of("key1", "333")).build();
+            FilterCondition filterCondition = FilterCondition.builder()
+                    .attributeConditions(List.of(
+                            new CustomAttributeCondition("IN_TEST", "key1", IN, null, null)
+                    )).build();
+
+            assertFalse(filterCondition.match(customerId));
+        }
+
+        @Test
+        public void should_in_match_return_false_when_items_is_null() {
+            CustomerId customerId = CustomerId.builder()
+                    .customerId("1-222")
+                    .clientId("1-2223")
+                    .attributes(Map.of("key1", "2222")).build();
+            FilterCondition filterCondition = FilterCondition.builder()
+                    .attributeConditions(List.of(
+                            new CustomAttributeCondition("IN_TEST", "key1", IN,
+                                    null, null)
+                    )).build();
+
+            assertFalse(filterCondition.match(customerId));
+        }
+
+        @Test
+        public void should_in_match_return_false_when_items_is_empty() {
+            CustomerId customerId = CustomerId.builder()
+                    .customerId("1-222")
+                    .clientId("1-2223")
+                    .attributes(Map.of("key1", "2222")).build();
+            FilterCondition filterCondition = FilterCondition.builder()
+                    .attributeConditions(List.of(
+                            new CustomAttributeCondition("IN_TEST", "key1", IN,
+                                    null, List.of())
+                    )).build();
+
+            assertFalse(filterCondition.match(customerId));
+        }
+    }
+
+
+    @Nested
+    class NotInMatchTest {
+        @Test
+        void should_not_in_match_return_false_when_attributes_match() {
+            CustomerId customerId = CustomerId.builder()
+                    .customerId("1-222")
+                    .clientId("1-2223")
+                    .attributes(Map.of("key1", "2222")).build();
+            FilterCondition filterCondition = FilterCondition.builder()
+                    .attributeConditions(List.of(
+                            new CustomAttributeCondition("IN_TEST", "key1", NOT_IN,
+                                    null, List.of("111", "2222"))
+                    )).build();
+
+            assertFalse(filterCondition.match(customerId));
+        }
+
+        @Test
+        public void should_not_in_match_return_true_when_attributes_not_match() {
+            CustomerId customerId = CustomerId.builder()
+                    .customerId("1-222")
+                    .clientId("1-2223")
+                    .attributes(Map.of("key1", "333")).build();
+            FilterCondition filterCondition = FilterCondition.builder()
+                    .attributeConditions(List.of(
+                            new CustomAttributeCondition("IN_TEST", "key1", NOT_IN,
+                                    null, null)
+                    )).build();
+
+            assertTrue(filterCondition.match(customerId));
+        }
+
+        @Test
+        public void should_not_in_match_return_true_when_items_is_null() {
+            CustomerId customerId = CustomerId.builder()
+                    .customerId("1-222")
+                    .clientId("1-2223")
+                    .attributes(Map.of("key1", "2222")).build();
+            FilterCondition filterCondition = FilterCondition.builder()
+                    .attributeConditions(List.of(
+                            new CustomAttributeCondition("IN_TEST", "key1", NOT_IN,
+                                    null, null)
+                    )).build();
+
+            assertTrue(filterCondition.match(customerId));
+        }
+
+        @Test
+        public void should_not_in_match_return_true_when_items_is_empty() {
+            CustomerId customerId = CustomerId.builder()
+                    .customerId("1-222")
+                    .clientId("1-2223")
+                    .attributes(Map.of("key1", "2222")).build();
+            FilterCondition filterCondition = FilterCondition.builder()
+                    .attributeConditions(List.of(
+                            new CustomAttributeCondition("IN_TEST", "key1", NOT_IN,
+                                    null, List.of())
+                    )).build();
+
+            assertTrue(filterCondition.match(customerId));
+        }
+    }
+
 }

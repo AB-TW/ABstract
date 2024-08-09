@@ -45,7 +45,7 @@
         </el-form-item>
 
         <el-form-item label="配置模版" prop="template">
-          <feature-template-item
+          <feature-template-component
             :key="feature.dataSource"
             :index="0"
             :isViewModel="isViewModel"
@@ -71,8 +71,8 @@
 import { onBeforeMount, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElForm, ElFormItem, ElInput, ElButton, ElMessage } from "element-plus"
-import { Feature, Features, FeatureTemplate, TemplateDataType } from "@/domain/Features"
-import FeatureTemplateItem from "../../components/FeatureTemplateItemNew.vue"
+import { ChoiceType, Feature, Features, FeatureTemplate, TemplateDataType } from "@/domain/Features"
+import FeatureTemplateComponent from "../../components/FeatureTemplate.vue"
 import _ from "lodash"
 import { replaceChildrenWithItems, StatusMaps, translateDataToTemplateItems, transTempToTreeDataSource } from "@/utils"
 import FeatureTimeLine from "@/components/FeatureTimeLine.vue"
@@ -100,7 +100,8 @@ onBeforeMount(async () => {
     template: {
       dataType: TemplateDataType.BOOLEAN,
       defaultValue: false,
-      items: [] as FeatureTemplate[]
+      items: [] as FeatureTemplate[],
+      choice: { type: ChoiceType.CONTENT, items: [], featureKey: "" }
     },
     dataSource: [
       transTempToTreeDataSource({
@@ -147,7 +148,6 @@ const submitForm = async () => {
     if (valid) {
       try {
         if (formType.value.toLowerCase() == "add") {
-          debugger
           await features.create(tempResult)
         } else {
           await features.update(tempResult)
