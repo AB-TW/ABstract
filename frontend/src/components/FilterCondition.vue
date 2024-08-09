@@ -104,7 +104,25 @@
               :validate-event="false"
               placeholder="请输入需要包含的值"
             />
-            <el-button class="add-tag-value-button" v-else @click="changeInputVisible(true)"> + Value</el-button>
+            <div v-else>
+              <el-button class="add-tag-value-button" @click="changeInputVisible(true)"> + Value</el-button>
+              <el-upload
+                class="add-tag-value-button"
+                v-if="!props.diabled"
+                style="float: right"
+                action=""
+                :before-upload="(file) => updateWhitelist(file, conditionItem)"
+                :show-file-list="false"
+                accept=".txt,.csv"
+              >
+                <el-button>
+                  <el-icon>
+                    <Upload />
+                  </el-icon>
+                  Import File
+                </el-button>
+              </el-upload>
+            </div>
           </div>
         </div>
       </el-form-item>
@@ -115,6 +133,7 @@
 
 <script lang="ts" setup>
 import _ from "lodash"
+import lodash from "lodash"
 import { reactive, ref, watch } from "vue"
 import {
   CompareOperator,
@@ -123,8 +142,7 @@ import {
   FilterCondition
 } from "@/domain/FilterConditions"
 import { Delete } from "@element-plus/icons-vue"
-import { ElForm, ElFormItem, ElInput, FormRules } from "element-plus"
-import lodash from "lodash"
+import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormRules } from "element-plus"
 
 defineOptions({
   name: "FilterCondition"
@@ -211,6 +229,21 @@ const removeTagValue = (customAttribute: CustomAttributeCondition, index: number
     customAttribute.items.splice(index, 1)
   }
 }
+
+const updateWhitelist = (file, customAttribute: CustomAttributeCondition) => {
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    try {
+      customAttribute.items = (event.target.result as string).split("\n").filter((item) => item)
+    } catch (error) {
+      ElMessage.error("文件解析失败，请上传正确的文本文件,并保证每行一个值")
+    }
+  }
+  reader.readAsText(file)
+
+  // 阻止文件自动上传
+  return false
+}
 </script>
 
 <style scoped lang="scss">
@@ -263,8 +296,8 @@ const removeTagValue = (customAttribute: CustomAttributeCondition, index: number
   }
 
   .add-tag-value-button {
-    border-style: dashed;
-    width: 100%;
+    //border-style: dashed;
+    width: 48%;
   }
 
   .tags {
