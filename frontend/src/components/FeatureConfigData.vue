@@ -1,5 +1,5 @@
 <template>
-  <div class="custom-tree-container" v-if="featureConfigData != undefined">
+  <div class="custom-tree-container">
     <div class="custom-tree-node">
       <el-form-item
         :key="key"
@@ -8,7 +8,7 @@
         :prop="template.key ? props.parentProp + '.' + template.key : props.parentProp"
         :rules="dataItemRule(template)"
       >
-        <div v-if="template?.dataType == TemplateDataType.OBJECT">
+        <div v-if="template?.dataType == TemplateDataType.OBJECT && featureConfigData != undefined">
           <div v-for="item in template.items" :key="item.key">
             <FeatureConfigData
               v-model="featureConfigData[item.key]"
@@ -195,7 +195,7 @@ const dataItemRule = (data: any) => {
   return [
     {
       required: data?.validator?.required || false,
-      // message: "该字段为必填字段",
+      message: "该字段为必填字段",
       trigger: "submit"
     }
   ]

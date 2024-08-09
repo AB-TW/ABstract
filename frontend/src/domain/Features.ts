@@ -82,7 +82,6 @@ export const defaultFeatureTemplate = {
   dataType: TemplateDataType.BOOLEAN,
   required: false,
   defaultValue: false,
-  keyParam: false,
   items: []
 } as FeatureTemplate
 
