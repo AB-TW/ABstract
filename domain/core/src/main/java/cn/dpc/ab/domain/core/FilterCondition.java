@@ -4,7 +4,6 @@ import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,7 +62,7 @@ public class FilterCondition {
     /**
      * CustomAttributeCondition represents the custom attribute condition of a filter.
      */
-    public record CustomAttributeCondition(String name, String key, Operator operator, String value) {
+    public record CustomAttributeCondition(String name, String key, Operator operator, String value, List<String> items) {
         /**
          * Operator represents the operator of a custom attribute condition.
          */
@@ -102,8 +101,8 @@ public class FilterCondition {
                 case GREATER_THAN_OR_EQUALS -> StringUtils.isNumeric(attributeValue)  && attributeValue.compareTo(value) >= 0;
                 case LESS_THAN -> StringUtils.isNumeric(attributeValue)  && attributeValue.compareTo(value) < 0;
                 case LESS_THAN_OR_EQUALS -> StringUtils.isNumeric(attributeValue)  && attributeValue.compareTo(value) <= 0;
-                case IN -> Arrays.asList(value.split(",")).contains(attributeValue);
-                case NOT_IN -> !Arrays.asList(value.split(",")).contains(attributeValue);
+                case IN -> Optional.ofNullable(items).map(list -> list.contains(attributeValue)).orElse(false);
+                case NOT_IN -> Optional.ofNullable(items).map(list -> !list.contains(attributeValue)).orElse(true);
                 case VERSION_GREATER_THAN ->
                         new DefaultArtifactVersion(attributeValue).compareTo(new DefaultArtifactVersion(value)) > 0;
                 case VERSION_GREATER_THAN_EQUALS ->

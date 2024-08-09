@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * ObjectAdapter represents a object in the database.
@@ -31,12 +32,20 @@ public class ObjectAdapter {
         }
 
         if (data instanceof Map<?, ?>) {
-            this.objData = (Map<?, ?>) data;
+            this.objData = ((Map<?, ?>) data).entrySet().stream()
+                    .map(entry -> (entry.getValue() instanceof Map<?, ?> || entry.getValue() instanceof List)
+                            ? Map.entry(entry.getKey(), new ObjectAdapter(entry.getValue()))
+                            : entry
+                    )
+                    .filter(entry -> null != entry.getValue())
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             return;
         }
 
         if (data instanceof List) {
-            this.arrayData = (List<?>) data;
+            this.arrayData = ((List<?>) data).stream().map(item -> (item instanceof Map<?, ?> || item instanceof List)
+                    ? new ObjectAdapter(item)
+                    : item).toList();
             return;
         }
 
@@ -60,11 +69,18 @@ public class ObjectAdapter {
      */
     public Object toObject() {
         if (null != this.objData) {
-            return objData;
+            return objData.entrySet().stream()
+                    .map(entry -> entry.getValue() instanceof ObjectAdapter
+                            ? Map.entry(entry.getKey(), ((ObjectAdapter) entry.getValue()).toObject())
+                            : entry
+                    ).filter(entry -> null != entry.getValue())
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
 
         if (null != this.arrayData) {
-            return arrayData;
+            return arrayData.stream().map(item -> item instanceof ObjectAdapter
+                    ? ((ObjectAdapter) item).toObject()
+                    : item).toList();
         }
 
         if (null != numData) {

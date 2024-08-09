@@ -74,7 +74,7 @@
           </el-select>
 
           <el-input
-            v-show="_.isString(conditionItem.value)"
+            v-show="![CompareOperator.IN, CompareOperator.NOT_IN].includes(conditionItem.operator)"
             v-model="conditionItem.value"
             maxlength="10"
             placeholder="请输入要匹配的值"
@@ -82,11 +82,11 @@
             type="text"
           />
 
-          <div v-show="_.isArray(conditionItem.value)">
-            <div class="tags" :style="conditionItem.value.length > 0 ? 'height:35px' : ''">
+          <div v-show="[CompareOperator.IN, CompareOperator.NOT_IN].includes(conditionItem.operator)">
+            <div class="tags" :style="conditionItem.items?.length > 0 ? 'height:35px' : ''">
               <el-tag
                 class="tag"
-                v-for="(tag, index) in conditionItem.value"
+                v-for="(tag, index) in conditionItem.items"
                 :key="index"
                 closable
                 :disable-transitions="false"
@@ -104,7 +104,25 @@
               :validate-event="false"
               placeholder="请输入需要包含的值"
             />
-            <el-button class="add-tag-value-button" v-else @click="changeInputVisible(true)"> + Value</el-button>
+            <div v-else>
+              <el-button class="add-tag-value-button" @click="changeInputVisible(true)"> + Value</el-button>
+              <el-upload
+                class="add-tag-value-button"
+                v-if="!props.diabled"
+                style="float: right"
+                action=""
+                :before-upload="(file) => updateWhitelist(file, conditionItem)"
+                :show-file-list="false"
+                accept=".txt,.csv"
+              >
+                <el-button>
+                  <el-icon>
+                    <Upload />
+                  </el-icon>
+                  Import File
+                </el-button>
+              </el-upload>
+            </div>
           </div>
         </div>
       </el-form-item>
@@ -115,6 +133,7 @@
 
 <script lang="ts" setup>
 import _ from "lodash"
+import lodash from "lodash"
 import { reactive, ref, watch } from "vue"
 import {
   CompareOperator,
@@ -123,8 +142,7 @@ import {
   FilterCondition
 } from "@/domain/FilterConditions"
 import { Delete } from "@element-plus/icons-vue"
-import { ElForm, ElFormItem, ElInput, FormRules } from "element-plus"
-import lodash from "lodash"
+import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormRules } from "element-plus"
 
 defineOptions({
   name: "FilterCondition"
@@ -174,18 +192,15 @@ const addCustomAttributeItem = () => {
     name: "条件" + (filterCondition.attributeConditions.length + 1),
     key: "",
     operator: CompareOperator.EQUALS,
-    value: ""
+    value: "",
+    items: []
   })
 }
 const conditionOperatorChanged = (val: CompareOperator, customAttribute: CustomAttributeCondition) => {
   if (_.includes([CompareOperator.IN, CompareOperator.NOT_IN], val)) {
-    if (!_.isArray(customAttribute.value)) {
-      customAttribute.value = []
-    }
+    customAttribute.items = []
   } else {
-    if (!_.isString(customAttribute.value)) {
-      customAttribute.value = ""
-    }
+    customAttribute.value = ""
   }
 }
 
@@ -195,20 +210,39 @@ const tagInputValue = ref<string>("")
 const changeInputVisible = (showOrHidden: boolean) => {
   tagInputVisible.value = showOrHidden
 }
+
 const addTagValue = (customAttribute: CustomAttributeCondition) => {
+  console.log("addTagValue")
+  console.log(customAttribute.items)
+  console.log(tagInputValue.value)
   if (_.isEmpty(tagInputValue.value)) {
     changeInputVisible(false)
     return
   }
-  if (_.isArray(customAttribute.value)) {
-    customAttribute.value?.push(tagInputValue.value)
-  }
+  customAttribute.items = customAttribute.items || []
+  customAttribute.items.push(tagInputValue.value)
   tagInputValue.value = ""
 }
+
 const removeTagValue = (customAttribute: CustomAttributeCondition, index: number) => {
-  if (_.isArray(customAttribute.value) && customAttribute.value.length >= index + 1) {
-    customAttribute.value.splice(index, 1)
+  if (_.isArray(customAttribute.items) && customAttribute.items.length >= index + 1) {
+    customAttribute.items.splice(index, 1)
   }
+}
+
+const updateWhitelist = (file, customAttribute: CustomAttributeCondition) => {
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    try {
+      customAttribute.items = (event.target.result as string).split("\n").filter((item) => item)
+    } catch (error) {
+      ElMessage.error("文件解析失败，请上传正确的文本文件,并保证每行一个值")
+    }
+  }
+  reader.readAsText(file)
+
+  // 阻止文件自动上传
+  return false
 }
 </script>
 
@@ -262,8 +296,8 @@ const removeTagValue = (customAttribute: CustomAttributeCondition, index: number
   }
 
   .add-tag-value-button {
-    border-style: dashed;
-    width: 100%;
+    //border-style: dashed;
+    width: 48%;
   }
 
   .tags {

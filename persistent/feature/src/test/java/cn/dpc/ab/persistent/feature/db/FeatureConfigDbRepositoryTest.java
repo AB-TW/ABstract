@@ -40,7 +40,7 @@ public class FeatureConfigDbRepositoryTest extends RepositoryTestBase {
         repository.save(FeatureConfigTestUtil.createFeatureConfigDb(id, featureKey))
                 .as(StepVerifier::create)
                 .expectNextMatches(config -> config.getId().equals(id) && config.getFeatureKey().equals(featureKey)
-                        && config.getDescription().getData() instanceof List<?>)
+                        && config.getDescription().getData() instanceof List)
                 .verifyComplete();
     }
 
@@ -103,7 +103,7 @@ public class FeatureConfigDbRepositoryTest extends RepositoryTestBase {
         repository.findByFeatureKey(featureKey)
                 .as(StepVerifier::create)
                 .expectNextMatches(config -> config.getId().equals(id) && config.getFeatureKey().equals(featureKey)
-                        && config.getDescription().getData() instanceof List<?>)
+                        && config.getDescription().getData() instanceof List)
                 .verifyComplete();
     }
 
