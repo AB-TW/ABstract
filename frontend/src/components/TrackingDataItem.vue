@@ -2,12 +2,12 @@
   <div class="track-container">
     <el-row :gutter="20">
       <el-col :span="10">
-        <el-form-item label="Key" required :prop="getProp('key')">
+        <el-form-item label="Key" :rules="itemRules" :prop="getProp('key')">
           <el-input v-model="item.key" autocomplete="off" :disabled="disabled" />
         </el-form-item>
       </el-col>
       <el-col :span="10">
-        <el-form-item label="Value" required :prop="getProp('value')">
+        <el-form-item label="Value" :rules="itemRules" :prop="getProp('value')">
           <el-input v-model="item.value" autocomplete="off" :disabled="disabled" />
         </el-form-item>
       </el-col>
@@ -49,7 +49,7 @@ const props = defineProps({
 
 const getProp = (prop) => {
   const parentPro = props.parentProp ? props.parentProp + "." : ""
-  const indexPro = props.index ? props.index + "." : ""
+  const indexPro = props.index != null ? props.index + "." : ""
   return parentPro + indexPro + prop
 }
 
@@ -59,6 +59,12 @@ const deleteItem = () => {
 }
 
 const item = ref(props.item)
+const itemRules = [
+  {
+    required: true,
+    message: "该字段为必填字段"
+  }
+]
 </script>
 
 <style lang="scss">

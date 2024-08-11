@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static cn.dpc.ab.persistent.cache.LocalCacheManager.FEATURE_CONFIG_KEY_PREFIX;
 
@@ -35,7 +36,13 @@ public class CustomerFeatureConfigs implements Customer.FeatureConfigs {
                 .filter(featureConfig -> Optional.ofNullable(featureConfig.getDescription().filterCondition())
                         .map(filterCondition -> filterCondition.match(customerId))
                         .orElse(true))
-                .sort(new FeatureConfigComparator());
+                .collectList()
+                .flatMapMany(list -> Flux.fromIterable(list.stream()
+                        .collect(Collectors.groupingBy(featureConfig ->
+                                featureConfig.getDescription().key())
+                        ).values()))
+                .map(list -> list.stream().min(new FeatureConfigComparator())
+                        .get());
     }
 
     private Flux<FeatureConfig> getByFeatureKeyFromCache(Feature.FeatureId featureKey) {

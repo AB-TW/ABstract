@@ -8,6 +8,7 @@
           placeholder="请输入featureKey或名称"
           class="search-input"
           @clear="searchData"
+          @keyup.enter="searchData"
         >
           <template #append>
             <el-button icon="Search" @click="searchData" />

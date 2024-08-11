@@ -11,6 +11,7 @@
         placeholder="请输入实验名称"
         class="search-input"
         @clear="getExperiments"
+        @keyup.enter="getExperiments"
       >
         <template #append>
           <el-button icon="Search" @click="() => getExperiments()" />
@@ -19,7 +20,7 @@
       <div class="operation-btn-group">
         <el-radio-group v-model="status" @change="() => getExperiments()">
           <el-radio-button :label="undefined">全部</el-radio-button>
-          <el-radio-button v-for="(value, key) in EXPERIMENT_STATUS_TEXT_MAPPING" :label="key">
+          <el-radio-button v-for="(value, key) in EXPERIMENT_STATUS_TEXT_MAPPING" :key="key" :label="key">
             {{ value }}
           </el-radio-button>
         </el-radio-group>
