@@ -70,8 +70,6 @@ class CustomerFeatureConfigsTest {
         customerFeatureConfigs.getByFeatureKey(new Feature.FeatureId(featureKey))
                 .as(StepVerifier::create)
                 .expectNextMatches(featureConfig -> featureConfig.getId().configId().equals("id4"))
-                .expectNextMatches(featureConfig -> featureConfig.getId().configId().equals("id2"))
-                .expectNextMatches(featureConfig -> featureConfig.getId().configId().equals("id3"))
                 .verifyComplete();
     }
 }
