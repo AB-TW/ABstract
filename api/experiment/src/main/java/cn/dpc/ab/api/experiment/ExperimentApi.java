@@ -9,6 +9,7 @@ import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Experiments;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -72,5 +73,11 @@ public class ExperimentApi {
     @DeleteMapping("/{experimentId}")
     Mono<Void> delete(@PathVariable String experimentId) {
         return experiments.delete(Experiment.ExperimentId.builder().id(experimentId).build());
+    }
+
+    @GetMapping("/{experimentId}/statistics")
+    Flux<Experiment.BucketStaticResult> statistics(@PathVariable String experimentId) {
+        return experiments.get(Experiment.ExperimentId.builder().id(experimentId).build())
+                .flatMapMany(experiment -> experiment.getAssignments().statisticBucketCount());
     }
 }
