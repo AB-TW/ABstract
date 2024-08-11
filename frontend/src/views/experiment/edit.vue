@@ -319,7 +319,7 @@ const isAddMode = computed(() => !isViewMode.value && !isEditMode.value)
 
 const model = isEditMode.value ? "edit" : isViewMode.value ? "view" : "add"
 title.value = StatusMaps[model] + "Experiment"
-
+const featureKey = route.query.featureKey as string
 // setup page
 const setup = async () => {
   const needQueryExperiment = isViewMode.value || isEditMode.value || isCopyMode.value
@@ -343,6 +343,11 @@ const setup = async () => {
       selectFeature(experimentResp.featureKey)
     }
   }
+  if (!_.isEmpty(featureKey)) {
+    console.log("route.query.featureKey")
+    console.log(featureKey)
+    selectFeature(featureKey)
+  }
   console.log(experimentForm)
 }
 setup()
@@ -350,6 +355,7 @@ setup()
 const selectFeature = (featureKey: string) => {
   selectedFeature.value = _.find(allFeatures, (feature: Feature) => feature.featureKey === featureKey)
   selectedTemplate.value = selectedFeature.value?.template
+  experimentForm.featureKey = featureKey
   experimentForm.buckets.forEach(
     (item) => (item.config = item.config ? item.config : getTemplateDefaultValue(selectedTemplate.value))
   )
