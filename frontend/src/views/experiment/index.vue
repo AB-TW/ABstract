@@ -25,7 +25,13 @@
           </el-radio-button>
         </el-radio-group>
       </div>
-      <el-button type="primary" icon="Plus" @click="() => router.push({ path: '/experiment/edit' })">新增</el-button>
+      <el-button
+        type="primary"
+        icon="Plus"
+        @click="() => router.push({ path: '/experiment/edit', query: { featureKey: pageSearchParams.featureKey } })"
+      >
+        新增
+      </el-button>
     </div>
 
     <el-table :data="experiments" border style="width: 100%; margin-top: 30px">
@@ -63,7 +69,10 @@
                 () =>
                   router.push({
                     path: `/experiment/edit/${scope.row.id}`,
-                    query: scope.row?.status?.status === Status.STOPPED ? { type: 'view' } : undefined
+                    query:
+                      scope.row?.status?.status === Status.STOPPED
+                        ? { type: 'view', featureKey: pageSearchParams.featureKey }
+                        : undefined
                   })
               "
               >{{ scope.row?.status?.status === Status.STOPPED ? "查看" : "编辑" }}
@@ -137,12 +146,14 @@ import { Experiment, Experiments } from "@/domain/Experiments"
 import { Features, PageResponse } from "@/domain/Features"
 import { ElMessage } from "element-plus"
 import { ExperimentQueryRequest } from "@/model/request/ExperimentQueryRequest"
+import { useRoute } from "vue-router"
 
 // API
 const experimentsApi = new Experiments()
 const features = new Features()
 const featureList = ref([] as any[])
 const featureNameMap = ref({})
+const route = useRoute()
 
 onBeforeMount(async () => {
   featureList.value.push(...((await features.fetchAll(0, 100))?.content || []))
@@ -158,7 +169,7 @@ const pageSearchParams = reactive<ExperimentQueryRequest>({
   page: 0,
   pageSize: 10,
   key: undefined,
-  featureKey: null
+  featureKey: route.query.featureKey || ""
 })
 
 const getFeatureName = (featureKey) => {

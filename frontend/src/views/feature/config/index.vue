@@ -124,8 +124,8 @@
             >
               查看
             </el-button>
-            <el-button v-if="scope.row?.status !== 'DISABLED'" type="primary" size="small" @click="top(scope.row.id)"
-              >置顶
+            <el-button v-if="scope.row?.status !== 'DISABLED'" type="primary" size="small" @click="top(scope.row.id)">
+              置顶
             </el-button>
           </template>
         </el-table-column>
