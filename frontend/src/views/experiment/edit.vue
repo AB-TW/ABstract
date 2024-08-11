@@ -5,8 +5,29 @@
         <div class="card-header" style="padding: 10px">
           <span class="title">{{ title }}</span>
           <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
+          <el-button size="small" style="float: right; margin-right: 10px" @click="statistics">统计</el-button>
         </div>
       </template>
+      <el-dialog
+        v-model="statisticsVisible"
+        title="统计结果"
+        width="500"
+        :before-close="() => (statisticsVisible = false)"
+      >
+        <div class="dialog-body" v-loading="statisticsLoading">
+          <el-row :gutter="16">
+            <el-col v-for="item in statisticResult" :key="item.bucket.key" :span="8">
+              <el-statistic :value="item.count">
+                <template #title>
+                  <div style="display: inline-flex; align-items: center">
+                    {{ item.bucket.name }}
+                  </div>
+                </template>
+              </el-statistic>
+            </el-col>
+          </el-row>
+        </div>
+      </el-dialog>
       <el-form
         :model="experimentForm"
         ref="experimentFormRef"
@@ -267,6 +288,7 @@ interface AddExperiment {
 // Vue Component
 const route = useRoute()
 const router = useRouter()
+const statisticsVisible = ref(false)
 // API
 const features = new Features()
 const experiments = new Experiments()
@@ -426,6 +448,15 @@ const count = ref(0)
 const configKey = computed(() => {
   return experimentForm.buckets.map((item) => JSON.stringify(item.config) || count.value++)
 })
+
+const statisticResult = ref([])
+const statisticsLoading = ref(false)
+const statistics = async () => {
+  statisticsLoading.value = true
+  statisticsVisible.value = true
+  statisticResult.value = await experiments.statistics(experimentId as string)
+  statisticsLoading.value = false
+}
 </script>
 
 <style scoped lang="scss">

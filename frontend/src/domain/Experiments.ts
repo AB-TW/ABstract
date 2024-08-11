@@ -17,6 +17,11 @@ export interface Experiment {
   filterCondition: FilterCondition
 }
 
+export interface BucketCount {
+  bucket: ExperimentBucket
+  count: number
+}
+
 export class Experiments {
   constructor(private readonly baseUrl: string = "") {}
 
@@ -54,5 +59,9 @@ export class Experiments {
 
   async deleted(id: string) {
     return await http.del(this.getUrl(`/experiments/${id}`), undefined).then((res: any) => res?.data)
+  }
+
+  async statistics(id: string): Promise<BucketCount[]> {
+    return await http.get(this.getUrl(`/experiments/${id}/statistics`), {}).then((res: any) => res?.data)
   }
 }

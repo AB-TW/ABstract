@@ -4,6 +4,7 @@ import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Experiments;
 import cn.dpc.ab.persistent.cache.LocalCacheManager;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDbRepository;
+import cn.dpc.ab.persistent.experiment.db.AssignmentStatisticsRepository;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDbRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class ExperimentsImpl implements Experiments {
 
     private final ExperimentDbRepository experimentDbRepository;
     private final AssignmentDbRepository assignmentDbRepository;
+    private final AssignmentStatisticsRepository assignmentStatisticsRepository;
     private final LocalCacheManager localCacheManager;
 
 
@@ -64,7 +66,7 @@ public class ExperimentsImpl implements Experiments {
     public Mono<Experiment> get(Experiment.ExperimentId id) {
         return experimentDbRepository.findById(id.id()).map(experimentDb -> {
             Experiment experiment = experimentDb.toExperiment();
-            experiment.setAssignments(new AssignmentsImpl(assignmentDbRepository, experiment));
+            experiment.setAssignments(new AssignmentsImpl(assignmentDbRepository, assignmentStatisticsRepository, experiment));
             return experiment;
         });
     }
@@ -130,7 +132,7 @@ public class ExperimentsImpl implements Experiments {
                         )), 0, 1)
                 .next()
                 .map(experiment -> {
-                    experiment.setAssignments(new AssignmentsImpl(assignmentDbRepository, experiment));
+                    experiment.setAssignments(new AssignmentsImpl(assignmentDbRepository, assignmentStatisticsRepository, experiment));
                     return experiment;
                 });
     }
