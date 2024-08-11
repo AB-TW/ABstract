@@ -67,6 +67,7 @@ export interface FeatureConfig {
   featureKey?: string
   data: any
   saData?: any
+  trackingData?: TrackingItem[]
   staticStatus?: StaticStatus
   status?: string
   startTime?: string
@@ -74,6 +75,12 @@ export interface FeatureConfig {
   priority?: number
   templateData?: any
   filterCondition?: FilterCondition
+}
+
+export interface TrackingItem {
+  index: number
+  key: string
+  value: string
 }
 
 enum StaticStatus {

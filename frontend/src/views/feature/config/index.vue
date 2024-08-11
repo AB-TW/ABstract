@@ -15,6 +15,7 @@
           placeholder="请输入关键字"
           class="search-input"
           @clear="searchData"
+          @keyup.enter="searchData"
         >
           <template #append>
             <el-button icon="Search" @click="searchData" />
