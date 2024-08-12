@@ -2,13 +2,11 @@ package cn.dpc.ab.domain.experiment;
 
 import cn.dpc.ab.domain.core.FilterCondition;
 import lombok.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Experiment represents an experiment.
@@ -273,5 +271,12 @@ public class Experiment {
         Mono<Assignment> update(Assignment assignment);
 
         Mono<? extends Assignment> addOrUpdate(Assignment assignment);
+
+        Flux<BucketStaticResult> statisticBucketCount();
     }
+
+    /**
+     * BucketStaticResult.
+     */
+    public record BucketStaticResult(Bucket bucket, Long count) {}
 }

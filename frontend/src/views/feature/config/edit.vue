@@ -42,7 +42,7 @@
         <el-form-item label="埋点数据" prop="trackingData">
           <div class="track-cls">
             <tracking-data-item
-              v-for="(item, index) in saData"
+              v-for="(item, index) in featureConfig.trackingData"
               :key="item.index"
               :item="item"
               :index="index"
@@ -93,14 +93,13 @@ const featureConfigs = new FeatureConfigs()
 
 const feature = ref({} as Feature)
 const template = ref(defaultFeatureTemplate)
-const featureConfig = ref(getTemplateDefaultValue(template) as FeatureConfig)
+const featureConfig = ref(getTemplateDefaultValue(template.value) as FeatureConfig)
 const features = new Features()
 const title = ref("Feature Config")
 const formType = ref("add")
 const originalFeatureConfig = ref({ data: null } as FeatureConfig)
 const featureKey = ref("")
 const id = ref("")
-const saData = ref([] as any[])
 const isViewModel = ref(false)
 let trackingDataIndex = 0
 const loading = ref(true)
@@ -133,7 +132,7 @@ onBeforeMount(async () => {
     } as FeatureConfig
   }
 
-  saData.value = featureConfig.value.saData
+  featureConfig.value.trackingData = featureConfig.value.saData
     ? Object.keys(featureConfig.value.saData).map((key) => {
         return {
           index: trackingDataIndex++,
@@ -157,7 +156,7 @@ const dataKey = computed(() => {
 })
 
 const formRules = {
-  title: [{ required: true, message: "Please enter title", trigger: "submit" }],
+  title: [{ required: true, message: "请出入标题", trigger: "submit" }],
   // data: [{ required: isSimpleBooleanOrNumber(), message: "Please enter data", trigger: "submit" }],
   endTime: [
     {
@@ -185,10 +184,10 @@ const form = ref<FormInstance>(null)
 const filterConditionRef = ref<FormInstance>(null)
 
 const deleteTrackingData = (index: number) => {
-  saData.value.splice(index, 1)
+  featureConfig.value.trackingData?.splice(index, 1)
 }
 const addTrackingData = () => {
-  saData.value.push({
+  featureConfig.value.trackingData?.push({
     index: trackingDataIndex++,
     key: "",
     value: ""
@@ -218,7 +217,7 @@ const submitForm = async () => {
             featureConfig.value.featureKey = featureKey.value
             featureConfig.value.status = StaticStatus.DRAFT
             featureConfig.value.key = getKey()
-            featureConfig.value.saData = saData.value.reduce((acc, cur) => {
+            featureConfig.value.saData = featureConfig.value.trackingData.reduce((acc, cur) => {
               acc[cur.key] = cur.value
               return acc
             }, {} as any)

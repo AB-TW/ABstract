@@ -183,6 +183,7 @@ public class FeatureConfig {
      */
     public FeatureConfig top() {
         this.description = Description.builder()
+                .key(this.description.key())
                 .title(this.description.title())
                 .description(this.description.description())
                 .data(this.description.data())
@@ -207,6 +208,7 @@ public class FeatureConfig {
 
     private FeatureConfig updateStatus(Status.StaticStatus status) {
         this.description = Description.builder()
+                .key(this.description.key())
                 .title(this.description.title())
                 .description(this.description.description())
                 .data(this.description.data())

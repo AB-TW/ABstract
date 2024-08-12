@@ -10,7 +10,7 @@ export interface Feature {
   name: string
   description?: string
   enabled: boolean
-  dataSource: Array<FeatureTemplate>
+  dataSource?: any[]
   template: FeatureTemplate
 }
 
@@ -81,6 +81,7 @@ export enum TemplateDataType {
 export const defaultFeatureTemplate = {
   dataType: TemplateDataType.BOOLEAN,
   required: false,
+  keyParam: false,
   defaultValue: false,
   items: []
 } as FeatureTemplate

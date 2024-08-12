@@ -4,11 +4,35 @@
       <template #header>
         <div class="card-header" style="padding: 10px">
           <span class="title">{{ title }}</span>
-          <el-button size="small" style="float: right" @click="router.go(-1)">返回</el-button>
+          <el-button size="small" style="float: right; margin-left: 5px" @click="router.go(-1)">返回</el-button>
+          <el-button
+            size="small"
+            style="float: right; margin-right: 5px"
+            v-if="isViewModel || formType != 'add'"
+            @click="
+              router.push({
+                path: '/feature/config/list',
+                query: { featureKey: feature.featureKey, featureName: feature.name }
+              })
+            "
+            >配置管理
+          </el-button>
+          <el-button
+            size="small"
+            style="float: right; margin-right: 5px"
+            v-if="isViewModel || formType != 'add'"
+            @click="
+              router.push({
+                path: '/experiment/list',
+                query: { featureKey: feature.featureKey }
+              })
+            "
+            >实验管理
+          </el-button>
           <el-button
             v-if="isViewModel || formType !== 'add'"
             size="small"
-            style="float: right; margin-right: 10px"
+            style="float: right; margin-right: 5px"
             @click="exportTemplate()"
           >
             <el-icon>
