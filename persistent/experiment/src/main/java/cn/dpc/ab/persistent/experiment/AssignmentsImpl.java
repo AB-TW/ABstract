@@ -4,8 +4,13 @@ import cn.dpc.ab.domain.experiment.Assignment;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDb;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDbRepository;
+import cn.dpc.ab.persistent.experiment.db.AssignmentStatisticsRepository;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * AssignmentImpl implements Assignments.
@@ -14,6 +19,7 @@ import reactor.core.publisher.Mono;
 public class AssignmentsImpl implements Experiment.Assignments {
 
     private final AssignmentDbRepository repository;
+    private final AssignmentStatisticsRepository statisticsRepository;
 
     private final Experiment experiment;
 
@@ -49,7 +55,8 @@ public class AssignmentsImpl implements Experiment.Assignments {
     @Override
     public Mono<Assignment> update(Assignment assignment) {
         return repository.findById(AssignmentDb.idFrom(assignment.getId()))
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Assignment not found: " + AssignmentDb.idFrom(assignment.getId()))))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Assignment not found: "
+                        + AssignmentDb.idFrom(assignment.getId()))))
                 .flatMap(assignmentDb -> repository.save(assignmentDb.update(assignmentDb.to(experiment)
                         .updateDescription(assignment.getDescription()).getDescription())))
                 .map(assignmentDb -> assignmentDb.to(experiment));
@@ -70,5 +77,19 @@ public class AssignmentsImpl implements Experiment.Assignments {
                 .switchIfEmpty(this.add(assignment));
     }
 
-
+    @Override
+    public Flux<Experiment.BucketStaticResult> statisticBucketCount() {
+        Experiment.Bucket emptyBucket = Experiment.Bucket.builder().name("未分组").build();
+        return statisticsRepository.statisticCountByBucketKey(experiment.getId().id())
+                .collectList()
+                .map(list ->
+                        Stream.concat(experiment.getDescription().buckets().stream(),
+                                        Stream.of(emptyBucket))
+                                .map(bucket -> new Experiment.BucketStaticResult(bucket,
+                                        list.stream().filter(item -> Objects.equals(item.bucketKey(), bucket.key()))
+                                                .map(item -> Long.valueOf(String.valueOf(item.count()))).findFirst().orElse(0L))
+                                ).toList()
+                )
+                .flatMapMany(Flux::fromIterable);
+    }
 }

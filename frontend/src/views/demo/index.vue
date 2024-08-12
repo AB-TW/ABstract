@@ -40,7 +40,11 @@
           <el-form label-width="140">
             <el-form-item label="Effect Result">
               <el-button :type="buttonType" :tip="tip">Effect Result</el-button>
-              {{ tip }}
+              <el-tooltip effect="dark" :content="tip" placement="top">
+                <el-icon style="margin-left: 4px" :size="12">
+                  <Warning />
+                </el-icon>
+              </el-tooltip>
             </el-form-item>
             <el-form-item label="Curl Command">
               <el-input type="textarea" placeholder="" v-model="curl" autosize />
@@ -60,7 +64,11 @@
           <el-form label-width="140">
             <el-form-item label="Effect Result">
               <el-button :type="rSocketButtonType" :tip="tip">Effect Result</el-button>
-              {{ tip }}
+              <el-tooltip effect="dark" :content="tip" placement="top">
+                <el-icon style="margin-left: 4px" :size="12">
+                  <Warning />
+                </el-icon>
+              </el-tooltip>
             </el-form-item>
             <el-form-item label="RSC Command">
               <el-input type="textarea" placeholder="" v-model="rsc" autosize />

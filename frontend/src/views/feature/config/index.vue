@@ -15,6 +15,7 @@
           placeholder="请输入关键字"
           class="search-input"
           @clear="searchData"
+          @keyup.enter="searchData"
         >
           <template #append>
             <el-button icon="Search" @click="searchData" />
@@ -123,8 +124,8 @@
             >
               查看
             </el-button>
-            <el-button v-if="scope.row?.status !== 'DISABLED'" type="primary" size="small" @click="top(scope.row.id)"
-              >置顶
+            <el-button v-if="scope.row?.status !== 'DISABLED'" type="primary" size="small" @click="top(scope.row.id)">
+              置顶
             </el-button>
           </template>
         </el-table-column>

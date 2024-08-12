@@ -6,13 +6,15 @@ import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.experiment.db.AssignmentDb;
 import cn.dpc.ab.persistent.experiment.db.AssignmentRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Implement Assignments.
  */
-@Component
 @RequiredArgsConstructor
 public class AssignmentsImpl implements Experiment.Assignments {
     private final AssignmentRepository repository;
@@ -55,6 +57,23 @@ public class AssignmentsImpl implements Experiment.Assignments {
     @Override
     public Mono<? extends Assignment> addOrUpdate(Assignment assignment) {
         return null;
+    }
+
+    @Override
+    public Flux<Experiment.BucketStaticResult> statisticBucketCount() {
+        Experiment.Bucket emptyBucket = Experiment.Bucket.builder().name("未分组").build();
+
+        return repository.statisticCountByBucketKey(experiment.getId().id())
+                .collectList()
+                .map(list ->
+                        Stream.concat(experiment.getDescription().buckets().stream(),
+                                        Stream.of(emptyBucket))
+                                .map(bucket -> new Experiment.BucketStaticResult(bucket,
+                                        list.stream().filter(item -> Objects.equals(item.bucketKey(), bucket.key()))
+                                                .map(item -> Long.valueOf(String.valueOf(item.count()))).findFirst().orElse(0L))
+                                ).toList()
+                )
+                .flatMapMany(Flux::fromIterable);
     }
 
 

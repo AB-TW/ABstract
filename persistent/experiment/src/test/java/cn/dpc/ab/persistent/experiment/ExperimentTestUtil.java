@@ -61,7 +61,8 @@ public class ExperimentTestUtil {
                                 .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
                                 .build())
                         .configVersion(0L)
-                        .buckets(List.of(Experiment.Bucket.builder().key("bucketKey").percentage(100).build()))
+                        .buckets(List.of(Experiment.Bucket.builder().key("key1").percentage(50).build(),
+                                Experiment.Bucket.builder().key("key2").percentage(50).build()))
                         .build());
     }
 }
