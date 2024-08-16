@@ -109,15 +109,16 @@ public class Feature {
                                   Validator validator,
                                   Boolean keyParam,
                                   Choice choice,
+                                  File file,
                                   List<FeatureTemplate> items) {
         public static final FeatureTemplate DEFAULT = new FeatureTemplate(DataType.BOOLEAN, null, null,
-                null, "false", null, false, null, null);
+                null, "false", null, false, null, null, null);
 
         /**
          * DataType represents the data type of a feature.
          */
         public enum DataType {
-            BOOLEAN, STRING, NUMBER, OBJECT, ARRAY, SELECT, GENERATED
+            BOOLEAN, STRING, NUMBER, OBJECT, ARRAY, SELECT, GENERATED, FILE
         }
 
         /**
@@ -147,6 +148,20 @@ public class Feature {
         @Builder
         public record ChoiceItem(String value, String label) {
         }
+
+        /**
+         * Config of File.
+         */
+        @Builder
+        public record File(Type type, List<String> fileExtensions, Long sizeLimit) {
+            /**
+             * Type of Choice config.
+             */
+            public enum Type {
+                IMAGE, VIDEO, AUDIO, OTHER
+            }
+        }
+
     }
 
     /**
