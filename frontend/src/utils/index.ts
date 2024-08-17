@@ -38,6 +38,7 @@ export const transTempToTreeDataSource = (temp: any) => {
     key: temp?.key || "",
     description: temp?.description || "",
     choice: temp?.choice,
+    file: temp?.file,
     value: null,
     keyParam: temp.keyParam,
     validator: {

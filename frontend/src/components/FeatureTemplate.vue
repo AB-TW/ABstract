@@ -42,6 +42,9 @@
             :disabled="isViewModel"
             v-if="data.dataType == TemplateDataType.SELECT"
           />
+          <el-form-item prop="file" label-width="auto" v-if="data.dataType == TemplateDataType.FILE">
+            <FeatureTemplateFile v-model="data.file" :disabled="isViewModel" parent-prop="file" />
+          </el-form-item>
           <el-form-item label="初值" prop="defaultValue" label-width="auto" v-if="showDefaultValue(node, data)">
             <el-input
               v-model="data.defaultValue"
@@ -137,9 +140,10 @@
 <script lang="ts" setup>
 import { computed, h, ref } from "vue"
 import type Node from "element-plus/es/components/tree/src/model/node"
-import { ChoiceType, TemplateDataType } from "@/domain/Features"
+import { ChoiceType, FileType, TemplateDataType } from "@/domain/Features"
 import { ElNotification } from "element-plus"
 import FeatureTemplateChoice from "@/components/FeatureTemplateChoice.vue"
+import FeatureTemplateFile from "@/components/FeatureTemplateFile.vue"
 
 const props = defineProps({
   index: {
@@ -165,7 +169,7 @@ const getNameRules = (content: string) => [
   {
     validator: () => {
       if (!content) {
-        return Promise.reject("请输入Key")
+        return Promise.reject("请输入名称")
       }
       if (content.length < 1 || content.length > 50) {
         return Promise.reject("长度在 1 到 50 个字符")
@@ -233,6 +237,9 @@ const handleDataTypeChange = (node: any, data: any) => {
     case TemplateDataType.SELECT:
       data.choice = data.choice || { type: ChoiceType.CONTENT, featureKey: "", items: [] }
       break
+    case TemplateDataType.FILE:
+      data.file = data.file || { type: FileType.IMAGE, sizeLimit: 1024, fileExtensions: [] }
+      break
     default:
       data.defaultValue = ""
       break
@@ -265,6 +272,7 @@ const addChildNode = (node: any, data: Tree) => {
     dataType: TemplateDataType.BOOLEAN,
     defaultValue: false,
     choice: { type: ChoiceType.CONTENT, items: [], featureKey: "" },
+    file: { type: FileType.IMAGE, sizeLimit: 1024, fileExtensions: [] },
     children: [],
     validator: {
       min: 0,
@@ -305,7 +313,9 @@ const showKey = (node, child) => {
 }
 
 const showDefaultValue = (parent, child) => {
-  return ![TemplateDataType.ARRAY, TemplateDataType.OBJECT, TemplateDataType.SELECT].includes(child.dataType)
+  return ![TemplateDataType.ARRAY, TemplateDataType.OBJECT, TemplateDataType.SELECT, TemplateDataType.FILE].includes(
+    child.dataType
+  )
 }
 
 const keyParamCount = computed(() => {
