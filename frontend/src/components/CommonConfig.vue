@@ -33,16 +33,54 @@
           />
         </el-select>
       </div>
+      <div v-else-if="dataType == TemplateDataType.FILE">
+        <el-tooltip
+          effect="dark"
+          :content="
+            '可选文件类型：' +
+            (file?.fileExtensions || []).join(',') +
+            '；文件大小不超过' +
+            (file?.sizeLimit || 2048) +
+            'KB'
+          "
+          placement="top"
+        >
+          <el-icon style="margin-left: 4px" :size="12">
+            <Warning />
+          </el-icon>
+        </el-tooltip>
+        <el-upload
+          v-model:file-list="fileList"
+          :accept="file.fileExtensions?.join(',') || '*'"
+          :before-upload="beforeFileUpload"
+          v-loading="fileUploadLoading"
+          :list-type="file.type != FileType.IMAGE ? 'text' : 'picture-card'"
+          @remove="
+            () => {
+              value = ''
+              onInput()
+            }
+          "
+        >
+          <el-icon v-if="file.type == FileType.IMAGE">
+            <Plus />
+          </el-icon>
+          <el-button v-else size="small" type="primary">点击上传</el-button>
+        </el-upload>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
-import { ChoiceItem, ChoiceType, TemplateDataType } from "@/domain/Features"
+import { computed, ref, watch } from "vue"
+import { ChoiceItem, ChoiceType, FileType, TemplateDataType } from "@/domain/Features"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
-import { ElMessage } from "element-plus"
+import { ElMessage, UploadProps } from "element-plus"
 import _ from "lodash"
+import { Files } from "@/domain/Files"
+
+const files = new Files()
 
 const props = defineProps({
   modelValue: {
@@ -78,6 +116,10 @@ const props = defineProps({
     required: true
   },
   choice: {
+    type: Object,
+    required: false
+  },
+  file: {
     type: Object,
     required: false
   },
@@ -160,25 +202,6 @@ const updateValue = (v1) => {
   console.log("value.value:" + value.value)
 }
 updateValue(value.value)
-// watch(
-//   () => props.modelValue,
-//   (v1) => {
-//     updateValue(v1)
-//   }
-// )
-
-// watch(
-//   () => value.value,
-//   (curValue, lastValue) => {
-//     console.log("watch value.value")
-//     console.log(curValue)
-//     console.log(lastValue)
-//     if (curValue != lastValue) {
-//       emit("update:modelValue", curValue)
-//       emit("change", curValue)
-//     }
-//   }
-// )
 
 watch(
   () => props.defaultValue,
@@ -194,6 +217,40 @@ watch(
     updateValue(value.value)
   }
 )
+
+const fileUploadLoading = ref(false)
+const fileList = computed(() => {
+  return value.value ? [{ name: (value.value as string).split("/").pop(), url: value.value as string }] : []
+})
+const beforeFileUpload: UploadProps["beforeUpload"] = async (rawFile) => {
+  if (
+    props.file?.fileExtensions &&
+    !props.file?.fileExtensions.includes(rawFile.name.split(".").pop().toLowerCase() || "")
+  ) {
+    ElMessage.error(`文件类型不支持！`)
+    return false
+  }
+  if (rawFile.size / 1024 > (props.file?.sizeLimit || 2048)) {
+    ElMessage.error(`文件大小超过${props.file?.sizeLimit || 2048}KB！`)
+    return false
+  }
+
+  fileUploadLoading.value = true
+  try {
+    const response = await files.uploadFile(rawFile)
+    console.log(response)
+    value.value = response.url
+    onInput()
+    console.log("value.value:" + value.value)
+  } catch (error) {
+    ElMessage.error("上传文件失败！")
+    return false
+  } finally {
+    fileUploadLoading.value = false
+  }
+
+  return true
+}
 </script>
 
 <style lang="scss" scoped>

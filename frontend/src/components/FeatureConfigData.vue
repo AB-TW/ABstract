@@ -65,6 +65,7 @@
             :choice="template.choice"
             :description="template.description"
             :parent="props.parent"
+            :file="template.file"
             v-model="featureConfigData"
             @update:modelValue="updateData"
           />
