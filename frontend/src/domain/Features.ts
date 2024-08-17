@@ -128,6 +128,8 @@ export const getTemplateDefaultValue = (template: FeatureTemplate | undefined): 
     return template.defaultValue || ""
   } else if (template.dataType === TemplateDataType.NUMBER) {
     return Number(template.defaultValue) || 0
+  } else if (template.dataType === TemplateDataType.FILE) {
+    return null
   } else if (template.dataType === TemplateDataType.SELECT) {
     return null
   }

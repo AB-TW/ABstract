@@ -51,8 +51,12 @@ const options = computed(() => {
     case FileType.IMAGE:
       return [
         { value: "jpg", label: "jpg" },
+        { value: "jpeg", label: "jpeg" },
         { value: "png", label: "png" },
-        { value: "gif", label: "gif" }
+        { value: "gif", label: "gif" },
+        { value: "bmp", label: "bmp" },
+        { value: "webp", label: "webp" },
+        { value: "svg", label: "svg" }
       ]
     case FileType.VIDEO:
       return [

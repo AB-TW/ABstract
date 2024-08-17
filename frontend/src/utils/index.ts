@@ -117,6 +117,8 @@ export function getValue(info) {
     return info.value || info.defaultValue
   } else if (info.dataType == TemplateDataType.SELECT) {
     return info.value || ""
+  } else if (info.dataType == TemplateDataType.FILE) {
+    return info.value || null
   } else {
     return info.value || info.defaultValue || null
   }
