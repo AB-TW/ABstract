@@ -31,6 +31,7 @@ export interface FeatureTemplate {
   validator?: any
   items?: FeatureTemplate[]
   choice?: Choice
+  file?: File
 }
 
 export interface Choice {
@@ -75,7 +76,21 @@ export enum TemplateDataType {
   OBJECT = "OBJECT",
   ARRAY = "ARRAY",
   SELECT = "SELECT",
-  GENERATED = "GENERATED"
+  GENERATED = "GENERATED",
+  FILE = "FILE"
+}
+
+export enum FileType {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+  RADIO = "RADIO",
+  OTHER = "OTHER"
+}
+
+export interface File {
+  type: FileType
+  fileExtensions: string[]
+  sizeLimit: number
 }
 
 export const defaultFeatureTemplate = {
