@@ -29,7 +29,7 @@
               v-model="featureConfigData[index]"
               :template="template.items[0]"
               :index="index"
-              :parent-prop="(props.parentProp || 'data') + '.' + index"
+              :parent-prop="(props.parentProp || 'data') + '.' + template.key + '.' + index"
               :parent="item"
               :isViewModel="props.isViewModel"
               :debug-mode="props.debugMode"
@@ -196,7 +196,7 @@ const dataItemRule = (data: any) => {
   return [
     {
       required: data?.validator?.required || false,
-      message: "该字段为必填字段",
+      // message: "该字段为必填字段",
       trigger: "submit"
     }
   ]
