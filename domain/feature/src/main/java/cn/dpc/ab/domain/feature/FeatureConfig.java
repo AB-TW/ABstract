@@ -6,6 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * FeatureConfig represents a feature config.
@@ -47,6 +48,9 @@ public class FeatureConfig {
                               LocalDateTime createdAt,
                               LocalDateTime updatedAt,
                               FilterCondition filterCondition) {
+        public String key() {
+            return Optional.ofNullable(this.key).filter(item -> !item.trim().isEmpty()).orElse(UUID.randomUUID().toString());
+        }
     }
 
     /**
