@@ -95,7 +95,15 @@
 import { onBeforeMount, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElForm, ElFormItem, ElInput, ElButton, ElMessage } from "element-plus"
-import { ChoiceType, Feature, Features, FeatureTemplate, FileType, TemplateDataType } from "@/domain/Features"
+import {
+  ChoiceType,
+  Feature,
+  Features,
+  FeatureTemplate,
+  FileType,
+  StringType,
+  TemplateDataType
+} from "@/domain/Features"
 import FeatureTemplateComponent from "../../components/FeatureTemplate.vue"
 import _ from "lodash"
 import { replaceChildrenWithItems, StatusMaps, translateDataToTemplateItems, transTempToTreeDataSource } from "@/utils"
@@ -126,7 +134,8 @@ onBeforeMount(async () => {
       defaultValue: false,
       items: [] as FeatureTemplate[],
       choice: { type: ChoiceType.CONTENT, items: [], featureKey: "" },
-      file: { type: FileType.IMAGE, sizeLimit: 1024, fileExtensions: [] }
+      file: { type: FileType.IMAGE, sizeLimit: 1024, fileExtensions: [] },
+      stringType: StringType.TEXT
     },
     dataSource: [
       transTempToTreeDataSource({

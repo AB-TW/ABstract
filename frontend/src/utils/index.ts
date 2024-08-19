@@ -2,7 +2,7 @@ import dayjs from "dayjs"
 import _ from "lodash"
 import lodash from "lodash"
 import moment from "moment"
-import { getDefaultValue, TemplateDataType } from "@/domain/Features"
+import { getDefaultValue, StringType, TemplateDataType } from "@/domain/Features"
 
 /** 格式化时间 */
 export const formatDateTime = (time: string | number | Date) => {
@@ -39,6 +39,7 @@ export const transTempToTreeDataSource = (temp: any) => {
     description: temp?.description || "",
     choice: temp?.choice,
     file: temp?.file,
+    stringType: temp?.stringType || StringType.TEXT,
     value: null,
     keyParam: temp.keyParam,
     validator: {

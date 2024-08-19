@@ -110,9 +110,28 @@ public class Feature {
                                   Boolean keyParam,
                                   Choice choice,
                                   File file,
+                                  StringType stringType,
                                   List<FeatureTemplate> items) {
         public static final FeatureTemplate DEFAULT = new FeatureTemplate(DataType.BOOLEAN, null, null,
-                null, "false", null, false, null, null, null);
+                null, "false", null, false, null, null, null, null);
+
+
+        /**
+         * StringType represents the subtype when dataType is STRING.
+         */
+        public enum StringType {
+            TEXT,
+            TEXTAREA,
+            RICH_TEXT,
+            PASSWORD,
+            EMAIL,
+            URL,
+            PHONE,
+            DATE,
+            DATE_TIME,
+            TIME,
+            COLOR
+        }
 
         /**
          * DataType represents the data type of a feature.
