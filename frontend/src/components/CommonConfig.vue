@@ -2,7 +2,55 @@
   <div class="common-container">
     <div>
       <div v-if="dataType == TemplateDataType.STRING">
-        <el-input v-model="value" :disabled="props.isViewModel" type="text" :maxlength="maxLength" @blur="onInput" />
+        <el-input
+          v-if="
+            [
+              StringType.TEXTAREA,
+              StringType.TEXT,
+              StringType.PHONE,
+              StringType.URL,
+              StringType.EMAIL,
+              StringType.PASSWORD
+            ].includes(stringType as StringType)
+          "
+          v-model="value"
+          :disabled="props.isViewModel"
+          :type="textType"
+          :maxlength="maxLength"
+          @blur="onInput"
+        />
+        <el-color-picker v-else-if="stringType == StringType.COLOR" v-model="value" @blur="onInput" />
+        <el-date-picker
+          v-else-if="stringType == StringType.DATE"
+          v-model="value"
+          :disabled="props.isViewModel"
+          type="date"
+          placeholder="请选择日期"
+          @blur="onInput"
+        />
+        <el-date-picker
+          v-else-if="stringType == StringType.DATE_TIME"
+          v-model="value"
+          :disabled="props.isViewModel"
+          type="datetime"
+          placeholder="请选择日期时间"
+          @blur="onInput"
+        />
+        <el-time-picker
+          v-else-if="stringType == StringType.TIME"
+          :disabled="props.isViewModel"
+          v-model="value"
+          placeholder="请选择时间"
+          @blur="onInput"
+        />
+        <el-input
+          v-else
+          v-model="value"
+          :disabled="props.isViewModel"
+          type="text"
+          :maxlength="maxLength"
+          @blur="onInput"
+        />
       </div>
       <div v-if="dataType == TemplateDataType.GENERATED">
         <el-input v-model="value" :disabled="true" type="text" @blur="onInput" />
@@ -74,7 +122,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
-import { ChoiceItem, ChoiceType, FileType, TemplateDataType } from "@/domain/Features"
+import { ChoiceItem, ChoiceType, FileType, StringType, TemplateDataType } from "@/domain/Features"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
 import { ElMessage, UploadProps } from "element-plus"
 import _ from "lodash"
@@ -121,6 +169,10 @@ const props = defineProps({
   },
   file: {
     type: Object,
+    required: false
+  },
+  stringType: {
+    type: String,
     required: false
   },
   parent: {
@@ -251,6 +303,21 @@ const beforeFileUpload: UploadProps["beforeUpload"] = async (rawFile) => {
 
   return true
 }
+
+const textType = computed(() => {
+  switch (props.stringType) {
+    case StringType.PASSWORD:
+      return "password"
+    case StringType.EMAIL:
+      return "email"
+    case StringType.URL:
+      return "url"
+    case StringType.TEXTAREA:
+      return "textarea"
+    default:
+      return "text"
+  }
+})
 </script>
 
 <style lang="scss" scoped>

@@ -32,6 +32,7 @@ export interface FeatureTemplate {
   items?: FeatureTemplate[]
   choice?: Choice
   file?: File
+  stringType?: StringType
 }
 
 export interface Choice {
@@ -78,6 +79,20 @@ export enum TemplateDataType {
   SELECT = "SELECT",
   GENERATED = "GENERATED",
   FILE = "FILE"
+}
+
+export enum StringType {
+  TEXT = "TEXT",
+  TEXTAREA = "TEXTAREA",
+  RICH_TEXT = "RICH_TEXT",
+  PASSWORD = "PASSWORD",
+  EMAIL = "EMAIL",
+  URL = "URL",
+  PHONE = "PHONE",
+  DATE = "DATE",
+  DATE_TIME = "DATE_TIME",
+  TIME = "TIME",
+  COLOR = "COLOR"
 }
 
 export enum FileType {

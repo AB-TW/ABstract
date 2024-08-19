@@ -32,7 +32,7 @@
           <el-form-item label="描述" prop="description" label-width="auto" v-if="showKey(node, data)">
             <el-input v-model="data.description" @change="updateData" />
           </el-form-item>
-          <el-form-item label="类型" prop="dataType" label-width="auto">
+          <el-form-item label="数据类型" prop="dataType" label-width="auto">
             <el-select v-model="data.dataType" @change="handleDataTypeChange(node, data)">
               <el-option v-for="item in Object.keys(TemplateDataType)" :key="item" :label="item" :value="item" />
             </el-select>
@@ -45,12 +45,39 @@
           <el-form-item prop="file" label-width="auto" v-if="data.dataType == TemplateDataType.FILE">
             <FeatureTemplateFile v-model="data.file" :disabled="isViewModel" parent-prop="file" />
           </el-form-item>
-          <el-form-item label="初值" prop="defaultValue" label-width="auto" v-if="showDefaultValue(node, data)">
+          <el-form-item
+            label="控件类型"
+            prop="stringType"
+            label-width="auto"
+            v-if="data.dataType == TemplateDataType.STRING"
+          >
+            <el-select v-model="data.stringType" :disabled="isViewModel">
+              <el-option v-for="item in Object.keys(StringType)" :key="item" :label="item" :value="item" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="默认值" prop="defaultValue" label-width="auto" v-if="showDefaultValue(node, data)">
             <el-input
+              v-if="data.dataType == TemplateDataType.GENERATED"
               v-model="data.defaultValue"
               :placeholder="defaultValuePlaceholder(data.dataType)"
               :type="data.dataType == TemplateDataType.NUMBER ? 'number' : 'string'"
               @change="updateData"
+            />
+            <CommonConfig
+              v-else
+              :isViewModel="props.isViewModel"
+              :default-value="null"
+              :max-length="data?.validator?.maxLength || Number.MAX_SAFE_INTEGER"
+              :max-value="data?.validator?.max || Number.MAX_SAFE_INTEGER"
+              :min-value="data?.validator?.min || 0"
+              :data-type="data.dataType"
+              :string-type="data.stringType"
+              :choice="data.choice"
+              :description="data.description"
+              :parent="null"
+              :file="data.file"
+              v-model="data.defaultValue"
+              @update:modelValue="updateData"
             />
           </el-form-item>
           <el-form-item label="是否主键字段" prop="keyParam" label-width="auto" v-if="showKeyParam(node, data)">
@@ -140,10 +167,11 @@
 <script lang="ts" setup>
 import { computed, h, ref } from "vue"
 import type Node from "element-plus/es/components/tree/src/model/node"
-import { ChoiceType, FileType, TemplateDataType } from "@/domain/Features"
+import { ChoiceType, FileType, StringType, TemplateDataType } from "@/domain/Features"
 import { ElNotification } from "element-plus"
 import FeatureTemplateChoice from "@/components/FeatureTemplateChoice.vue"
 import FeatureTemplateFile from "@/components/FeatureTemplateFile.vue"
+import CommonConfig from "@/components/CommonConfig.vue"
 
 const props = defineProps({
   index: {
