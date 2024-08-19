@@ -17,7 +17,7 @@
           :disabled="props.isViewModel"
           :type="textType"
           :maxlength="maxLength"
-          @blur="onInput"
+          @change="onInput"
         />
         <el-color-picker v-else-if="stringType == StringType.COLOR" v-model="value" @blur="onInput" />
         <el-date-picker
@@ -43,6 +43,24 @@
           placeholder="请选择时间"
           @blur="onInput"
         />
+        <div v-else-if="stringType == StringType.RICH_TEXT" style="border: 1px solid #ccc">
+          <Toolbar
+            style="border-bottom: 1px solid #ccc"
+            :editor="editorRef"
+            :defaultConfig="toolbarConfig"
+            mode="simple"
+            :disabled="props.isViewModel"
+          />
+          <Editor
+            style="height: 500px; overflow-y: hidden"
+            v-model="value"
+            :defaultConfig="editorConfig"
+            mode="simple"
+            @onCreated="handleCreated"
+            :disabled="props.isViewModel"
+            @onBlur="onInput"
+          />
+        </div>
         <el-input
           v-else
           v-model="value"
@@ -121,7 +139,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
+import "@wangeditor/editor/dist/css/style.css" // 引入 css
+import { Editor, Toolbar } from "@wangeditor/editor-for-vue"
+import { computed, ref, shallowRef, watch } from "vue"
 import { ChoiceItem, ChoiceType, FileType, StringType, TemplateDataType } from "@/domain/Features"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
 import { ElMessage, UploadProps } from "element-plus"
@@ -318,6 +338,37 @@ const textType = computed(() => {
       return "text"
   }
 })
+
+const editorRef = shallowRef()
+const toolbarConfig = {}
+const editorConfig = {
+  placeholder: "请输入内容...",
+  MENU_CONF: {
+    uploadImage: {
+      async customUpload(file: File, insertFn) {
+        if (!file.type?.startsWith("image")) {
+          ElMessage.error(`请选择图片`)
+          return
+        }
+        if (file.size / 1024 / 1024 > 2) {
+          ElMessage.error(`文件大小超过2MB！`)
+          return
+        }
+
+        fileUploadLoading.value = true
+        try {
+          const response = await files.uploadFile(file)
+          insertFn(response.url, "", "")
+        } catch (error) {
+          ElMessage.error("上传文件失败！")
+        }
+      }
+    }
+  }
+}
+const handleCreated = (editor) => {
+  editorRef.value = editor // 记录 editor 实例，重要！
+}
 </script>
 
 <style lang="scss" scoped>
