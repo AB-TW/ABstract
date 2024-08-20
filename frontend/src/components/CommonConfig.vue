@@ -2,7 +2,73 @@
   <div class="common-container">
     <div>
       <div v-if="dataType == TemplateDataType.STRING">
-        <el-input v-model="value" :disabled="props.isViewModel" type="text" :maxlength="maxLength" @blur="onInput" />
+        <el-input
+          v-if="
+            [
+              StringType.TEXTAREA,
+              StringType.TEXT,
+              StringType.PHONE,
+              StringType.URL,
+              StringType.EMAIL,
+              StringType.PASSWORD
+            ].includes(stringType as StringType)
+          "
+          v-model="value"
+          :disabled="props.isViewModel"
+          :type="textType"
+          :maxlength="maxLength"
+          @change="onInput"
+        />
+        <el-color-picker v-else-if="stringType == StringType.COLOR" v-model="value" @blur="onInput" />
+        <el-date-picker
+          v-else-if="stringType == StringType.DATE"
+          v-model="value"
+          :disabled="props.isViewModel"
+          type="date"
+          placeholder="请选择日期"
+          @blur="onInput"
+        />
+        <el-date-picker
+          v-else-if="stringType == StringType.DATE_TIME"
+          v-model="value"
+          :disabled="props.isViewModel"
+          type="datetime"
+          placeholder="请选择日期时间"
+          @blur="onInput"
+        />
+        <el-time-picker
+          v-else-if="stringType == StringType.TIME"
+          :disabled="props.isViewModel"
+          v-model="value"
+          placeholder="请选择时间"
+          @blur="onInput"
+        />
+        <div v-else-if="stringType == StringType.RICH_TEXT" style="border: 1px solid #ccc">
+          <Toolbar
+            style="border-bottom: 1px solid #ccc"
+            :editor="editorRef"
+            :defaultConfig="toolbarConfig"
+            mode="simple"
+            :disabled="props.isViewModel"
+          />
+          <Editor
+            style="height: 500px; overflow-y: hidden"
+            v-model="value"
+            :defaultConfig="editorConfig"
+            mode="simple"
+            @onCreated="handleCreated"
+            :disabled="props.isViewModel"
+            @onBlur="onInput"
+          />
+        </div>
+        <el-input
+          v-else
+          v-model="value"
+          :disabled="props.isViewModel"
+          type="text"
+          :maxlength="maxLength"
+          @blur="onInput"
+        />
       </div>
       <div v-if="dataType == TemplateDataType.GENERATED">
         <el-input v-model="value" :disabled="true" type="text" @blur="onInput" />
@@ -33,16 +99,56 @@
           />
         </el-select>
       </div>
+      <div v-else-if="dataType == TemplateDataType.FILE">
+        <el-tooltip
+          effect="dark"
+          :content="
+            '可选文件类型：' +
+            (file?.fileExtensions || []).join(',') +
+            '；文件大小不超过' +
+            (file?.sizeLimit || 2048) +
+            'KB'
+          "
+          placement="top"
+        >
+          <el-icon style="margin-left: 4px" :size="12">
+            <Warning />
+          </el-icon>
+        </el-tooltip>
+        <el-upload
+          v-model:file-list="fileList"
+          :accept="file.fileExtensions?.join(',') || '*'"
+          :before-upload="beforeFileUpload"
+          v-loading="fileUploadLoading"
+          :list-type="file.type != FileType.IMAGE ? 'text' : 'picture-card'"
+          @remove="
+            () => {
+              value = ''
+              onInput()
+            }
+          "
+        >
+          <el-icon v-if="file.type == FileType.IMAGE">
+            <Plus />
+          </el-icon>
+          <el-button v-else size="small" type="primary">点击上传</el-button>
+        </el-upload>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
-import { ChoiceItem, ChoiceType, TemplateDataType } from "@/domain/Features"
+import "@wangeditor/editor/dist/css/style.css" // 引入 css
+import { Editor, Toolbar } from "@wangeditor/editor-for-vue"
+import { computed, ref, shallowRef, watch } from "vue"
+import { ChoiceItem, ChoiceType, FileType, StringType, TemplateDataType } from "@/domain/Features"
 import { FeatureConfig, FeatureConfigs } from "@/domain/FeatureConfigs"
-import { ElMessage } from "element-plus"
+import { ElMessage, UploadProps } from "element-plus"
 import _ from "lodash"
+import { Files } from "@/domain/Files"
+
+const files = new Files()
 
 const props = defineProps({
   modelValue: {
@@ -79,6 +185,14 @@ const props = defineProps({
   },
   choice: {
     type: Object,
+    required: false
+  },
+  file: {
+    type: Object,
+    required: false
+  },
+  stringType: {
+    type: String,
     required: false
   },
   parent: {
@@ -160,25 +274,6 @@ const updateValue = (v1) => {
   console.log("value.value:" + value.value)
 }
 updateValue(value.value)
-// watch(
-//   () => props.modelValue,
-//   (v1) => {
-//     updateValue(v1)
-//   }
-// )
-
-// watch(
-//   () => value.value,
-//   (curValue, lastValue) => {
-//     console.log("watch value.value")
-//     console.log(curValue)
-//     console.log(lastValue)
-//     if (curValue != lastValue) {
-//       emit("update:modelValue", curValue)
-//       emit("change", curValue)
-//     }
-//   }
-// )
 
 watch(
   () => props.defaultValue,
@@ -194,6 +289,86 @@ watch(
     updateValue(value.value)
   }
 )
+
+const fileUploadLoading = ref(false)
+const fileList = computed(() => {
+  return value.value ? [{ name: (value.value as string).split("/").pop(), url: value.value as string }] : []
+})
+const beforeFileUpload: UploadProps["beforeUpload"] = async (rawFile) => {
+  if (
+    props.file?.fileExtensions &&
+    !props.file?.fileExtensions.includes(rawFile.name.split(".").pop().toLowerCase() || "")
+  ) {
+    ElMessage.error(`文件类型不支持！`)
+    return false
+  }
+  if (rawFile.size / 1024 > (props.file?.sizeLimit || 2048)) {
+    ElMessage.error(`文件大小超过${props.file?.sizeLimit || 2048}KB！`)
+    return false
+  }
+
+  fileUploadLoading.value = true
+  try {
+    const response = await files.uploadFile(rawFile)
+    console.log(response)
+    value.value = response.url
+    onInput()
+    console.log("value.value:" + value.value)
+  } catch (error) {
+    ElMessage.error("上传文件失败！")
+    return false
+  } finally {
+    fileUploadLoading.value = false
+  }
+
+  return true
+}
+
+const textType = computed(() => {
+  switch (props.stringType) {
+    case StringType.PASSWORD:
+      return "password"
+    case StringType.EMAIL:
+      return "email"
+    case StringType.URL:
+      return "url"
+    case StringType.TEXTAREA:
+      return "textarea"
+    default:
+      return "text"
+  }
+})
+
+const editorRef = shallowRef()
+const toolbarConfig = {}
+const editorConfig = {
+  placeholder: "请输入内容...",
+  MENU_CONF: {
+    uploadImage: {
+      async customUpload(file: File, insertFn) {
+        if (!file.type?.startsWith("image")) {
+          ElMessage.error(`请选择图片`)
+          return
+        }
+        if (file.size / 1024 / 1024 > 2) {
+          ElMessage.error(`文件大小超过2MB！`)
+          return
+        }
+
+        fileUploadLoading.value = true
+        try {
+          const response = await files.uploadFile(file)
+          insertFn(response.url, "", "")
+        } catch (error) {
+          ElMessage.error("上传文件失败！")
+        }
+      }
+    }
+  }
+}
+const handleCreated = (editor) => {
+  editorRef.value = editor // 记录 editor 实例，重要！
+}
 </script>
 
 <style lang="scss" scoped>

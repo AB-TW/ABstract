@@ -32,7 +32,7 @@
           <el-form-item label="描述" prop="description" label-width="auto" v-if="showKey(node, data)">
             <el-input v-model="data.description" @change="updateData" />
           </el-form-item>
-          <el-form-item label="类型" prop="dataType" label-width="auto">
+          <el-form-item label="数据类型" prop="dataType" label-width="auto">
             <el-select v-model="data.dataType" @change="handleDataTypeChange(node, data)">
               <el-option v-for="item in Object.keys(TemplateDataType)" :key="item" :label="item" :value="item" />
             </el-select>
@@ -42,12 +42,42 @@
             :disabled="isViewModel"
             v-if="data.dataType == TemplateDataType.SELECT"
           />
-          <el-form-item label="初值" prop="defaultValue" label-width="auto" v-if="showDefaultValue(node, data)">
+          <el-form-item prop="file" label-width="auto" v-if="data.dataType == TemplateDataType.FILE">
+            <FeatureTemplateFile v-model="data.file" :disabled="isViewModel" parent-prop="file" />
+          </el-form-item>
+          <el-form-item
+            label="控件类型"
+            prop="stringType"
+            label-width="auto"
+            v-if="data.dataType == TemplateDataType.STRING"
+          >
+            <el-select v-model="data.stringType" :disabled="isViewModel">
+              <el-option v-for="item in Object.keys(StringType)" :key="item" :label="item" :value="item" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="默认值" prop="defaultValue" label-width="auto" v-if="showDefaultValue(node, data)">
             <el-input
+              v-if="data.dataType == TemplateDataType.GENERATED"
               v-model="data.defaultValue"
               :placeholder="defaultValuePlaceholder(data.dataType)"
               :type="data.dataType == TemplateDataType.NUMBER ? 'number' : 'string'"
               @change="updateData"
+            />
+            <CommonConfig
+              v-else
+              :isViewModel="props.isViewModel"
+              :default-value="null"
+              :max-length="data?.validator?.maxLength || Number.MAX_SAFE_INTEGER"
+              :max-value="data?.validator?.max || Number.MAX_SAFE_INTEGER"
+              :min-value="data?.validator?.min || 0"
+              :data-type="data.dataType"
+              :string-type="data.stringType"
+              :choice="data.choice"
+              :description="data.description"
+              :parent="null"
+              :file="data.file"
+              v-model="data.defaultValue"
+              @update:modelValue="updateData"
             />
           </el-form-item>
           <el-form-item label="是否主键字段" prop="keyParam" label-width="auto" v-if="showKeyParam(node, data)">
@@ -137,9 +167,11 @@
 <script lang="ts" setup>
 import { computed, h, ref } from "vue"
 import type Node from "element-plus/es/components/tree/src/model/node"
-import { ChoiceType, TemplateDataType } from "@/domain/Features"
+import { ChoiceType, FileType, StringType, TemplateDataType } from "@/domain/Features"
 import { ElNotification } from "element-plus"
 import FeatureTemplateChoice from "@/components/FeatureTemplateChoice.vue"
+import FeatureTemplateFile from "@/components/FeatureTemplateFile.vue"
+import CommonConfig from "@/components/CommonConfig.vue"
 
 const props = defineProps({
   index: {
@@ -165,7 +197,7 @@ const getNameRules = (content: string) => [
   {
     validator: () => {
       if (!content) {
-        return Promise.reject("请输入Key")
+        return Promise.reject("请输入名称")
       }
       if (content.length < 1 || content.length > 50) {
         return Promise.reject("长度在 1 到 50 个字符")
@@ -233,6 +265,9 @@ const handleDataTypeChange = (node: any, data: any) => {
     case TemplateDataType.SELECT:
       data.choice = data.choice || { type: ChoiceType.CONTENT, featureKey: "", items: [] }
       break
+    case TemplateDataType.FILE:
+      data.file = data.file || { type: FileType.IMAGE, sizeLimit: 1024, fileExtensions: [] }
+      break
     default:
       data.defaultValue = ""
       break
@@ -265,6 +300,7 @@ const addChildNode = (node: any, data: Tree) => {
     dataType: TemplateDataType.BOOLEAN,
     defaultValue: false,
     choice: { type: ChoiceType.CONTENT, items: [], featureKey: "" },
+    file: { type: FileType.IMAGE, sizeLimit: 1024, fileExtensions: [] },
     children: [],
     validator: {
       min: 0,
@@ -305,7 +341,9 @@ const showKey = (node, child) => {
 }
 
 const showDefaultValue = (parent, child) => {
-  return ![TemplateDataType.ARRAY, TemplateDataType.OBJECT, TemplateDataType.SELECT].includes(child.dataType)
+  return ![TemplateDataType.ARRAY, TemplateDataType.OBJECT, TemplateDataType.SELECT, TemplateDataType.FILE].includes(
+    child.dataType
+  )
 }
 
 const keyParamCount = computed(() => {

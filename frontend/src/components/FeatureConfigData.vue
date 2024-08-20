@@ -29,7 +29,7 @@
               v-model="featureConfigData[index]"
               :template="template.items[0]"
               :index="index"
-              :parent-prop="(props.parentProp || 'data') + '.' + index"
+              :parent-prop="(props.parentProp || 'data') + '.' + template.key + '.' + index"
               :parent="item"
               :isViewModel="props.isViewModel"
               :debug-mode="props.debugMode"
@@ -62,9 +62,11 @@
             :max-value="template?.validator?.max || Number.MAX_SAFE_INTEGER"
             :min-value="template?.validator?.min || 0"
             :data-type="template.dataType"
+            :string-type="template.stringType"
             :choice="template.choice"
             :description="template.description"
             :parent="props.parent"
+            :file="template.file"
             v-model="featureConfigData"
             @update:modelValue="updateData"
           />
@@ -78,7 +80,7 @@
 import { computed, ref, watch } from "vue"
 import CommonConfig from "@/components/CommonConfig.vue"
 import _ from "lodash"
-import { TemplateDataType, FeatureTemplate, getTemplateDefaultValue } from "@/domain/Features"
+import { TemplateDataType, FeatureTemplate, getTemplateDefaultValue, StringType } from "@/domain/Features"
 
 const props = defineProps({
   modelValue: {
@@ -192,13 +194,28 @@ watch(
 )
 
 const dataItemRule = (data: any) => {
-  return [
+  const rules = [
     {
       required: data?.validator?.required || false,
       message: "该字段为必填字段",
       trigger: "submit"
     }
   ]
+  if (data.dataType == TemplateDataType.STRING) {
+    switch (data.stringType) {
+      case StringType.URL:
+        rules.push({ type: "url", message: "请输入正确的URL地址", trigger: "submit" })
+        break
+      case StringType.EMAIL:
+        rules.push({ type: "email", message: "请输入正确的邮箱地址", trigger: "submit" })
+        break
+      case StringType.PHONE:
+        rules.push({ pattern: /^1[3456789]\d{9}$/, message: "请输入正确的手机号码", trigger: "submit" })
+        break
+    }
+  }
+
+  return rules
 }
 </script>
 <style lang="scss">

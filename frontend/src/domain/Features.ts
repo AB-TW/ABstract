@@ -31,6 +31,8 @@ export interface FeatureTemplate {
   validator?: any
   items?: FeatureTemplate[]
   choice?: Choice
+  file?: File
+  stringType?: StringType
 }
 
 export interface Choice {
@@ -75,7 +77,35 @@ export enum TemplateDataType {
   OBJECT = "OBJECT",
   ARRAY = "ARRAY",
   SELECT = "SELECT",
-  GENERATED = "GENERATED"
+  GENERATED = "GENERATED",
+  FILE = "FILE"
+}
+
+export enum StringType {
+  TEXT = "TEXT",
+  TEXTAREA = "TEXTAREA",
+  RICH_TEXT = "RICH_TEXT",
+  PASSWORD = "PASSWORD",
+  EMAIL = "EMAIL",
+  URL = "URL",
+  PHONE = "PHONE",
+  DATE = "DATE",
+  DATE_TIME = "DATE_TIME",
+  TIME = "TIME",
+  COLOR = "COLOR"
+}
+
+export enum FileType {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+  RADIO = "RADIO",
+  OTHER = "OTHER"
+}
+
+export interface File {
+  type: FileType
+  fileExtensions: string[]
+  sizeLimit: number
 }
 
 export const defaultFeatureTemplate = {
@@ -113,6 +143,8 @@ export const getTemplateDefaultValue = (template: FeatureTemplate | undefined): 
     return template.defaultValue || ""
   } else if (template.dataType === TemplateDataType.NUMBER) {
     return Number(template.defaultValue) || 0
+  } else if (template.dataType === TemplateDataType.FILE) {
+    return null
   } else if (template.dataType === TemplateDataType.SELECT) {
     return null
   }
