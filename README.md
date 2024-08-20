@@ -100,7 +100,7 @@ RSC是类似与curl命令的RSocket客户端命令行工具，方便对RSocket A
 
 ## 系统功能
 
-[![ABStract](https://i9.ytimg.com/vi_webp/VEW3CP06tvs/mqdefault.webp?v=66c1d49b&sqp=CNyqh7YG&rs=AOn4CLC_PuzBjDGCETqnjT05BkvSBbS5gw)](https://youtu.be/VEW3CP06tvs)
+[![ABStract](https://i9.ytimg.com/vi_webp/VEW3CP06tvs/mqdefault.webp?v=66c1d49b&sqp=CPDnj7YG&rs=AOn4CLALt57yk4xqkOVNCbgko5NkwjPqdA)](https://www.youtube.com/watch?v=VEW3CP06tvs)
 
 ### 特性管理
 
