@@ -18,6 +18,8 @@
                 v-for="(item, index) in attributes"
                 :key="item.index"
                 :item="item"
+                parentProp="attributes"
+                :enable-validation="false"
                 :index="index"
                 @deleteItem="deleteAttribute(index)"
               />

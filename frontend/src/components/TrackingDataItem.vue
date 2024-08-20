@@ -41,6 +41,11 @@ const props = defineProps({
     required: false,
     defaultValue: "trackingData"
   },
+  enableValidation: {
+    type: Boolean,
+    required: false,
+    defaultValue: true
+  },
   disabled: {
     type: Boolean,
     required: false
@@ -59,12 +64,14 @@ const deleteItem = () => {
 }
 
 const item = ref(props.item)
-const itemRules = [
-  {
-    required: true,
-    message: "该字段为必填字段"
-  }
-]
+const itemRules = props.enableValidation
+  ? [
+      {
+        required: true,
+        message: "该字段为必填字段"
+      }
+    ]
+  : []
 </script>
 
 <style lang="scss">

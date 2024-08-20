@@ -48,6 +48,7 @@
               :index="index"
               :disabled="formType == 'view'"
               parent-prop="trackingData"
+              :enable-validation="true"
               @deleteItem="deleteTrackingData(index)"
             />
             <div>

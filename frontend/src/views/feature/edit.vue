@@ -95,7 +95,15 @@
 import { onBeforeMount, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { ElForm, ElFormItem, ElInput, ElButton, ElMessage } from "element-plus"
-import { ChoiceType, Feature, Features, FeatureTemplate, TemplateDataType } from "@/domain/Features"
+import {
+  ChoiceType,
+  Feature,
+  Features,
+  FeatureTemplate,
+  FileType,
+  StringType,
+  TemplateDataType
+} from "@/domain/Features"
 import FeatureTemplateComponent from "../../components/FeatureTemplate.vue"
 import _ from "lodash"
 import { replaceChildrenWithItems, StatusMaps, translateDataToTemplateItems, transTempToTreeDataSource } from "@/utils"
@@ -125,7 +133,9 @@ onBeforeMount(async () => {
       dataType: TemplateDataType.BOOLEAN,
       defaultValue: false,
       items: [] as FeatureTemplate[],
-      choice: { type: ChoiceType.CONTENT, items: [], featureKey: "" }
+      choice: { type: ChoiceType.CONTENT, items: [], featureKey: "" },
+      file: { type: FileType.IMAGE, sizeLimit: 1024, fileExtensions: [] },
+      stringType: StringType.TEXT
     },
     dataSource: [
       transTempToTreeDataSource({
@@ -166,6 +176,7 @@ const submitForm = async () => {
   const copyJsonObj = _.cloneDeep(feature.value)
   const tempResult = translateDataToTemplateItems(copyJsonObj)
   replaceChildrenWithItems(tempResult.template)
+  console.log("JSON.stringify(tempResult)")
   console.log(JSON.stringify(tempResult))
 
   form.value.validate(async (valid: boolean) => {
