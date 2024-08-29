@@ -53,7 +53,7 @@ public class ChatbotConfiguration {
                 OllamaOptions.create(), objectMapper, aiProperties);
         var addFeatureChatHandler = new AddFeatureChatHandler(openAiChatModel, openAiChatModel, objectMapper, features);
         var queryWithFunctionChatHandler = new QueryWithFunctionChatHandler(openAiChatModel, openAiChatModel,
-                OllamaOptions.create());
+                OllamaOptions.builder().withFunctions(functions).build());
         var intentionHandler = new IntentionHandler(objectMapper, ChatClient.builder(openAiChatModel).build(), aiProperties);
         return new ChatBot(historyVectorStore,
                 Map.of(Intention.QA, qaChatHandler,
