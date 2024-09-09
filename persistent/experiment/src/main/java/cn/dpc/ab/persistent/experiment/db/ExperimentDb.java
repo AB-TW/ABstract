@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.couchbase.core.mapping.Document;
 import org.springframework.data.couchbase.core.mapping.id.GeneratedValue;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 /**
  * ExperimentDb represents an experiment.
  */
+@TypeAlias("experiment")
 @Document
 @Data
 @Builder

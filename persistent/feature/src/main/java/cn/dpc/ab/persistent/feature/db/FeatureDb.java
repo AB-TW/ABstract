@@ -4,6 +4,7 @@ import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Feature.Description;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.couchbase.core.mapping.Document;
 import org.springframework.data.couchbase.core.mapping.Field;
@@ -19,6 +20,7 @@ import static org.springframework.data.couchbase.core.mapping.id.GenerationStrat
 /**
  * FeatureDb represents a feature in the database.
  */
+@TypeAlias("feature")
 @Document
 @Data
 public class FeatureDb {
