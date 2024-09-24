@@ -1,3 +1,9 @@
+import http from "@/utils/http/http"
+import { PageResponse } from "@/domain/Features"
+import { FilterConditionQueryRequest } from "@/model/request/FilterConditionQueryRequest"
+import { FilterConditionAddRequest } from "@/model/request/FilterConditionAddRequest"
+import { FilterConditionUpdateRequest } from "@/model/request/FilterConditionUpdateRequest"
+
 export interface FilterCondition {
   grayReleaseCondition?: GrayReleaseCondition
   attributeConditions?: CustomAttributeCondition[]
@@ -30,6 +36,14 @@ export enum CompareOperator {
   VERSION_LESS_THAN_OR_EQUALS = "VERSION_LESS_THAN_OR_EQUALS"
 }
 
+export interface FilterConditionTemplate {
+  templateId: string
+  templateName: string
+  attributeConditions: CustomAttributeCondition[]
+  createdAt: string
+  updatedAt: string
+}
+
 export const defaultFilterCondition = (): FilterCondition =>
   ({
     grayReleaseCondition: {
@@ -37,3 +51,31 @@ export const defaultFilterCondition = (): FilterCondition =>
     },
     attributeConditions: []
   } as FilterCondition)
+
+export class FilterConditions {
+  constructor(private readonly baseUrl: string = "") {}
+
+  private getUrl(path: string) {
+    return this.baseUrl + path
+  }
+
+  async getByPage(request: FilterConditionQueryRequest): Promise<PageResponse<FilterConditionTemplate>> {
+    return await http.get(this.getUrl("/filterCondition"), { params: request }).then((res: any) => res?.data)
+  }
+
+  async getById(templateId: string): Promise<PageResponse<FilterConditionTemplate>> {
+    return await http.get(this.getUrl(`/filterCondition/${templateId}`), {}).then((res: any) => res?.data)
+  }
+
+  async add(request: FilterConditionAddRequest): Promise<FilterConditionTemplate> {
+    return await http.post(this.getUrl("/filterCondition"), request).then((res: any) => res?.data)
+  }
+
+  async update(request: FilterConditionUpdateRequest): Promise<void> {
+    return await http.put(this.getUrl(`/filterCondition/${request.templateId}`), request).then((res: any) => res?.data)
+  }
+
+  async deleteById(templateId: string): Promise<void> {
+    return await http.del(this.getUrl(`/filterCondition/${templateId}`), {}).then((res: any) => res?.data)
+  }
+}

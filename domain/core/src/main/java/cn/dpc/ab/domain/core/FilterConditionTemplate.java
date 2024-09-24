@@ -3,6 +3,7 @@ package cn.dpc.ab.domain.core;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * FilterConditionTemplate represents an filterCondition template.
@@ -18,7 +19,7 @@ public class FilterConditionTemplate {
 
     private String templateName;
 
-    private FilterCondition.CustomAttributeCondition attributeCondition;
+    private List<FilterCondition.CustomAttributeCondition> attributeConditions;
 
     private LocalDateTime createdAt;
 

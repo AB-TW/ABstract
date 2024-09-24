@@ -1,11 +1,12 @@
 package cn.dpc.ab.api.filtercondition;
 
+import cn.dpc.ab.api.dto.PageResponse;
+import cn.dpc.ab.api.filtercondition.dto.FilterConditionPageQueryRequest;
+import cn.dpc.ab.api.filtercondition.dto.FilterConditionTemplateRequest;
 import cn.dpc.ab.api.filtercondition.dto.FilterConditionTemplateResponse;
 import cn.dpc.ab.domain.core.FilterConditions;
-import cn.dpc.ab.api.filtercondition.dto.FilterConditionTemplateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -25,8 +26,22 @@ public class FilterConditionApi {
     }
 
     @GetMapping
-    Flux<FilterConditionTemplateResponse> getAll() {
-        return filterConditions.getAll()
+    Mono<PageResponse<FilterConditionTemplateResponse>> getByPage(FilterConditionPageQueryRequest filterConditionPageQueryRequest) {
+        FilterConditions.FilterParams filterParams = filterConditionPageQueryRequest.filterParams();
+        return filterConditions.subCollection(filterParams, filterConditionPageQueryRequest.getFrom(), filterConditionPageQueryRequest.getTo())
+                .map(FilterConditionTemplateResponse::from)
+                .collectList().zipWith(filterConditions.size(filterParams))
+                .map(tuple -> PageResponse.<FilterConditionTemplateResponse>builder()
+                        .content(tuple.getT1())
+                        .total(tuple.getT2())
+                        .page(filterConditionPageQueryRequest.getPage())
+                        .pageSize(filterConditionPageQueryRequest.getPageSize())
+                        .build());
+    }
+
+    @GetMapping("/{templateId}")
+    Mono<FilterConditionTemplateResponse> getById(@PathVariable String templateId) {
+        return filterConditions.getById(templateId)
                 .map(FilterConditionTemplateResponse::from);
     }
 
