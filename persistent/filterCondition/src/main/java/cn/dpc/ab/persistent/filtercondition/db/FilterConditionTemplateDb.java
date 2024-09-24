@@ -69,6 +69,11 @@ public class FilterConditionTemplateDb {
                 .build();
     }
 
+    /**
+     * to update FilterConditionTemplateDb from FilterConditionTemplate.
+     *
+     * @return the filterCondition Template Db
+     */
     public FilterConditionTemplateDb updateFrom(FilterConditionTemplate filterConditionTemplate) {
         this.attributeConditions = filterConditionTemplate.getAttributeConditions();
         this.templateName = filterConditionTemplate.getTemplateName();
