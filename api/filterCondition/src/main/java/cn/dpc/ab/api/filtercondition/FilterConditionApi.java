@@ -28,7 +28,11 @@ public class FilterConditionApi {
     @GetMapping
     Mono<PageResponse<FilterConditionTemplateResponse>> getByPage(FilterConditionPageQueryRequest filterConditionPageQueryRequest) {
         FilterConditions.FilterParams filterParams = filterConditionPageQueryRequest.filterParams();
-        return filterConditions.subCollection(filterParams, filterConditionPageQueryRequest.getFrom(), filterConditionPageQueryRequest.getTo())
+        return filterConditions.subCollection(
+                        filterParams,
+                        filterConditionPageQueryRequest.getFrom(),
+                        filterConditionPageQueryRequest.getTo()
+                )
                 .map(FilterConditionTemplateResponse::from)
                 .collectList().zipWith(filterConditions.size(filterParams))
                 .map(tuple -> PageResponse.<FilterConditionTemplateResponse>builder()
