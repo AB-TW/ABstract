@@ -13,6 +13,7 @@ import org.springframework.data.couchbase.core.mapping.id.GeneratedValue;
 import org.springframework.data.couchbase.core.mapping.id.GenerationStrategy;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * FilterConditionTemplateDb represents an filterCondition template.
@@ -32,7 +33,7 @@ public class FilterConditionTemplateDb {
 
     private String templateName;
 
-    private FilterCondition.CustomAttributeCondition attributeCondition;
+    private List<FilterCondition.CustomAttributeCondition> attributeConditions;
 
     private LocalDateTime createdAt;
 
@@ -49,7 +50,7 @@ public class FilterConditionTemplateDb {
         return FilterConditionTemplateDb.builder()
                 .id(filterConditionTemplate.getTemplateId())
                 .templateName(filterConditionTemplate.getTemplateName())
-                .attributeCondition(filterConditionTemplate.getAttributeCondition())
+                .attributeConditions(filterConditionTemplate.getAttributeConditions())
                 .createdAt(filterConditionTemplate.getCreatedAt())
                 .updatedAt(filterConditionTemplate.getUpdatedAt())
                 .build();
@@ -64,8 +65,14 @@ public class FilterConditionTemplateDb {
         return FilterConditionTemplate.builder()
                 .templateId(filterConditionTemplateDb.getId())
                 .templateName(filterConditionTemplateDb.getTemplateName())
-                .attributeCondition(filterConditionTemplateDb.getAttributeCondition())
+                .attributeConditions(filterConditionTemplateDb.getAttributeConditions())
                 .build();
     }
 
+    public FilterConditionTemplateDb updateFrom(FilterConditionTemplate filterConditionTemplate) {
+        this.attributeConditions = filterConditionTemplate.getAttributeConditions();
+        this.templateName = filterConditionTemplate.getTemplateName();
+        this.updatedAt = LocalDateTime.now();
+        return this;
+    }
 }

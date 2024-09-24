@@ -30,7 +30,7 @@ spring:
   couchbase:
     username: bucket1
     password: bucket1pass
-    connectionString: couchbase://127.0.0.1
+    connectionString: couchbase://${COUCHBASE_HOST:127.0.0.1}
   data:
     couchbase:
       repositories:
