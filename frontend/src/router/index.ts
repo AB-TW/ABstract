@@ -95,6 +95,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: "Experiment",
     redirect: "/experiment/list",
     meta: {
+      title: "Experiment管理",
       keepAlive: true
     },
     children: [
@@ -113,7 +114,38 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/experiment/edit.vue"),
         name: "Edit-Experiment",
         meta: {
-          title: "Experiment管理",
+          title: "编辑",
+          hidden: true
+        }
+      }
+    ]
+  },
+  {
+    path: "/template/filter-condition",
+    component: Layout,
+    name: "FilterConditionTemplate",
+    redirect: "/template/filter-condition/list",
+    meta: {
+      title: "FilterCondition管理",
+      keepAlive: true
+    },
+    children: [
+      {
+        path: "/template/filter-condition/list",
+        component: () => import("@/views/filter-condition-template/index.vue"),
+        name: "Filter-Condition-Template-List",
+        meta: {
+          title: "FilterCondition管理",
+          elIcon: "Document",
+          keepAlive: true
+        }
+      },
+      {
+        path: "/template/filter-condition/edit/:id?",
+        component: () => import("@/views/filter-condition-template/edit.vue"),
+        name: "Edit-Filter-Condition-Template",
+        meta: {
+          title: "编辑",
           hidden: true
         }
       }
