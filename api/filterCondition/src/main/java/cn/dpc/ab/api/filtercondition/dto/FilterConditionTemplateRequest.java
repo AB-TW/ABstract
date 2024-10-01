@@ -4,6 +4,7 @@ import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.core.FilterConditionTemplate;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Builder
 public class FilterConditionTemplateRequest {
 
-    private FilterCondition.CustomAttributeCondition attributeCondition;
+    private List<FilterCondition.CustomAttributeCondition> attributeConditions;
 
     private String templateName;
 
@@ -27,7 +28,7 @@ public class FilterConditionTemplateRequest {
         return FilterConditionTemplate.builder()
                 .templateId(UUID.randomUUID().toString())
                 .templateName(templateName)
-                .attributeCondition(attributeCondition)
+                .attributeConditions(attributeConditions)
                 .build();
     }
 }

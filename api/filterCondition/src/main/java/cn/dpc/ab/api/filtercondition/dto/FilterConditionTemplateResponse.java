@@ -5,6 +5,7 @@ import cn.dpc.ab.domain.core.FilterConditionTemplate;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * FilterConditionTemplateResponse provides for filterCondition api.
@@ -12,7 +13,11 @@ import java.time.LocalDateTime;
 @Data
 public class FilterConditionTemplateResponse {
 
-    private FilterCondition.CustomAttributeCondition attributeCondition;
+    private String templateId;
+
+    private String templateName;
+
+    private List<FilterCondition.CustomAttributeCondition> attributeConditions;
 
     private LocalDateTime createdAt;
 
@@ -23,9 +28,11 @@ public class FilterConditionTemplateResponse {
      */
     public static FilterConditionTemplateResponse from(FilterConditionTemplate filterConditionTemplate) {
         FilterConditionTemplateResponse filterConditionTemplateResponse = new FilterConditionTemplateResponse();
-        filterConditionTemplateResponse.setAttributeCondition(filterConditionTemplate.getAttributeCondition());
-        filterConditionTemplateResponse.setCreatedAt(LocalDateTime.now());
-        filterConditionTemplateResponse.setUpdatedAt(LocalDateTime.now());
+        filterConditionTemplateResponse.setAttributeConditions(filterConditionTemplate.getAttributeConditions());
+        filterConditionTemplateResponse.setCreatedAt(filterConditionTemplate.getCreatedAt());
+        filterConditionTemplateResponse.setUpdatedAt(filterConditionTemplate.getUpdatedAt());
+        filterConditionTemplateResponse.setTemplateId(filterConditionTemplate.getTemplateId());
+        filterConditionTemplateResponse.setTemplateName(filterConditionTemplate.getTemplateName());
         return filterConditionTemplateResponse;
     }
 
