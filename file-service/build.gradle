@@ -1,0 +1,8 @@
+plugins {
+    id 'api'
+}
+
+dependencies {
+    implementation project(':api:api-file')
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
