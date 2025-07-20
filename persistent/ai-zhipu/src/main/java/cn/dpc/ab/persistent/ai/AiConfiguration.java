@@ -19,11 +19,11 @@ public class AiConfiguration {
 
     @Bean
     public SimpleVectorStore simpleVectorStore(ZhiPuAiEmbeddingModel embeddingModel) {
-        return new SimpleVectorStore(embeddingModel);
+        return SimpleVectorStore.builder(embeddingModel).build();
     }
 
     @Bean
     public SimpleVectorStore historyVectorStore(ZhiPuAiEmbeddingModel embeddingModel) {
-        return new SimpleVectorStore(embeddingModel);
+        return SimpleVectorStore.builder(embeddingModel).build();
     }
 }

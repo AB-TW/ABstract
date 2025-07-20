@@ -53,7 +53,7 @@ public class ChatbotConfiguration {
                         .build(), objectMapper, aiProperties);
         var addFeatureChatHandler = new AddFeatureChatHandler(zhiPuAiChatModel, zhiPuAiChatModel, objectMapper, features);
         var queryWithFunctionChatHandler = new QueryWithFunctionChatHandler(zhiPuAiChatModel, zhiPuAiChatModel, ZhiPuAiChatOptions.builder()
-                .withFunctions(functions)
+                .functions(functions)
                 .build());
         var intentionHandler = new IntentionHandler(objectMapper, ChatClient.builder(zhiPuAiChatModel).build(), aiProperties);
         return new ChatBot(historyVectorStore,

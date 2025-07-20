@@ -19,11 +19,11 @@ public class AiConfiguration {
 
     @Bean
     public SimpleVectorStore simpleVectorStore(OllamaEmbeddingModel embeddingModel) {
-        return new SimpleVectorStore(embeddingModel);
+        return SimpleVectorStore.builder(embeddingModel).build();
     }
 
     @Bean
     public SimpleVectorStore historyVectorStore(OllamaEmbeddingModel embeddingModel) {
-        return new SimpleVectorStore(embeddingModel);
+        return SimpleVectorStore.builder(embeddingModel).build();
     }
 }
