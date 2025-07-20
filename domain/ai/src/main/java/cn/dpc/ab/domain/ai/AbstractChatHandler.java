@@ -31,10 +31,10 @@ public abstract class AbstractChatHandler implements ChatHandler {
                 .map(response -> Optional.ofNullable(response.getResult())
                         .map(Generation::getOutput)
                         .map(resultMessage -> {
-                            if (null != resultMessage.getContent()) {
-                                assistantMessage.append(resultMessage.getContent());
+                            if (null != resultMessage.getText()) {
+                                assistantMessage.append(resultMessage.getText());
                             }
-                            return resultMessage.getContent();
+                            return resultMessage.getText();
                         })
                         .orElse(""))
                 .concatWith(Mono.just(sources))

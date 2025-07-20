@@ -64,7 +64,7 @@ public class AddFeatureChatHandler extends AbstractChatHandler {
 
         history.add(userMessage);
         ChatResponse response = chatModel.call(new Prompt(messages));
-        String content = response.getResult().getOutput().getContent();
+        String content = response.getResult().getOutput().getText();
         List<Slot> slots = Slot.extractSlotsFromContent(content, objectMapper);
 
         if (!slots.isEmpty()

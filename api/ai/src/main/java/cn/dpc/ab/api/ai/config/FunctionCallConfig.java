@@ -33,7 +33,7 @@ public class FunctionCallConfig {
      *
      * @return the function
      */
-    @Bean
+    @Bean("addFeature")
     @Description("""
             Add or create a new feature to the system, return the feature key if success, return error message when fail
             调用前请校验补充必要参数
@@ -56,7 +56,7 @@ public class FunctionCallConfig {
      *
      * @return the countFeature function
      */
-    @Bean
+    @Bean("countFeature")
     @Description("Count the number of features in the system with optional filter parameters")
     public Function<Features.FilterParams, Response> countFeature() {
         return request -> {
@@ -77,7 +77,7 @@ public class FunctionCallConfig {
      *
      * @return the getFeatureByFeatureKey function
      */
-    @Bean
+    @Bean("getFeatureByFeatureKey")
     @Description("Get the feature by feature key")
     public Function<GetFeatureRequest, Response> getFeatureByFeatureKey() {
         return request -> {
@@ -92,7 +92,7 @@ public class FunctionCallConfig {
      *
      * @return the countExperiment function
      */
-    @Bean
+    @Bean("countExperiment")
     @Description("Count the number of experiments in the system with optional filter parameters")
     public Function<Experiments.FilterParams, Response> countExperiment() {
         return request -> {
@@ -107,7 +107,7 @@ public class FunctionCallConfig {
      *
      * @return the getExperimentByFeatureKey function
      */
-    @Bean
+    @Bean("getExperimentByFeatureKey")
     @Description("Get the feature related experiment by feature key")
     public Function<GetExperimentRequest, Response> getExperimentByFeatureKey() {
         return request -> {

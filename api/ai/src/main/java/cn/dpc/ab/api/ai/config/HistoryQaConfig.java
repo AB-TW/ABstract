@@ -46,8 +46,7 @@ public class HistoryQaConfig {
 
     private void initHistoryVectorStore(String sourceLink, String intention) {
         TextReader textReader = new TextReader(sourceLink);
-        textReader.get().forEach(doc -> doc.getMetadata().put(INTENTION, intention));
-
+        textReader.getCustomMetadata().put(INTENTION, intention);
 
         TextSplitter textSplitter = new MarkDownTextSplitter();
 

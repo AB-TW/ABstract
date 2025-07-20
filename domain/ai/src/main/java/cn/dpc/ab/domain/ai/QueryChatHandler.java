@@ -58,12 +58,15 @@ public class QueryChatHandler extends AbstractChatHandler {
 
     @Override
     public Flux<String> handle(String clientId, String message, List<Message> history) throws JsonProcessingException {
-        List<Document> similarDocs = simpleVectorStore.similaritySearch(SearchRequest.query(message)
-                .withSimilarityThreshold(aiProperties.getQaSimilarityThreshold())
-                .withTopK(5)
+        List<Document> similarDocs = simpleVectorStore.similaritySearch(
+                SearchRequest.builder()
+                        .query(message)
+                        .similarityThreshold(aiProperties.getQaSimilarityThreshold())
+                        .topK(5)
+                        .build()
         );
         String context = similarDocs.stream()
-                .map(Document::getContent)
+                .map(Document::getText)
                 .collect(joining(System.lineSeparator()));
         var systemPromptTemplate = new SystemPromptTemplate(systemResource);
 
@@ -80,7 +83,7 @@ public class QueryChatHandler extends AbstractChatHandler {
         String sources;
         try {
             sources = similarDocs.isEmpty() ? "" : "#Sources:" + objectMapper.writeValueAsString(similarDocs.stream()
-                    .map(Document::getContent)
+                    .map(Document::getText)
                     .toList());
         } catch (JsonProcessingException e) {
             sources = "";

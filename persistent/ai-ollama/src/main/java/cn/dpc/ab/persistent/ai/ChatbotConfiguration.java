@@ -50,10 +50,10 @@ public class ChatbotConfiguration {
                            Set<String> functions,
                            AiProperties aiProperties) {
         var qaChatHandler = new QueryChatHandler(openAiChatModel, openAiChatModel, qaVectorStore, systemResource,
-                OllamaOptions.create(), objectMapper, aiProperties);
+                OllamaOptions.builder().build(), objectMapper, aiProperties);
         var addFeatureChatHandler = new AddFeatureChatHandler(openAiChatModel, openAiChatModel, objectMapper, features);
         var queryWithFunctionChatHandler = new QueryWithFunctionChatHandler(openAiChatModel, openAiChatModel,
-                OllamaOptions.create());
+                OllamaOptions.builder().build());
         var intentionHandler = new IntentionHandler(objectMapper, ChatClient.builder(openAiChatModel).build(), aiProperties);
         return new ChatBot(historyVectorStore,
                 Map.of(Intention.QA, qaChatHandler,

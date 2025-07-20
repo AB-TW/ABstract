@@ -88,9 +88,9 @@ public class ChatBot {
                 .stream()
                 .map(resultMessage -> {
                     if (resultMessage.getMessageType() == MessageType.USER) {
-                        return new ChatbotMessage("user", resultMessage.getContent());
+                        return new ChatbotMessage("user", resultMessage.getText());
                     }
-                    return new ChatbotMessage("bot", resultMessage.getContent());
+                    return new ChatbotMessage("bot", resultMessage.getText());
                 })
                 .toList();
     }

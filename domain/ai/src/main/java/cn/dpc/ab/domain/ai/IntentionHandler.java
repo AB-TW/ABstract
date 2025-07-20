@@ -34,9 +34,11 @@ public class IntentionHandler {
      */
     public Intention getIntentionByMessage(String message, SimpleVectorStore historyVectorStore) throws JsonProcessingException {
         List<Document> intentions = historyVectorStore.similaritySearch(
-                SearchRequest.query(message)
-                        .withSimilarityThreshold(aiProperties.getIntentSimilarityThreshold())
-                        .withTopK(5));
+                SearchRequest.builder()
+                        .query(message)
+                        .similarityThreshold(aiProperties.getIntentSimilarityThreshold())
+                        .topK(5)
+                        .build());
         if (intentions.isEmpty()) {
             return Intention.OTHER;
         }
@@ -66,7 +68,7 @@ public class IntentionHandler {
                                     .param("candidates", objectMapper.writeValueAsString(
                                             intentions
                                                     .stream()
-                                                    .map(Document::getContent).toList()))
+                                                    .map(Document::getText).toList()))
                                     .param("input", message);
                         } catch (JsonProcessingException e) {
                             throw new RuntimeException(e);
