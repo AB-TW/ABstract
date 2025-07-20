@@ -4,6 +4,7 @@ import cn.dpc.ab.domain.ai.*;
 import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
@@ -52,9 +53,10 @@ public class ChatbotConfiguration {
                 OpenAiChatOptions.builder()
                         .build(), objectMapper, aiProperties);
         var addFeatureChatHandler = new AddFeatureChatHandler(openAiChatModel, openAiChatModel, objectMapper, features);
-        var queryWithFunctionChatHandler = new QueryWithFunctionChatHandler(openAiChatModel, openAiChatModel, OpenAiChatOptions.builder()
-                .withFunctions(functions)
-                .build());
+        var queryWithFunctionChatHandler = new QueryWithFunctionChatHandler(openAiChatModel, openAiChatModel,
+                ToolCallingChatOptions.builder()
+                        .toolNames(functions)
+                        .build());
         var intentionHandler = new IntentionHandler(objectMapper, ChatClient.builder(openAiChatModel).build(), aiProperties);
         return new ChatBot(historyVectorStore,
                 Map.of(Intention.QA, qaChatHandler,
