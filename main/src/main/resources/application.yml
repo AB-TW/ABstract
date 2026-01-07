@@ -89,12 +89,12 @@ spring:
     ollama:
       chat:
         options:
-          model: qwen2:latest
+          model: llama3.1:latest
       embedding:
         options:
-          model: qwen2:latest
+          model: mxbai-embed-large:latest
 
 ai:
   enabled: true
-  intent-similarity-threshold: 0.5
-  qa-similarity-threshold: 0.5
+  intent-similarity-threshold: 0.55
+  qa-similarity-threshold: 0.6
