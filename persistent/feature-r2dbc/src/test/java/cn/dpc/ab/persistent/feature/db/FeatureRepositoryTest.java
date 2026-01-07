@@ -1,4 +1,4 @@
-package cn.dpc.ab.persistent.featrue.db;
+package cn.dpc.ab.persistent.feature.db;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,7 @@ import reactor.test.StepVerifier;
 
 import java.util.UUID;
 
-import static cn.dpc.ab.persistent.featrue.db.FeatureTestUtil.createFeatureDb;
+import static cn.dpc.ab.persistent.feature.db.FeatureTestUtil.createFeatureDb;
 
 @ExtendWith(SpringExtension.class)
 @DataR2dbcTest(properties = "logging.level.org.springframework.data.r2dbc=DEBUG")

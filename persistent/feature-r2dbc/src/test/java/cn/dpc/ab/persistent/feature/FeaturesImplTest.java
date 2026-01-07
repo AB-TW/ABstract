@@ -1,8 +1,8 @@
-package cn.dpc.ab.persistent.featrue;
+package cn.dpc.ab.persistent.feature;
 
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Features;
-import cn.dpc.ab.persistent.featrue.db.*;
+import cn.dpc.ab.persistent.feature.db.*;
 import cn.dpc.ab.persistent.utils.JsonUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

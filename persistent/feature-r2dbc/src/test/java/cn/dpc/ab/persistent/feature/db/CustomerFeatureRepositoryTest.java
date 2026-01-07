@@ -1,4 +1,4 @@
-package cn.dpc.ab.persistent.featrue.db;
+package cn.dpc.ab.persistent.feature.db;
 
 import cn.dpc.ab.domain.feature.Features;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +11,7 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.test.StepVerifier;
 
-import static cn.dpc.ab.persistent.featrue.db.FeatureTestUtil.createFeatureDb;
+import static cn.dpc.ab.persistent.feature.db.FeatureTestUtil.createFeatureDb;
 import static org.springframework.data.domain.Sort.by;
 
 

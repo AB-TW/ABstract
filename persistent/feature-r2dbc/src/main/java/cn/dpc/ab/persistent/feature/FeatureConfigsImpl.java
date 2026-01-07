@@ -1,11 +1,11 @@
-package cn.dpc.ab.persistent.featrue;
+package cn.dpc.ab.persistent.feature;
 
 import cn.dpc.ab.domain.exception.RecordNotFoundException;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
-import cn.dpc.ab.persistent.featrue.db.CustomerFeatureConfigRepository;
-import cn.dpc.ab.persistent.featrue.db.FeatureConfigDb;
-import cn.dpc.ab.persistent.featrue.db.FeatureConfigRepository;
+import cn.dpc.ab.persistent.feature.db.CustomerFeatureConfigRepository;
+import cn.dpc.ab.persistent.feature.db.FeatureConfigDb;
+import cn.dpc.ab.persistent.feature.db.FeatureConfigRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;

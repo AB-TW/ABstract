@@ -1,4 +1,4 @@
-package cn.dpc.ab.persistent.featrue.db;
+package cn.dpc.ab.persistent.feature.db;
 
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
@@ -15,7 +15,7 @@ import reactor.test.StepVerifier;
 
 import java.util.List;
 
-import static cn.dpc.ab.persistent.featrue.db.FeatureTestUtil.generateFeatureConfig;
+import static cn.dpc.ab.persistent.feature.db.FeatureTestUtil.generateFeatureConfig;
 
 @ExtendWith(SpringExtension.class)
 @DataR2dbcTest(properties = "logging.level.org.springframework.data.r2dbc=DEBUG")

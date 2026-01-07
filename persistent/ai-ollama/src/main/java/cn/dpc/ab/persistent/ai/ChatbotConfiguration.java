@@ -5,6 +5,7 @@ import cn.dpc.ab.domain.ai.*;
 import cn.dpc.ab.domain.feature.Features;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
@@ -53,7 +54,7 @@ public class ChatbotConfiguration {
                 OllamaOptions.builder().build(), objectMapper, aiProperties);
         var addFeatureChatHandler = new AddFeatureChatHandler(openAiChatModel, openAiChatModel, objectMapper, features);
         var queryWithFunctionChatHandler = new QueryWithFunctionChatHandler(openAiChatModel, openAiChatModel,
-                OllamaOptions.builder().withFunctions(functions).build());
+                ToolCallingChatOptions.builder().toolNames(functions).build());
         var intentionHandler = new IntentionHandler(objectMapper, ChatClient.builder(openAiChatModel).build(), aiProperties);
         return new ChatBot(historyVectorStore,
                 Map.of(Intention.QA, qaChatHandler,

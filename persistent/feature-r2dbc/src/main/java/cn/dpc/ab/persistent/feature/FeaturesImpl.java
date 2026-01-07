@@ -1,9 +1,9 @@
-package cn.dpc.ab.persistent.featrue;
+package cn.dpc.ab.persistent.feature;
 
 import cn.dpc.ab.domain.feature.AbstractFeatures;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Features;
-import cn.dpc.ab.persistent.featrue.db.*;
+import cn.dpc.ab.persistent.feature.db.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;

@@ -1,4 +1,4 @@
-package cn.dpc.ab.persistent.featrue.db;
+package cn.dpc.ab.persistent.feature.db;
 
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 

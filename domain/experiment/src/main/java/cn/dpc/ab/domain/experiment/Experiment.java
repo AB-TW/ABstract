@@ -7,6 +7,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.Objects;
 
 /**
  * Experiment represents an experiment.
@@ -187,7 +188,7 @@ public class Experiment {
                 || oldDescription.buckets.stream().anyMatch(bucket ->
                 newDescription.buckets.stream().anyMatch(newBucket -> newBucket.key.equals(bucket.key)
                         && newBucket.percentage != bucket.percentage))
-                || !oldDescription.filterCondition.equals(newDescription.filterCondition);
+                || !Objects.equals(oldDescription.filterCondition, newDescription.filterCondition);
     }
 
     /**

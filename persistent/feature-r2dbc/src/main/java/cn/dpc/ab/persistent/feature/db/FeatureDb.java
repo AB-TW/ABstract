@@ -1,4 +1,4 @@
-package cn.dpc.ab.persistent.featrue.db;
+package cn.dpc.ab.persistent.feature.db;
 
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.persistent.utils.JsonUtil;
