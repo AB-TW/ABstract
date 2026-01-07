@@ -30,7 +30,6 @@ public class RsocketRequesterStore {
         Map<String, RSocketRequester> customerRequesterMap = requesters.getOrDefault(customerId.clientId(), new HashMap<>());
         requesters.put(customerId.clientId(), customerRequesterMap);
         if (customerRequesterMap.get(featureKey) != requester) {
-            System.out.println("customerRequesterMap.get(key) != requester");
             customerRequesterMap.put(featureKey, requester);
         }
     }

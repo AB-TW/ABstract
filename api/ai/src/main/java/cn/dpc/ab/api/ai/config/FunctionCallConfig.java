@@ -5,6 +5,7 @@ import cn.dpc.ab.domain.experiment.Experiments;
 import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.Features;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,7 @@ import java.util.function.Function;
 /**
  * Configuration for function calls.
  */
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "ai.enabled", havingValue = "true")
@@ -127,8 +129,12 @@ public class FunctionCallConfig {
     private static Response handleResponse(Mono<Response> mono) {
         CompletableFuture<Response> future = new CompletableFuture<>();
         mono
-                .onErrorResume(e -> Mono.just(new Response(false, null, e.getMessage())))
+                .onErrorResume(e -> {
+                    log.error("Error in function call: {}", e.getMessage(), e);
+                    return Mono.just(new Response(false, null, e.getMessage()));
+                })
                 .doOnSuccess(future::complete)
+                .doOnError(e -> log.error("Unexpected error completing future: {}", e.getMessage(), e))
                 .subscribe();
 
         try {
