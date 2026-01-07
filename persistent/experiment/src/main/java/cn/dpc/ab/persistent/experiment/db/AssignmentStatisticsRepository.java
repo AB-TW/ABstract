@@ -26,7 +26,7 @@ public class AssignmentStatisticsRepository {
     public Flux<BucketCount> statisticCountByBucketKey(String experimentId) {
         String n1ql = "SELECT bucketKey, COUNT(1) as count FROM `"
                 + template.getBucketName()
-                + "` WHERE _class='cn.dpc.ab.persistent.experiment.db.AssignmentDb' AND experimentId='"
+                + "` WHERE _class='assignment' AND experimentId='"
                 + experimentId
                 + "' GROUP BY bucketKey";
         return couchbaseReactiveCluster.query(n1ql, QueryOptions.queryOptions().scanConsistency(REQUEST_PLUS))
