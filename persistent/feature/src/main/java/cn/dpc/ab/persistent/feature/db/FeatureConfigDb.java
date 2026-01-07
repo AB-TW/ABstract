@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.couchbase.core.index.QueryIndexed;
 import org.springframework.data.couchbase.core.mapping.Document;
@@ -22,6 +23,7 @@ import static org.springframework.data.couchbase.core.mapping.id.GenerationStrat
 /**
  * FeatureConfigDB represents a feature in the database.
  */
+@TypeAlias("featureConfig")
 @Document
 @Data
 public class FeatureConfigDb {

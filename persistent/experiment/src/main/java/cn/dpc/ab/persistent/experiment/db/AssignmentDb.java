@@ -5,6 +5,7 @@ import cn.dpc.ab.domain.experiment.Experiment;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.couchbase.core.mapping.Document;
 import org.springframework.data.couchbase.core.mapping.id.GeneratedValue;
@@ -21,6 +22,7 @@ import static org.springframework.data.couchbase.core.mapping.id.GenerationStrat
 /**
  * AssignmentDb provides for save assignments.
  */
+@TypeAlias("assignment")
 @Document
 @Data
 @Builder
