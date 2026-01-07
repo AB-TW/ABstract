@@ -1,0 +1,6 @@
+-   Story
+    -   作为系统管理员 我希望系统提供Assignment修改/删除的能力
+        以便我修改Assignment中对应的实验分组结果信息 作为用户
+        我希望系统提供Assignment查看的能力
+        以便我查看Assignment中对应的实验分组结果信息
+    -   {{embed \[\[Assignment业务上下文补充工具\]\]}}

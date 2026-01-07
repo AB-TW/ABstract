@@ -1,0 +1,60 @@
+-   Story
+    -   作为系统管理员 id:: 646ddb09-3ca3-493e-8d6d-64e1a0a349f8
+        我希望系统提供Feature
+        Config新增/修改/分页查看/发布/撤销/删除的能力
+        以便我增加/修改Feature中对应的配置信息
+
+    -   {{embed \[\[Feature Config 业务上下文补充工具\]\]}} \## AC
+
+    -   
+
+    -   \[\[gpt\]\] Scenario 1: 假设系统管理员想要新增一个Feature
+        Config，其中Feature Key是'Notification'，Title是'Notification
+        Settings'，Description是'Configure notification settings for
+        user'，Data是JSON对象：{"push": true,"email":
+        false}，saData是空的，圈人条件是开始时间：2022年1月1日，截止时间：2022年12月31日，圈人白名单：用户ID
+        1，2，3，地理位置：中国大陆，灰度比例：50%。
+
+        那么： Given 管理员进入Feature Config页面 When
+        管理员点击"新增"按钮，填写Feature
+        Key、Title、Description、Data、saData和圈人条件，将灰度比例设置为50%，保存
+        Then 保存的Feature
+        Config以DRAFT状态保存，管理员可以在分页查看页面找到该记录
+
+        Scenario 2: 假设管理员想要对先前创建的Feature
+        Config进行修改，以将白名单修改为用户ID 4，5和6。
+
+        那么： Given 管理员进入Feature Config的分页查看页面 When
+        管理员选择要修改的记录并单击"修改"按钮，更改圈人白名单以包括用户ID
+        4，5和6，保存更改 Then 更改后的Feature
+        Config记录以DRAFT状态保存，管理员可以在分页查看页面找到该记录
+
+        Scenario 3: 假设管理员需要发布先前创建的Feature Config。
+        假设现在满足创建时指定的圈人条件。
+
+        那么： Given 管理员进入Feature
+        Config的分页查看界面，找到状态为DRAFT且已满足圈人条件的记录 When
+        管理员选择该记录并单击"发布"按钮 Then
+        该记录以PUBLISHED状态保存，圈出的用户可以看到Feature
+        Config的配置信息
+
+        Scenario 4: 假设管理员要取消发先前创建的Feature Config。
+
+        那么： Given 管理员进入Feature
+        Config的分页查看界面，找到状态为PUBLISHED的记录 When
+        管理员选择该记录并单击"撤销"按钮 Then
+        该记录以DISABLED状态保存，C端用户不再可以看到该Feature Config
+
+        Scenario 5: 假设管理员删除状态为DRAFT的Feature Config记录。
+
+        那么： Given 管理员进入Feature
+        Config的分页查看页面，找到状态为DRAFT的记录 When
+        管理员选择该记录并单击"删除"按钮 Then
+        该记录从数据库中物理删除，不再出现在管理页面中。
+
+        Scenario 5: 假设管理员删除状态为非 DRAFT的Feature Config记录。
+
+        那么： Given 管理员进入Feature
+        Config的分页查看页面，找到状态为非 DRAFT的记录 When
+        管理员选择该记录并单击"删除"按钮 Then
+        该记录状态更新为DELETED，不再出现在管理页面中。

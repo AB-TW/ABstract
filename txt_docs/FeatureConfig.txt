@@ -1,0 +1,12 @@
+-   FeatureConfig 用于配置某个 Feature
+    中控制前端展示效果的配置项，其主要属性包括 featureKey（Feature
+    标识）、data（配置数据）、saData（埋点数据）、status、标题、描述、创建时间和更新时间。其中，status
+    为枚举值，取值范围为 DRAFT、PUBLISHED 和 DISABLED。新增的
+    FeatureConfig 状态为 DRAFT，执行发布操作后变为
+    PUBLISHED，执行撤销操作后变为 DISABLED。一个 Feature 中可以包含多个
+    FeatureConfig，通过 featureKey 字段进行关联。 id::
+    646d75fb-3cfa-4594-837d-9195583d98ff 添加 FeatureConfig
+    的主要目的是为了控制 FeatureConfig 消费方的某个行为。在添加
+    FeatureConfig 时，应该包含
+    featureKey、data、saData、status、标题和描述信息。新增的
+    FeatureConfig 状态为 DRAFT。

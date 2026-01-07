@@ -1,0 +1,182 @@
+-   `<img src="https://www.plantuml.com/plantuml/png/jLZRRjGm47tFLrZf0ulKflHrXLQ5RQaGq5OgF-0ctjJivYBRYwWG_uuJnvTnx2Gj8W-xcvbZd_7CySHPX2wvm4mSgqFovac8bg_Fpzi3hZjBbZVLUNx0d9yL59SCLqbo83k1H8COBPy4AYWZkQ1DdRGut-EIeFGJmUB8I8f-9qXUf1PKFAF1YavQMk-LfxjeiTQkpuMnxfJb2tbUemV1Q5qQLq5upcZRKPgHLzRcJx5jwXqjkO4EzptiJn88K07yCBrG5SW9U2ReFd0iy1hTFVwG-G8EmMJchcBUlAaBEgoM7WHXMss0imVIeg8C9QUxPDN5qK_CGszqiqDhoRd3ET50Zaxk6AvbfMrwIY86xsgSXRU6m-2pB9la6AeqoJHWmeHVAHVl0N2Z2VjlivRq8aLdPoXzbsMtAOXJ2rOZBjAGXho0WzCfPv98ShD9hd-rXD5AQYz5c2DxUwyGOEzOxmrhZgqI9uARoCCusWJIy62-E7H-HiGpd0vTgUXV4L58gGlaBuVdShHCsXhTcz-17VxncE_9U2NTjOzishmlNN1ZBgRzm3ajwsWIhTl9474o6ydpOx-QKBV93tGOw3kEN3GLOG4NA8aDAQ0Fk66z8aUsh8TQnJNoTcHRn6jlnn40VZxDtVSDwzZCaS-kTnMl95Wgs7qX9bkJ2AS3c2RjrsZHcvTFSZeMNsnUlQIHJc2d3DNSxtfE8uvNFpJIBLUCrXkt66YZwd6gnNWOjtJ1HIp0gp2ift-QEC-JxzqXGjR1EtLfy_NFMFi12AUzH9l8FxMc6bV4uxoLfd0R0h3PJWJGaJq2CQzJE9W3D0Wl0bWwu1p3jO2oBAIDAUWWEVTmKH4PSSuzBNphhV8J1uLWtKubLRsiArmevOzK2B1FC4TOu_AOPBMwKB2880Rdgd8M3rEXowvicocERi0aJmzOmHaxs-oi_sKDtQSREDIhLtD7F4uB6qNeONNSeQaTQ0G0DBqTpYwUgBKPdTmmGcfFMLjpu9dlQq1RUg2hhkYhfGR7Np5jJSFOG65Vyi9pQavsDfY9bo1zIGd4mfi-RKGE38i3SnvZC9x-rfHK2c8YjI6O4mt0lE0jpHssw46yW4T-XIAKwmqS94RRRmQJs7RVFH7CGI2v97NH_Qlp5m00" />`{=html}
+    collapsed:: true {{renderer :plantuml_glrklrrcg}}
+    -   ``` plantuml
+        @startuml
+        'https://plantuml.com/class-diagram
+
+        left to right direction
+        package "Feature" {
+            entity Feature #pink{
+                id: FeatureId
+                featureKey: String
+                description: FeatureDescription
+                featureConfigs: FeatureConfigs
+            }
+
+            entity FeatureConfig #pink{
+                    id: FeatureConfigId
+                    featureKey: String
+                    data: Object
+                    trackData: Object
+                    condition: FilterCondition
+                    description: FeatureConfigDescription
+                    status: FeatureConfigStatus
+            }
+
+            interface Features #Orange {
+                getFeature(featureKey: String): Feature
+                ...
+            }
+
+            interface FeatureConfigs #Orange {
+                getFeatureConfigs(featureKey: String): List<FeatureConfig>
+            }
+
+
+            Features "1" -- "0..N" Feature
+            Feature "1" -- "1" FeatureConfigs
+            FeatureConfigs "1" -- "0..N" FeatureConfig
+
+        }
+
+        package "Experiment" as ExperimentPackage{
+            entity ExperimentGroup #pink {
+                id: ExperimentGroupId
+                description: ExperimentGroupDescription
+            }
+
+
+            entity Experiment #pink {
+                id: ExperimentId
+                groupId: ExperimentGroupId
+                description: ExperimentDescription
+                condition: FilterCondition
+                percentage: Percentage
+            }
+
+            entity Bucket #pink {
+                    key: String
+                    config: Object
+                    percentage: Percentage
+            }
+
+            entity Assignment #pink {
+                id: AssignmentId
+                experimentId: ExperimentId
+                bucketKey: String
+                clientId: String
+                customerId: String
+                description: AssignmentDescription
+            }
+
+            interface ExperimentGroups #Orange {
+                getExperimentGroup(groupId: ExperimentGroupId): ExperimentGroup
+            }
+
+            interface ExperimentGroupExperiments #Orange {
+              getExperiments(groupId: ExperimentGroupId): List<Experiment>
+            }
+
+            interface Experiments #Orange {
+                getExperiment(experimentId: ExperimentId): Experiment
+            }
+
+
+            interface ExperimentAssignments #Orange {
+                getAssignments(experimentId: ExperimentId): List<Assignment>
+                getAssignments(experimentId: ExperimentId, bucketKey: String): List<Assignment>
+            }
+
+
+            ExperimentGroups "1" -- "0..N" ExperimentGroup
+            ExperimentGroup "1" -- "1" ExperimentGroupExperiments
+            ExperimentGroupExperiments "1" -- "0..N" Experiment
+            Experiments "1" -- "0..N" Experiment
+            Experiment "1" -- "1..N" Bucket
+            ExperimentAssignments "1" -- "1" Experiment
+            ExperimentAssignments "1" -- "0..N" Assignment
+
+        }
+
+
+
+        package "Tracking" {
+            entity TrackingEvent #pink {
+                id: TrackingEventId
+                clientId: String
+                experimentId: ExperimentId
+                bucketKey: String
+                name: TrackingEventName
+                description: TrackingEventDescription
+            }
+
+            interface TrackingEvents #Orange {
+                getTrackingEvents(experimentId: ExperimentId, bucketKey: String): List<TrackingEvent>
+            }
+
+            TrackingEvents "1" -- "0..N" TrackingEvent
+            TrackingEvent "1..N" .. "1" Experiment
+            TrackingEvent "1..N" .. "1" Bucket
+        }
+
+        package "metrics" {
+            entity MetricMeta #pink {
+                id: MetricMetaId
+                name: MetricMeta
+                description: MetricDescription
+            }
+
+            entity Metric #pink {
+                id: MetricId
+                name: MetricName
+                description: MetricDescription
+            }
+
+            interface Metrics #Orange {
+                getMetrics(metricMetaId: MetricMetaId): List<Metric>
+            }
+
+            interface MetricMetas #Orange {
+                getMetricMetas(): List<MetricMeta>
+            }
+
+            interface MetricMetaMetrics #Orange {
+                getMetrics(metricMetaId: MetricMetaId): List<Metric>
+            }
+            MetricMetas "1" -- "0..N" MetricMeta
+            MetricMeta "1" -- "1" MetricMetaMetrics
+            MetricMetaMetrics "1" -- "0..N" Metric
+            Metrics "1" -- "0..N" Metric
+
+        }
+
+        package "Customer" {
+            entity Customer #Green {
+                id: CustomerId
+                clientId: String
+                description: CustomerDescription
+
+                featureConfigs: CustomerFeatureConfigs
+            }
+
+            interface CustomerFeatureConfigs #Orange {
+                        getFeatureConfigs(featureKey: String, customer: Customer): List<FeatureConfig>
+                    }
+
+
+            interface CustomerAssignments #Orange {
+                        getAssignments(featureKey: String, customer: Customer): Assignment
+                    }
+
+            Customer -- CustomerFeatureConfigs
+            Customer -- CustomerAssignments
+            CustomerFeatureConfigs "1" -- "0..N" FeatureConfig
+            CustomerAssignments "1" -- "0..N" Assignment
+            CustomerFeatureConfigs "1" -- "1" CustomerAssignments
+        }
+
+        Experiment "1" -- "0..N" MetricMeta
+        Experiment "1" -- "0..N" Metric
+        "metrics" .. "Tracking"
+        @enduml
+        ```

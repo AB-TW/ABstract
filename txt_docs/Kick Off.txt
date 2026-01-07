@@ -1,0 +1,52 @@
+-   # 项目背景介绍
+
+    -   知识库
+        -   https://github.com/AB-TW/ABstract-docs
+    -   代码库
+        -   https://github.com/AB-TW/ABstract
+    -   业务背景
+        -   \[\[ABstract\]\]
+
+-   # 组织计划
+
+    -   每周二20:00 - 21:00 catch up
+    -   有问题在微信群里即时沟通
+
+-   # 任务分配
+
+    -   https://github.com/orgs/AB-TW/projects/1
+    -   自己认领，设置自己为assignee，并在群里同步
+
+-   # 开发规范
+
+    -   步骤： logseq.order-list-type:: number
+        -   使用AI工具/模版完善业务上下文/生成基本代码
+            logseq.order-list-type:: number
+        -   以AI生成代码为基础完成后续开发（开发过程可以使用copilot等AI辅助工具）
+            logseq.order-list-type:: number
+        -   代码提及需要通过项目中的基本校验 logseq.order-list-type::
+            number
+    -   分支策略 logseq.order-list-type:: number
+        -   分支
+            -   main - 开发主分支（主分支不能直接提交，需要提pull
+                request 有人审核后才能合入）
+            -   开发分支 - 开发自己基于main创建，开发完成通过pull
+                request合入main分支，合入完成后删除开发分支
+
+-   # 迭代计划
+
+    -   迭代一： 完成AB 测试核心的配置管理、实验管理、配置下发
+    -   迭代二：实验组、前端SDK、埋点、事件上报
+
+-   # 注意事项
+
+    -   知识库需要打开自动提交
+        -   ![image.png](../assets/image_1688972957038_0.png "fig:")
+    -   添加post-commit git hook自动push
+        -   ``` shell
+            #!/bin/sh
+
+            git push origin master
+            ```
+    -   知识库提交有冲突时，可以在IDE中手动解冲突，不能简单覆盖
+    -   收到编译失败提醒邮件时需要及时处理

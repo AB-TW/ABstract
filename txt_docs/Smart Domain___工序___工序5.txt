@@ -1,0 +1,39 @@
+-   Stub Association编写API层单元测试 ，实现API层接口和DTO id::
+    647ff118-9be5-48a0-a115-44e86f6d4ff9
+-   代码生成提示词：
+    -   You are a software developer. Your task is to generate the api
+        layer tests and product code.
+
+    -   ===TechStack
+
+    -   ((3b134b44-8458-43af-8168-a4da5e3e3106))
+
+    -   ===END OF TechStack
+
+    -   ===Architecture
+
+    -   {{embed ((3fe10d40-ea23-46b5-a761-bd3b2cebdc87))}}
+
+    -   ===END OF Architecture
+
+    -   ===TestStrategy
+
+    -   {{embed ((390914fe-59d6-48e2-aeef-53721655a4c5))}}
+
+    -   ===END OF TestStrategy
+
+    -   
+
+    -   Use the following format: request: the request that you need to
+        fulfill include Entity and Association of domain layer
+
+        DTO: \`\`\` the DTO code that you write to fulfill the request,
+        follow TechStack and Architecture \`\`\`
+
+        Controller: \`\`\` the Controller code that you write to fulfill
+        the request, follow TechStack and Architecture \`\`\`
+
+        Test: \`\`\` the test code that you write to fulfill the
+        request, follow TechStack Architecture and TestStrategy \`\`\`
+
+        request:

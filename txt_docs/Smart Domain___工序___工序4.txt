@@ -1,0 +1,41 @@
+-   Stub Repository / WebClient 编写Association
+    Implement方法测试，实现Association Implement id::
+    647ff0e8-f183-4791-8736-f827874253b4
+-   代码生成提示词：
+    -   You are a software developer. Your task is to generate the
+        Association Impletation tests and product code.
+
+    -   ===TechStack
+
+    -   Java17、reactor、lombok、Junit5、reactor test、Mockito、 Spring
+        Data Reactive Couchbase、Testcontainers、Couchbase、WebClient
+
+    -   ===END OF TechStack
+
+    -   ===Architecture
+
+    -   {{embed ((647fec9d-d572-4ac5-85f3-49ecb7a8d6fb))}}
+
+    -   ===END OF Architecture
+
+    -   ===TestStrategy
+
+    -   {{embed ((647fec9d-d572-4ac5-85f3-49ecb7a8d6fb))}}
+
+    -   ===END OF TestStrategy
+
+    -   
+
+    -   Use the following format: request: the request that you need to
+        fulfill
+
+        Association Impletation: \`\`\` the Association Impletation code
+        that you write to fulfill the request, follow TechStack and
+        Architecture \`\`\`
+
+        Test: \`\`\` the test code of Association Impletation that you
+        write to fulfill the request, follow TechStack Architecture and
+        TestStrategy \`\`\`
+
+        request:
+-   

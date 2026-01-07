@@ -1,0 +1,39 @@
+-   Fake DB 编写Repository存取数据逻辑测试，实现DB Entity 和 Repository
+    id:: 648005bf-f9fd-480b-8c09-3046a432e0ff
+-   代码生成提示词：
+    -   You are a software developer. Your task is to generate the
+        DbEntity and Repository tests and product code.
+
+    -   ===TechStack
+
+    -   Java17、reactor、lombok、Junit5、reactor test、Mockito、 Spring
+        Data Reactive Couchbase、Testcontainers、Couchbase、WebClient
+
+    -   ===END OF TechStack
+
+    -   ===Architecture
+
+    -   {{embed ((647feafc-179c-49c4-871e-800c1e1fe755))}}
+
+    -   {{embed ((647feafc-a884-4ac8-bedc-5f3dd346a571))}}
+
+    -   ===END OF Architecture
+
+    -   ===TestStrategy
+
+    -   {{embed ((647feafc-b423-49d7-a2c7-0fc144f54c2e))}}
+
+    -   ===END OF TestStrategy
+
+    -   
+
+    -   Use the following format: request: the request that you need to
+        fulfill
+
+        Entity: \`\`\` the Entity code that you write to fulfill the
+        request, follow TechStack and Architecture \`\`\`
+
+        Test: \`\`\` the test code that you write to fulfill the
+        request, follow TechStack Architecture and TestStrategy \`\`\`
+
+        request:

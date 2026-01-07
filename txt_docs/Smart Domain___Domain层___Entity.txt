@@ -1,0 +1,75 @@
+-   ## 架构描述
+
+    -   Entity: This component is use to represents business concepts
+        and encapsulates business rules. id::
+        647edc63-595d-4865-9f3d-7af4aaa867f7 It may include 3 parts:
+        -   id(identity of entity)
+
+        -   description (properties package of entity represent the
+            value of entity),
+
+        -   associations (collection of associated entiy)
+
+        -   ---example code: @Getter @AllArgsConstructor public class
+            Feature { // id private FeatureId id;
+
+                  // description
+                  private FeatureDescription description;
+
+                  // associations
+                  private FeatureConfigs configs;
+
+                  public record FeatureId(String featureKey) {
+
+                  }
+
+                  @Builder
+                  public record FeatureDescription(String name, 
+                                      String description, 
+                                      Boolean isEnable,
+                                      LocalDateTime updatedAt,
+                                      LocalDateTime createdAt))) {
+
+                  }
+
+                  public Feature update(Feature newFeature) {
+                      this.description = FeatureDescription.builder()
+                          .name(newFeature.description.name())
+                          .description(newFeature.description.description())
+                          .isEnable(this.description.isEnable())
+                          .updatedAt(LocalDateTime.now())
+                          .createdAt(this.description.createdAt());
+
+                      return this;
+                  }
+
+                  public interface FeatureConfigs() {
+                      Flux<FeatureConfig> findAll();
+                      Flux<FeatureConfig> subCollection(long from, long to);
+                      Mono<FeatureConfig> findById(FeatureConfigId id);
+                  }
+
+            } ---end of example code
+
+-   ## 测试策略
+
+    -   For the Entity, we can write unit test to ensure that the
+        business rules related to Merchandise are correctly
+        encapsulated. id:: 647edcd2-7df0-46d6-b918-741a0de8af3c
+        -   ---example code class FeatureTest { @Test void
+            should_update_feature_description() { // given Feature
+            feature = Feature.builder() .id(new FeatureId("featureKey"))
+            .description(new FeatureDescription("name", "description",
+            true, LocalDateTime.now(), LocalDateTime.now())) .build();
+            Feature newFeature = Feature.builder() .id(new
+            FeatureId("featureKey")) .description(new
+            FeatureDescription("newName", "newDescription", true,
+            LocalDateTime.now(), LocalDateTime.now())) .build(); // when
+            feature.update(newFeature); // then
+            assertThat(feature.description().name()).isEqualTo("newName");
+            assertThat(feature.description().description()).isEqualTo("newDescription");
+            } } ---end of example code """
+
+-   \[\[Entity 代码生成工具\]\]
+
+-   

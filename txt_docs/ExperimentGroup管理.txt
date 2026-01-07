@@ -1,0 +1,69 @@
+-   Story: collapsed:: true
+    -   作为系统管理员 id:: 64a77967-89ca-4e3a-b4c9-50fcc2ddb5fa
+        我希望系统提供ExperimentGroup新增/修改/分页查看的能力
+        以便我增加/修改的ExperimentGroup
+-   business tool: collapsed:: true
+    -   You are a business analyst who is familiar with specification by
+        example. I'm the domain expert.
+    -   ===CONTEXT
+    -   {{embed ((6486b7a2-8555-49d5-b9ce-3804941d0fdd))}}
+    -   ===END OF CONTXT
+    -   ===USER STORY
+    -   {{embed ((64a77967-89ca-4e3a-b4c9-50fcc2ddb5fa))}}
+    -   ===END OF USER STORY
+    -   Explain the user story as scenarios. use the following format:
+    -   Thought: you should always think about what is still uncertain
+        about the user story. Ignore technical concerns.
+    -   Question: the Question to ask to clarify the user story
+    -   Answer: the answer I responded to the question
+    -   ... (this Thought/Question/Answer repeat at least 3 times, at
+        most 10 times)
+    -   Thought: I know enough to explain the user story
+    -   Scenarios: List all possible scenarios with concrete example in
+        Given/When/Then style
+    -   
+    -   Please use Chinese! Begin!
+-   AC: collapsed:: true
+    -   generatedby: GPT 场景：新增实验组
+        假设现在已经存在两个实验组，分别是实验组A和实验组B。
+        假设我作为系统管理员，我想要新增一个实验组。
+        那么就可以按照以下步骤进行：
+
+        假设： 实验组名称：实验组C 实验组描述：这是一个新的实验组
+
+        当： 我在系统界面点击新增实验组按钮 并填写实验组名称和实验组描述
+
+        那么： 系统会自动生成一个唯一的实验组id
+        系统会校验实验组名称是否与已有的实验组名称冲突
+        如果冲突，系统会提示我重新填写
+        如果没有冲突，系统会成功新增实验组，并在实验组列表中显示实验组C
+
+        场景：分页查看实验组
+        假设现在已经存在五个实验组，分别是实验组A、实验组B、实验组C、实验组D和实验组E。
+        假设我作为系统管理员，我想要分页查看实验组。
+        那么就可以按照以下步骤进行：
+
+        假设： 每页显示的实验组数量：2 当前页数：1
+
+        当： 我在系统界面点击分页查看实验组按钮 并选择当前页数为1
+
+        那么：
+        系统会根据每页显示的实验组数量，将实验组列表分页显示，每页显示两个实验组
+        系统会在当前页中显示实验组A和实验组B
+
+        额外场景：修改实验组 假设现在已经存在一个实验组，名为实验组A。
+        假设我作为系统管理员，我想要修改这个实验组的描述。
+        那么就可以按照以下步骤进行：
+
+        假设： 实验组名称：实验组A
+        修改后的实验组描述：这是经过修改后的描述
+
+        当： 我在系统界面找到实验组A，并点击修改按钮
+        然后在相应的输入框中填写修改后的实验组描述
+
+        那么： 系统会校验实验组名称是否存在
+        如果实验组名称不存在，系统会提示实验组A不存在
+        如果实验组名称存在，系统会修改实验组A的描述为新的描述
+
+        这些场景覆盖了用户故事所描述的功能需求，其中包括新增实验组、分页查看实验组和修改实验组。
+-   

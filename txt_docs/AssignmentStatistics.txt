@@ -1,0 +1,2 @@
+-   **AssignmentStatistics**:
+    表示对实验分组结果的统计，包含的属性有实验id（experimentId）、桶的键（bucketKey）、总的分组人数（bucketAmount）和按照天数统计的分组人数（bucketAmountByDay）。

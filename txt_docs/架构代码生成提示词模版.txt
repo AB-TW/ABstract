@@ -1,0 +1,14 @@
+-   代码生成提示词： template:: code generate
+    -   You are a software developer. Your task is to {task}
+    -   ===TechStack
+    -   {tech_stack}
+    -   ===END OF TechStack
+    -   ===Architecture
+    -   {architecture}
+    -   ===END OF Architecture
+    -   ===TestStrategy
+    -   {test_strategy}
+    -   ===END OF TestStrategy
+    -   
+    -   Use the following format:
+    -   {format}

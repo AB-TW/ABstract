@@ -1,0 +1,152 @@
+-   {{embed \[\[Feature Config 管理\]\]}}
+
+-   Code
+
+    -   {{embed ((647ff92f-97b0-4371-a25d-b0618ed9ebea))}}
+        -   -   {{embed ((64ad4c22-23a9-4a1f-b137-41a80260c636))}}
+
+-   generatedBy:: GPT Entity:
+
+        @Getter
+        @AllArgsConstructor
+        public class FeatureConfig {
+            // id
+            private FeatureConfigId id;
+
+            // Feature key associated with this config
+            private FeatureId featureId;
+
+            // Feature config title and description
+            private String title;
+            private String description;
+
+            // Feature config data and sa data
+            private JsonObject data;
+            private JsonObject saData;
+
+            // Circle conditions associated with this config
+            private CircleConditions circleConditions;
+
+            // Status of feature config (DRAFT, PUBLISHED, DISABLED, DELETED)
+            private FeatureConfigStatus status;
+
+            public void update(FeatureConfig newFeatureConfig) {
+                this.title = newFeatureConfig.title;
+                this.description = newFeatureConfig.description;
+                this.data = newFeatureConfig.data;
+                this.saData = newFeatureConfig.saData;
+                this.circleConditions = newFeatureConfig.circleConditions;
+            }
+        }
+
+    Association:
+
+        public interface FeatureConfigs {
+            Flux<FeatureConfig> findAll();
+            Flux<FeatureConfig> subCollection(long from, long to);
+            Mono<FeatureConfig> findById(FeatureConfigId id);
+            Mono<FeatureConfig> save(FeatureConfig featureConfig);
+            Mono<Void> update(FeatureConfigId id, FeatureConfig featureConfig);
+            Mono<Void> delete(FeatureConfigId id);
+            Mono<Void> publish(FeatureConfigId id);
+            Mono<Void> disable(FeatureConfigId id);
+        }
+
+    Test:
+
+        @ExtendWith(MockitoExtension.class)
+        class FeatureConfigsTest {
+            @Mock
+            FeatureConfigsRepository repo;
+
+            @InjectMocks
+            FeatureConfigs featureConfigs;
+
+            @Test
+            void save() {
+                // given
+                FeatureId featureId = new FeatureId("featureKey");
+                FeatureConfig featureConfig = FeatureConfig.builder()
+                        .id(new FeatureConfigId())
+                        .featureId(featureId)
+                        .title("feature config title")
+                        .description("feature config description")
+                        .data(new JsonObject())
+                        .saData(new JsonObject())
+                        .circleConditions(new CircleConditions())
+                        .status(FeatureConfigStatus.DRAFT)
+                        .build();
+
+                when(repo.save(any(FeatureConfig.class))).thenReturn(Mono.just(featureConfig));
+
+                // when
+                Mono<FeatureConfig> result = featureConfigs.save(featureConfig);
+
+                // then
+                StepVerifier.create(result)
+                        .expectNext(featureConfig)
+                        .verifyComplete();
+
+                verify(repo).save(any(FeatureConfig.class));
+            }
+
+            @Test
+            void update() {
+                // given
+                FeatureId featureId = new FeatureId("featureKey");
+                FeatureConfigId featureConfigId = new FeatureConfigId();
+                FeatureConfig oldFeatureConfig = FeatureConfig.builder()
+                        .id(featureConfigId)
+                        .featureId(featureId)
+                        .title("old title")
+                        .description("old description")
+                        .data(new JsonObject())
+                        .saData(new JsonObject())
+                        .circleConditions(new CircleConditions())
+                        .status(FeatureConfigStatus.DRAFT)
+                        .build();
+
+                FeatureConfig newFeatureConfig = FeatureConfig.builder()
+                        .id(featureConfigId)
+                        .featureId(featureId)
+                        .title("new title")
+                        .description("new description")
+                        .data(new JsonObject())
+                        .saData(new JsonObject())
+                        .circleConditions(new CircleConditions())
+                        .status(FeatureConfigStatus.DRAFT)
+                        .build();
+
+                when(repo.findById(any(FeatureConfigId.class))).thenReturn(Mono.just(oldFeatureConfig));
+                when(repo.update(any(FeatureConfig.class))).thenReturn(Mono.empty());
+
+                // when
+                Mono<Void> result = featureConfigs.update(featureConfigId, newFeatureConfig);
+
+                // then
+                StepVerifier.create(result)
+                        .verifyComplete();
+
+                verify(repo).findById(any(FeatureConfigId.class));
+                verify(repo).update(any(FeatureConfig.class));
+            }
+
+            @Test
+            void delete() {
+                // given
+                FeatureConfigId featureConfigId = new FeatureConfigId();
+
+                when(repo.delete(any(FeatureConfigId.class))).thenReturn(Mono.empty());
+
+                // when
+                Mono<Void> result = featureConfigs.delete(featureConfigId);
+
+                // then
+                StepVerifier.create(result)
+                        .verifyComplete();
+
+                verify(repo).delete(any(FeatureConfigId.class));
+            }
+        }
+
+-   

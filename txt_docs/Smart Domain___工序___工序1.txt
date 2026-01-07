@@ -1,0 +1,43 @@
+-   编写Domain层Entity单元测试，实现Entity和Association id::
+    647ff90f-b8c4-4a88-94de-7bcf9058277a
+    -   代码生成提示词： id:: 647ff92f-97b0-4371-a25d-b0618ed9ebea
+        -   You are a software developer. Your task is to generate
+            domain layer tests and product code.
+
+        -   ===TechStack
+
+        -   ((d1640ec4-1e80-4266-93e5-e2d4fa0ceebf))
+
+        -   ===END OF TechStack
+
+        -   ===Architecture
+
+        -   {{embed ((73697053-09ac-457a-a5f4-764d5775a078))}}
+
+        -   ===END OF Architecture
+
+        -   ===TestStrategy
+
+        -   {{embed ((647edcd2-7df0-46d6-b918-741a0de8af3c))}}
+
+        -   {{embed ((647edebc-ae3e-4e48-b483-f36ac3e25271))}}
+
+        -   ===END OF TestStrategy
+
+        -   
+
+        -   Use the following format: request: the request that you need
+            to fulfill
+
+            Entity: \`\`\` the Entity code that you write to fulfill the
+            request, follow TechStack and Architecture \`\`\`
+
+            Association: \`\`\` the Association code that you write to
+            fulfill the request, follow TechStack and Architecture
+            \`\`\`
+
+            Test: \`\`\` the test code that you write to fulfill the
+            request, follow TechStack Architecture and TestStrategy
+            \`\`\`
+
+            request:

@@ -1,0 +1,54 @@
+-   技术栈
+    -   Java17、reactor、lombok、Junit5、reactor test、Mockito、 Spring
+        WebFlux、Spring Boot Test id::
+        3b134b44-8458-43af-8168-a4da5e3e3106
+-   架构描述
+    -   the api layer inclue 2 componets: id::
+        3fe10d40-ea23-46b5-a761-bd3b2cebdc87 DTO: This component is use
+        to define data structure that api request and response.
+        Controller: This component is use to define the interface to
+        access api. ---eaxmple code: @RestController
+        @RequiredArgsConstructor @RequestMapping("/features") public
+        class FeatureController { private final Features features;
+
+                    @GetMapping()
+                    public Flux<Feature> findAll() {{
+                        return features.getAll();
+                    }}
+
+                    @PostMapping()
+                    public Mono<Feature> add(@RequestBody Feature feature) {{
+                        return features.add(feature);
+                    }}
+                }}
+            ---end of eaxmple code
+-   测试策略
+    -   For the Controller and DTO, we can write component test to test
+        the actual implementation of api operations, test class rely on
+        Association interface use WebFluxTest and WebTestClient ability.
+        id:: 390914fe-59d6-48e2-aeef-53721655a4c5 ---eaxmple code:
+        @ExtendWith(SpringExtension.class) @WebFluxTest(value =
+        FeatureApi.class, properties =
+        "spring.main.lazy-initialization=true")
+        @ContextConfiguration(classes =
+        cn.dpc.ab.persistent.TestConfiguration.class) class
+        FeatureControllerTest extends ControllerTestBase {{ @Autowired
+        WebTestClient webClient;
+
+                    @MockBean
+                    Features features;
+
+                    @Test
+                    void should_getAll_success_when_no_records() {{
+                        when(features.getAll(Mockito.any())).thenReturn(Flux.empty());
+
+                        webClient.get()
+                                .uri("/features")
+                                .exchange()
+                                .expectStatus()
+                                .isOk()
+                                .expectBodyList(FeatureResponse.class)
+                                .hasSize(0);
+                    }
+                }   
+            ---end of eaxmple code

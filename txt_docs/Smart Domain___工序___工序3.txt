@@ -1,0 +1,2 @@
+-   Stub三方服务编写WebClient调用三方服务接口测试，实现 WebClient id::
+    6480073d-700e-4982-9bff-57fa8cfea62e

@@ -1,0 +1,113 @@
+-   business tool:
+    -   You are a business analyst who is familiar with specification by
+        example. I'm the domain expert.
+
+    -   ===CONTEXT
+
+    -   Assignment表示一个实验分配（分组结果），用于跟踪实体在实验中的分配情况。
+
+        Assignment管理可以分为管理页面接口和c端接口，用户可以通过c端接口进行数据查询操作，管理员可以通过通过管理页面接口进行Assignment修改、删除操作；
+
+        Assignment包含的属性有所属的实验id（experimentId），实验的版本（experimentVersion），桶的键（bucketKey），客户端ID（clientId），客户ID（customerId）。Assignment的唯一标识id由实验id（experimentId）和客户端ID（clientId）组成，即assignmentId=experimentId+clientId。
+
+        当用户通过c端接口查询featureKey对应的实验分配结果Assignment，用户查询featureKey查询对应的实验，然后通过实验id（experimentId）和客户端ID（clientId）查询实验分配结果Assignment。如果实验并未发布未运行或者已发布未运行，能够查询到对应的Assignment，返回对应的Assignment，查询不到分组结果Assignment，返回默认Assignment；如果实验已发布已运行，通过查询实验的filterCondition来判断对应的Assignment是否满足分组圈人的条件，如果不满足，返回默认Assignment。实验的filterCondition是指实验用来过滤用户的条件，筛选符合条件的用户。所谓默认Assignment，就是没有bucketKey的分组（或者bucketKey为空）。
+
+    -   
+
+    -   当管理端进行实验分配结果Assignment的查询，查到的结果直接返回，没有查到的返回空，不新建也不返回默认Assignment。
+
+    -   在测试阶段，可能会手动修改用户的分组，来测试不同分组的实验效果，所以需要在管理端提供分组结果的修改。当通过管理界面进行修改操作时，可以通过实验id（experimentId）和客户端ID（clientId）查找对应的Assignment去修改Assignment的桶的键（bucketKey）。当修改分组比例（bucket的配置）之后，已经分组的用户可能会变成默认分组（bucketKey为空）用户，默认分组的用户需要重新分组。
+        每个实验具有对应的版本号，Assignment在实验创建后具有与实验相同的版本号。如果在查询用户实验对应的Assignment时，查询的实验版本号和对应的Assignment的版本号不一致，就重新分组。c端来进行重新分组，给需要重新分组的Assignment存入对应的bucketKey。
+
+        当通过管理界面进行删除操作时，可以通过实验id（experimentId）和客户端ID（clientId）直接删除对应的整个Assignment，Assignment对应的实验并不受到影响。
+
+    -   
+
+    -   管理界面进行删除和修改操作时，可以根据对应的实验id（experimentId）和客户端ID（clientId）删除所有的Assignment。
+
+    -   ===END OF CONTXT
+
+    -   ===USER STORY
+
+    -   作为系统管理员 我希望系统提供Assignment查看/修改/删除的能力
+        以便我修改Assignment中对应的实验分组结果信息 作为用户
+        我希望系统提供Assignment查看的能力
+        以便我查看Assignment中对应的实验分组结果信息
+
+    -   ===END OF USER STORY
+
+    -   Explain the user story as scenarios. use the following format:
+
+    -   Thought: you should always think about what is still uncertain
+        about the user story. Ignore technical concerns.
+
+    -   Question: the Question to ask to clarify the user story
+
+    -   Answer: the answer I responded to the question
+
+    -   ... (this Thought/Question/Answer repeat at least 3 times, at
+        most 10 times)
+
+    -   Thought: I know enough to explain the user story
+
+    -   Scenarios: List all possible scenarios with concrete example in
+        Given/When/Then style
+
+    -   
+
+    -   Please use Chinese! Begin!
+
+-   AC:
+
+-   -   用户故事：
+
+    -   作为系统管理员，我希望系统提供Assignment查看/修改/删除的能力，以便我修改Assignment中对应的实验分组结果信息。作为用户，我希望系统提供Assignment查看的能力，以便我查看Assignment中对应的实验分组结果信息。
+
+    -   想法：需要确定Assignment的查看、修改和删除操作对应的具体流程和权限管理方式。
+
+    -   问题：管理员能否修改其他用户的分组信息？如果实验未发布或已结束，管理员能否查看所有Assignment记录？
+
+    -   答案：管理员不能修改其他用户的分组信息，必须通过实验id和客户端ID确认对应的Assignment。管理员只能查看已发布并正在运行的实验的Assignment记录。
+
+    -   场景：
+
+        -   场景1：
+            -   假设管理员要修改实验id为123456、客户端ID为789的用户的Assignment记录，将其桶的键（bucketKey）由"A"修改为"B"。
+            -   假设对应的Assignment记录为：{"assignmentId":
+                "123456789", "experimentId": "123456",
+                "experimentVersion": "1", "bucketKey": "A", "clientId":
+                "789", "customerId": "1"}。
+            -   假设管理员已登录管理界面，进入Assignment管理页面，并成功定位到对应的Assignment记录。
+            -   当管理员点击修改按钮时，系统会弹出Assignment修改窗口，显示当前记录的详细信息，包括实验id、客户端ID、bucketKey等。
+            -   管理员将bucketKey值修改为"B"，并点击保存按钮，系统会更新相应的Assignment记录，因此该用户的分组信息从"A"变为"B"。
+        -   场景2：
+            -   假设用户想查询实验id为123456、客户端ID为789的Assignment记录。
+            -   假设对应的Assignment记录为：{"assignmentId":
+                "123456789", "experimentId": "123456",
+                "experimentVersion": "1", "bucketKey": "A", "clientId":
+                "789", "customerId": "1"}。
+            -   假设用户已登录系统，进入Assignment查询页面，并输入实验id和客户端ID进行查询。
+            -   系统会根据输入的实验id和客户端ID查找对应的Assignment记录，当找到对应记录时，系统会显示该记录的详细信息，包括实验id、客户端ID、bucketKey等。
+            -   当系统没有查找到对应的记录时，系统会提示用户没有找到对应的Assignment记录。
+        -   场景3：
+            -   假设管理员要删除实验id为123456、客户端ID为789的用户的所有Assignment记录。
+            -   假设存在三条对应的Assignment记录：{"assignmentId":
+                "123456789", "experimentId": "123456",
+                "experimentVersion": "1", "bucketKey": "A", "clientId":
+                "789", "customerId": "1"}、{"assignmentId": "123456789",
+                "experimentId": "123456", "experimentVersion": "2",
+                "bucketKey": "A", "clientId": "789", "customerId":
+                "1"}、{"assignmentId": "123456789", "experimentId":
+                "123456", "experimentVersion": "1", "bucketKey": null,
+                "clientId": "789", "customerId": "1"}。
+            -   假设管理员已登录管理界面，进入Assignment管理页面，并成功定位到对应的Assignment记录。
+            -   当管理员点击删除按钮时，系统会提示管理员确认是否删除对应的Assignment记录。
+            -   当管理员确认删除后，系统会直接删除所有实验id为123456、客户端ID为789的Assignment记录。
+
+-   代码：
+
+-   {{embed ((647ff92f-97b0-4371-a25d-b0618ed9ebea))}}
+
+-   
+
+-   

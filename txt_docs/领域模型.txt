@@ -1,0 +1,178 @@
+-   {{embed \[\[领域模型图\]\]}}
+
+-   # Feature Module
+
+    description:: 实验对象（特性）及其配置管理模块
+    -   ## \[\[Feature\]\]
+
+        -   "Feature"指的是可以添加到系统中的新功能或能力。 id::
+            646dd29e-e7a1-40a7-8055-42718add3431
+
+            Feature包含featureKey（feature的唯一标识）、名称、描述、是否生效、配置模版信息。
+
+            禁用的Feature也可在列表中展示，以便后续后续重新生效。
+
+            配置模版用来指导后续Feature
+            Config表单生成，模版中包含C端控制功能或能力特性的字段的元数据（包括
+            key，名称，描述，字段类型，默认值，校验规则等）。
+
+            Feature管理模块应支持分页查看功能，按页展示所有Feature，具体的分页方式可以通过提供页码或每页显示的数量来实现。
+
+        -   Feature 中可以包含多个 Feature Config，可以用关联对象
+            FeatureConfigs表示Feature对应的Feature Config 集合
+
+    -   ## \[\[Feature Config\]\]
+
+        -   Feature
+            Config指的是一些特性的配置信息，例如应用程序的功能模块和设置。
+            id:: 64ad4c22-23a9-4a1f-b137-41a80260c636
+
+            管理员可以通过界面进行新增、修改、分页查看、发布、撤销和删除操作；
+
+            新增Feature Config应该提供 FeatureKey（通过FeatureKey
+            与Feature关联），title 和 description，
+            data（配置的数据，数据格式依据Feature配置模版生成，由用户填写），saData（键值对埋点数据，由用户自定义输入），圈人条件（包括开始时间、截止时间、圈人白名单、地理位置、灰度比例等）
+
+            新增后FeatureConfig记录状态默认为DRFAT。
+            管理课对DRAFT状态的数据执行发布操作，发布后记录变为PUBLISHED状态，
+            仅PUBLISHED状态的数据且符合圈人条件的配置C端可见。PUBLISHED状态的数据可执行撤销操作，撤销后记录变为DISABLED状态。
+
+            对DRAFT状态的记录执行删除操作后，记录会从数据库中物理删除，费DRAFT状态的记录，执行删除操作，进行逻辑删除状态标记为DELETED，DELETED状态的数据在管理界面上不可见。
+
+    -   ## \[\[Features\]\]
+
+        -   **Features**表示特性的集合，定义了与特性相关的操作，如根据特性键获取特性。
+
+    -   ## \[\[FeatureConfigs\]\]
+
+        -   **FeatureConfigs**表示某个特性所属配置的集合，定义了与特性配置相关的操作，如根据特性键获取特性配置列表。
+
+-   # Experiment Module
+
+    description:: 实验管理模块
+    -   ## \[\[ExperimentGroup\]\]
+
+        -   **ExperimentGroup**表示实验组，具有唯一的标识符（id）和名称、描述（description）。实验组用于组织和管理相关的实验。
+            id:: 6486b7a2-8555-49d5-b9ce-3804941d0fdd
+
+            id系统自动生成
+
+            名称需要保证全局唯一
+
+            同一组中的实验之间流量互斥。
+
+    -   ## \[\[ExperimentGroups\]\]
+
+        -   **ExperimentGroups**实验组集合，定义了与实验组相关的操作，如根据组ID获取实验组。
+
+    -   ## \[\[Experiment\]\]
+
+        -   **Experiment**表示一个实验，具有唯一的标识符（id），所属的实验组（groupId），名称（name），描述（description），过滤条件（condition），以及采样比例（percentage），创建时间、更新时间，关联的featureKey，开始时间，截止时间，实验静态状态（包括
+            DRAFT、PUBLISHED、PAUSED、STOPPED），
+            动态状态（是根据静态状态和开始时间、截止时间计算得来，包括
+            DRAFT、NOT_BEGIN、RUNNING、PAUSED、STOPPED），多个实验分组（Bucket）。实验用于定义和管理具体的实验设置；
+            id:: 6486b7a2-9c7b-4760-80b5-d4decb0cd3b7
+
+            新增后的实验静态状态默认为草稿（DRAFT），执行发布后静态状态变为PUBLISHED，执行暂停操作后静态状态变为PAUSED，
+            执行停止操作后静态状态变为STOPPED。 静态状态为 DRAFT时
+            动态状态也为DRAFT；
+
+            静态状态为PUBLISHED时，如果当前时间早于开始时间则动态状态为NOT_BEGIN，如果当前时间晚于截止时间则动态状态为STOPPED，如果当前时间在开始时间和截止时间中间则动态状态为RUNNING；
+
+            静态状态为 PAUSED时 动态状态也为PAUSED； 静态状态为
+            STOPPED时 动态状态也为STOPPED；
+
+            新增Experiment时用户需要输入实验组（通过下拉框选择）、名称、描述、采样比例、过滤条件、开始时间、截止时间、实验分组（分组标识、分组名称、分组比例、分组配置）、关联feature，新增完后系统自动生成Experiment的唯一标识（ID）、创建时间、更新时间、静态状态、动态状态。
+
+            只有DRAFT状态下才能对Experiment执行修改操作，修改时可以修改名称、描述、采样比例、过滤条件、开始时间、截止时间、实验分组（分组标识、分组名称、分组比例、分组配置）、关联feature，修改完成后系统自动更新更新时间。
+
+            动态状态为
+            NOT_BEGIN、RUNNING可以执行暂停操作，暂停操作完成后静态状态和动态状态都变为PAUSED，系统更新更新时间。
+
+            动态状态为
+            NOT_BEGIN、RUNNING、PAUSED可以执行终止操作，终止操作完成后静态状态和动态状态都变为STOPPED，系统更新更新时间。
+
+    -   ## \[\[Bucket\]\]
+
+        -   **Bucket**:
+            表示一个桶，具有键（key），配置（config），以及百分比（percentage）。桶用于将参与实验的实体划分为不同的组。
+
+    -   ## \[\[Assignment\]\]
+
+        -   **Assignment**:
+            表示一个实验分配（分组结果），具有唯一的标识符（id），所属的实验（experimentId），桶的键（bucketKey），客户端ID（clientId），客户ID（customerId），以及描述（description）。实验分配用于跟踪实体在实验中的分配情况。
+
+    -   ## \[\[ExperimentGroupExperiments\]\]
+
+        -   **ExperimentGroupExperiments**:
+            定义了与实验组中的实验相关的操作，如根据组ID获取实验列表。
+
+    -   ## \[\[Experiments\]\]
+
+        -   **Experiments**:
+            定义了与实验相关的操作，如根据实验ID获取实验。
+
+    -   ## \[\[ExperimentAssignments\]\]
+
+        -   **ExperimentAssignments**:
+            定义了与实验分配相关的操作，如根据实验ID获取实验分配列表，以及根据实验ID和桶的键获取实验分配列表。
+        -   {{embed \[\[AssignmentStatistics\]\]}}
+            -   
+
+-   # Customer Module
+
+    description:: 客户端相关模块，提供对客户端的相关信息查询功能
+    -   ## \[\[Customer\]\]
+
+        -   Customer表示客户端用户，包含客户端Id（clientId），用户id（customerId），用户属性等信息。
+
+    -   ## \[\[CustomerAssignments\]\]
+
+        -   CustomerAssignments表示Customer实验分组结果集合，定义查询用户实验分组结果相关操作，比如查询某一实验下的分组结果。
+
+    -   ## \[\[CustomerFeatureConfigs\]\]
+
+        -   CustomerFeatureConfigs表示某用户可见Feature
+            Config集合，定义查询用户可见Feature
+            Config相关操作，比如查询该用户某一Feature下可见配置列表。
+
+-   # Tracking Module
+
+    description:: 埋点事件收集模块
+    -   ## \[\[TrackingEvent\]\]
+
+        -   **TrackingEvent**:
+            表示跟踪事件，具有唯一的标识符（id），客户端ID（clientId），实验ID（experimentId），桶的键（bucketKey），事件名称（name），以及描述（description）。跟踪事件用于记录实验中发生的事件。
+
+    -   ## \[\[TrackingEvents\]\]
+
+        -   **TrackingEvents**:
+            定义了与跟踪事件相关的操作，如根据实验ID和桶的键获取跟踪事件列表。
+
+-   # Metirc Moudle
+
+    description:: 指标数据模块
+    -   ## \[\[MetricMeta\]\]
+
+        -   **MetricMeta**:
+            表示度量元数据，具有唯一的标识符（id），名称（name），以及描述（description）。
+
+    -   ## \[\[Metric\]\]
+
+        -   **Metric**:
+            表示度量，具有唯一的标识符（id），名称（name），以及描述（description）。度量用于记录实验结果和指标。
+
+    -   ## \[\[Metrics\]\]
+
+        -   **Metrics**:
+            定义了与度量相关的操作，如根据度量元数据ID获取度量列表。
+
+    -   ## \[\[MetricMetas\]\]
+
+        -   **MetricMetas**:
+            定义了与度量元数据相关的操作，如获取度量元数据列表。
+
+    -   ## \[\[MetricMetaMetrics\]\]
+
+        -   **MetricMetaMetrics**:
+            定义了与度量元数据和度量相关的操作，如根据度量元数据ID获取度量列表。
