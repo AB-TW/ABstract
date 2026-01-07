@@ -6,6 +6,7 @@ import cn.dpc.ab.persistent.cache.LocalCacheManager;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDb;
 import cn.dpc.ab.persistent.feature.db.FeatureConfigDbRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import reactor.core.publisher.Flux;
@@ -17,6 +18,7 @@ import static cn.dpc.ab.persistent.cache.LocalCacheManager.FEATURE_CONFIG_KEY_PR
 /**
  * FeatureConfigsImpl implements FeatureConfigs.
  */
+@Slf4j
 @RequiredArgsConstructor
 public class FeatureConfigsImpl implements Feature.Configs {
     private final FeatureConfigDbRepository repository;
@@ -121,7 +123,10 @@ public class FeatureConfigsImpl implements Feature.Configs {
     }
 
     private void clearCache() {
-        localCacheManager.clearCache(FEATURE_CONFIG_KEY_PREFIX + featureId.featureKey()).subscribe();
+        localCacheManager.clearCache(FEATURE_CONFIG_KEY_PREFIX + featureId.featureKey())
+                .doOnError(e -> log.warn("Failed to clear cache for feature: {}, error: {}", featureId.featureKey(), e.getMessage()))
+                .onErrorComplete()
+                .subscribe();
     }
 }
 

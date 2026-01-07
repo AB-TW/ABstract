@@ -8,6 +8,7 @@ import cn.dpc.ab.persistent.experiment.db.AssignmentStatisticsRepository;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
 import cn.dpc.ab.persistent.experiment.db.ExperimentDbRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import static cn.dpc.ab.domain.experiment.Experiment.Status.DynamicStatus.DRAFT;
 /**
  * Implement experiments.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ExperimentsImpl implements Experiments {
@@ -154,6 +156,8 @@ public class ExperimentsImpl implements Experiments {
     private void clearCache(String featureKey) {
         localCacheManager.clearCache(LocalCacheManager.EXPERIMENT_KEY_PREFIX
                         + featureKey)
+                .doOnError(e -> log.warn("Failed to clear cache for experiment feature: {}, error: {}", featureKey, e.getMessage()))
+                .onErrorComplete()
                 .subscribe();
     }
 }
