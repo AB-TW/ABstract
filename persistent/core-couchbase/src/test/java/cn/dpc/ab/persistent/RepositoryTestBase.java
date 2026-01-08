@@ -1,6 +1,5 @@
 package cn.dpc.ab.persistent;
 
-import org.junit.ClassRule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +19,6 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 @Testcontainers
 @ActiveProfiles("test")
 public class RepositoryTestBase {
-    @ClassRule
     @Container
     public static final CouchbaseContainer couchbaseContainer = CouchbaseTestContainer.getInstance();
 
