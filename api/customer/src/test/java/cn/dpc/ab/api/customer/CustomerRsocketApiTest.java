@@ -8,7 +8,7 @@ import cn.dpc.ab.domain.feature.Feature;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 class CustomerRsocketApiTest extends RsocketBaseTest {
-    @MockBean
+    @MockitoBean
     Customers customers;
 
     @Mock

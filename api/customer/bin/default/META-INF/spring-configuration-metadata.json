@@ -1,0 +1,30 @@
+{
+  "groups": [
+    {
+      "name": "rsocket",
+      "type": "cn.dpc.ab.api.customer.config.RsocketConfigProperties",
+      "sourceType": "cn.dpc.ab.api.customer.config.RsocketConfigProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "rsocket.custom-web-socket-enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否开启自定义WebSocket 协议端口.",
+      "sourceType": "cn.dpc.ab.api.customer.config.RsocketConfigProperties"
+    },
+    {
+      "name": "rsocket.custom-web-socket-port",
+      "type": "java.lang.Integer",
+      "description": "自定义WebSocket 协议端口.",
+      "sourceType": "cn.dpc.ab.api.customer.config.RsocketConfigProperties"
+    },
+    {
+      "name": "rsocket.feature-key-push-enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否开启FeatureConfig变更推送.",
+      "sourceType": "cn.dpc.ab.api.customer.config.RsocketConfigProperties"
+    }
+  ],
+  "hints": []
+}
