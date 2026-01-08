@@ -1,0 +1,48 @@
+server:
+  port: 8080
+
+spring:
+  couchbase:
+    env:
+      timeouts:
+        connect: 15s
+      io:
+        max-endpoints: 8
+    username: bucket1
+    password: bucket1pass
+    connectionString: couchbase://couchbase
+  data:
+    couchbase:
+      repositories:
+        type: auto
+      auto-index: true
+      bucket-name: bucket1
+
+  rsocket:
+    server:
+      port: 7001
+  ai:
+    openai:
+      apiKey: ${OPENAI_API_KEY}
+      baseUrl: ${OPENAI_API_BASE}
+      chat:
+        options:
+          model: gpt-3.5-turbo
+      embedding:
+        options:
+          model: text-embedding-ada-002
+
+logging:
+  level:
+    root: INFO
+
+cache:
+  local:
+    expire-after-write: 10s
+
+rsocket:
+  feature-key-push-enabled: true
+  custom-web-socket-enabled: true
+
+ai:
+  enabled: true

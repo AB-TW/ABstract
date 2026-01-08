@@ -1,0 +1,100 @@
+server:
+  port: 8080
+
+spring:
+  couchbase:
+    env:
+      timeouts:
+        connect: 15s
+      io:
+        max-endpoints: 8
+  ai:
+    openai:
+      apiKey: ${OPENAI_API_KEY}
+      baseUrl: ${OPENAI_API_BASE}
+      chat:
+        options:
+          model: gpt-4o-mini
+      embedding:
+        options:
+          model: text-embedding-ada-002
+    ollama:
+      embedding:
+        model: milkey/m3e
+
+---
+spring:
+  config:
+    activate:
+      on-profile: default
+  couchbase:
+    username: bucket1
+    password: bucket1pass
+    connectionString: couchbase://${COUCHBASE_HOST:127.0.0.1}
+  data:
+    couchbase:
+      repositories:
+        type: auto
+      auto-index: true
+      bucket-name: bucket1
+
+  rsocket:
+    server:
+      port: 7001
+
+logging:
+  level:
+    root: INFO
+
+cache:
+  local:
+    expire-after-write: 10s
+
+rsocket:
+  feature-key-push-enabled: true
+  custom-web-socket-enabled: true
+
+ai:
+  enabled: true
+  intent-similarity-threshold: 0.7
+  qa-similarity-threshold: 0.7
+
+---
+spring:
+  config:
+    activate:
+      on-profile: zhipu
+
+  ai:
+    zhipuai:
+      chat:
+        options:
+          model: GLM-4
+      api-key: ${ZHIPU_AI_APIKEY}
+      embedding:
+        options:
+          model: embedding-2
+
+ai:
+  enabled: true
+  intent-similarity-threshold: 0.6
+  qa-similarity-threshold: 0.6
+---
+spring:
+  config:
+    activate:
+      on-profile: ollama
+
+  ai:
+    ollama:
+      chat:
+        options:
+          model: llama3.1:latest
+      embedding:
+        options:
+          model: mxbai-embed-large:latest
+
+ai:
+  enabled: true
+  intent-similarity-threshold: 0.55
+  qa-similarity-threshold: 0.6
