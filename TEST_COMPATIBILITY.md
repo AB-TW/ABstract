@@ -1,13 +1,22 @@
 # Test Compatibility Issues - Spring Boot 4.0.1 Upgrade
 
-## Status: ⚠️ Tests Temporarily Disabled
+## Status: ⚠️ API Unit Tests Temporarily Disabled / ✅ Repository Tests Working
 
 **Date:** 2026-01-08
 **Upgrade:** Spring Boot 3.3.13 → 4.0.1, JDK 17 → 21
 
+## Test Status Summary
+
+| Test Type | Status | Notes |
+|-----------|--------|-------|
+| **Repository Tests (@DataR2dbcTest)** | ✅ **Working** | R2DBC database integration tests work fine |
+| **API Unit Tests (@WebFluxTest + @MockitoBean)** | ❌ **Blocked** | Mockito 5.20 doesn't support JUnit 6 |
+| **Application Build** | ✅ **Working** | `./gradlew build -x test` works |
+| **Application Run** | ✅ **Working** | `./gradlew bootrun` works |
+
 ## Root Cause
 
-Spring Boot 4.0.1 requires **JUnit 6** and **Spring Framework 7**, but the current version of **Mockito 5.20** (included in Spring Boot 4.0.1) is **not compatible** with JUnit 6.
+Spring Boot 4.0.1 requires **JUnit 6** and **Spring Framework 7**, but **Mockito 5.20** (included in Spring Boot 4.0.1) is **not compatible** with JUnit 6.
 
 ### Technical Details
 
@@ -25,6 +34,55 @@ Spring Boot 4.0.1 requires **JUnit 6** and **Spring Framework 7**, but the curre
    - Spring Boot 4.0.1 BOM → JUnit 6.0.1
    - Mockito 5.20 → JUnit 5.13.4
    - Using either version causes test failures
+
+4. **Cannot Force JUnit 5:**
+   - Attempted to use JUnit 5.11.4 explicitly
+   - **Result**: Spring Framework 7.x still calls JUnit 6 methods → NoSuchMethodError
+   - **Conclusion**: Cannot use JUnit 5 with Spring Boot 4.x
+
+### Error Messages
+
+**With JUnit 5.x (attempted workaround):**
+```
+java.lang.NoSuchMethodError: 'java.lang.Object org.junit.jupiter.api.extension.ExtensionContext$Store.computeIfAbsent(java.lang.Object, java.util.function.Function, java.lang.Class)'
+```
+
+**With JUnit 6.x and Mockito 5.20:**
+```
+org.junit.platform.commons.JUnitException: OutputDirectoryCreator not available; probably due to unaligned versions of the junit-platform-engine and junit-platform-launcher jars
+```
+
+## Working Test Commands
+
+### ✅ Repository Tests (Working)
+
+```bash
+# R2DBC Repository tests - these work!
+./gradlew :persistent:persistent-feature-r2dbc:test --no-parallel
+./gradlew :persistent:persistent-experiment-r2dbc:test --no-parallel
+```
+
+### ❌ API Tests (Blocked)
+
+```bash
+# These will fail due to Mockito incompatibility
+./gradlew :api:api-customer:test --no-parallel
+./gradlew :api:api-experiment:test --no-parallel
+./gradlew :api:api-feature:test --no-parallel
+```
+
+### ✅ Build Commands (Working)
+
+```bash
+# Build without tests
+./gradlew build -x test --no-parallel
+
+# Compile source code only
+./gradlew compileJava --no-parallel
+
+# Run application
+./gradlew bootrun
+```
 
 ### Error Messages
 
