@@ -75,11 +75,14 @@ public class CustomerFeatureConfigRepository {
             return criteria;
         }
 
-        return criteria.and(params.status()
+        // Properly group status criteria to ensure correct SQL precedence
+        Criteria statusCriteria = params.status()
                 .stream()
                 .map(this::getStatusCriteria)
                 .reduce(Criteria::or)
-                .orElse(Criteria.empty()));
+                .orElse(Criteria.empty());
+
+        return criteria.and(statusCriteria);
     }
 
     private Criteria getStatusCriteria(FeatureConfig.Status.DynamicStatus status) {

@@ -70,7 +70,7 @@ public class FeatureConfigsImpl implements Feature.Configs {
         return repository.findById(id.configId())
                 .switchIfEmpty(Mono.error(new RecordNotFoundException(id.configId())))
                 .flatMap(db -> {
-                    if (db.getStaticStatus() == FeatureConfig.Status.StaticStatus.DRAFT) {
+                    if (db.getStatusAsEnum() == FeatureConfig.Status.StaticStatus.DRAFT) {
                         return repository.delete(db);
                     }
 

@@ -5,20 +5,23 @@ import cn.dpc.ab.api.customer.dto.FeatureConfigResponse;
 import cn.dpc.ab.domain.core.CustomerId;
 import cn.dpc.ab.domain.customer.Customer;
 import cn.dpc.ab.domain.customer.Customers;
+import cn.dpc.ab.domain.feature.Feature;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static cn.dpc.ab.api.customer.CustomerTestUtil.createFeatureConfig;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -32,15 +35,19 @@ class CustomerApiTest {
     @MockitoBean
     Customers customers;
 
-    @Mock
     Customer.FeatureConfigs configs;
-
-    @Mock
     Customer.Assignments assignments;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        configs = mock(Customer.FeatureConfigs.class);
+        assignments = mock(Customer.Assignments.class);
+    }
 
     @Test
     void should_getFeatureConfigs_return_empty_when_customers_return_empty() {
-        when(customers.getById(Mockito.any()))
+        when(customers.getById(any(CustomerId.class)))
                 .thenReturn(Mono.empty());
 
         webClient.post()
@@ -57,7 +64,7 @@ class CustomerApiTest {
 
     @Test
     void should_getFeatureConfigs_return_empty_when_configs_return_empty() {
-        when(customers.getById(Mockito.any()))
+        when(customers.getById(any(CustomerId.class)))
                 .thenAnswer(invocation -> {
                     Customer customer = new Customer((CustomerId) invocation.getArguments()[0]);
                     customer.setFeatureConfigs(configs);
@@ -65,9 +72,9 @@ class CustomerApiTest {
                     return Mono.just(customer);
                 });
 
-        when(configs.getByFeatureKey(Mockito.any()))
+        when(configs.getByFeatureKey(any(Feature.FeatureId.class)))
                 .thenReturn(Flux.empty());
-        when(assignments.getByFeatureKey(Mockito.any()))
+        when(assignments.getByFeatureKey(any(Feature.FeatureId.class)))
                 .thenReturn(Mono.empty());
 
 
@@ -85,7 +92,7 @@ class CustomerApiTest {
 
     @Test
     public void should_getFeatureConfigs_success() {
-        when(customers.getById(Mockito.any()))
+        when(customers.getById(any(CustomerId.class)))
                 .thenAnswer(invocation -> {
                     Customer customer = new Customer((CustomerId) invocation.getArguments()[0]);
                     customer.setFeatureConfigs(configs);
@@ -94,11 +101,11 @@ class CustomerApiTest {
                 });
 
         String featureKey = "key";
-        when(configs.getByFeatureKey(Mockito.any()))
+        when(configs.getByFeatureKey(any(Feature.FeatureId.class)))
                 .thenReturn(Flux.just(createFeatureConfig("id1", featureKey),
                         createFeatureConfig("id2", featureKey)));
 
-        when(assignments.getByFeatureKey(Mockito.any()))
+        when(assignments.getByFeatureKey(any(Feature.FeatureId.class)))
                 .thenReturn(Mono.empty());
 
 

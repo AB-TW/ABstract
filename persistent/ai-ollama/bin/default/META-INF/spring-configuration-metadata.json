@@ -23,5 +23,8 @@
       "sourceType": "cn.dpc.ab.persistent.ai.AiProperties"
     }
   ],
-  "hints": []
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
 }

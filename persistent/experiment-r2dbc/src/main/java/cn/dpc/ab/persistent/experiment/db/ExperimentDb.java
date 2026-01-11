@@ -4,7 +4,9 @@ import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.utils.JsonUtil;
 import lombok.Data;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,19 +18,55 @@ import java.util.Optional;
 @Data
 @Table("experiment")
 public class ExperimentDb {
+    @Column("id")
     private Long id;
+    @Column("name")
     private String name;
+    @Column("description")
     private String description;
+    @Column("feature_key")
     private String featureKey;
-    private Experiment.Status.StaticStatus staticStatus;
+    @Column("static_status")
+    private String staticStatus;
+    @Column("start_time")
     private LocalDateTime startTime;
+    @Column("end_collect_time")
     private LocalDateTime endCollectTime;
+    @Column("end_time")
     private LocalDateTime endTime;
+    @Column("buckets")
     private String buckets;
+    @Column("created_at")
     private LocalDateTime createdAt;
+    @Column("updated_at")
     private LocalDateTime updatedAt;
+    @Column("filter_condition")
     private String filterCondition;
+    @Column("config_version")
     private long configVersion;
+
+    /**
+     * Get static status as enum (for domain use only).
+     * R2DBC uses the String field directly.
+     */
+    public Experiment.Status.StaticStatus getStaticStatusAsEnum() {
+        if (staticStatus == null || staticStatus.trim().isEmpty()) {
+            return Experiment.Status.StaticStatus.DRAFT;
+        }
+        try {
+            return Experiment.Status.StaticStatus.valueOf(staticStatus);
+        } catch (IllegalArgumentException e) {
+            return Experiment.Status.StaticStatus.DRAFT;
+        }
+    }
+
+    /**
+     * Set static status from enum (for domain use only).
+     * R2DBC uses the String field directly.
+     */
+    public void setStaticStatusFromEnum(Experiment.Status.StaticStatus status) {
+        this.staticStatus = status != null ? status.name() : null;
+    }
 
 
     /**
@@ -46,7 +84,7 @@ public class ExperimentDb {
         experimentDb.setName(experiment.getDescription().name());
         experimentDb.setDescription(experiment.getDescription().description());
         experimentDb.setFeatureKey(experiment.getDescription().featureKey());
-        experimentDb.setStaticStatus(experiment.getDescription().status().staticStatus());
+        experimentDb.setStaticStatusFromEnum(experiment.getDescription().status().staticStatus());
         experimentDb.setStartTime(experiment.getDescription().status().getStartTime());
         experimentDb.setEndCollectTime(experiment.getDescription().status().getEndCollectTime());
         experimentDb.setEndTime(experiment.getDescription().status().getEndTime());
@@ -72,7 +110,7 @@ public class ExperimentDb {
                         this.description,
                         this.featureKey,
                         Experiment.Status.builder()
-                                .staticStatus(this.staticStatus)
+                                .staticStatus(getStaticStatusAsEnum())
                                 .startTime(this.startTime)
                                 .endCollectTime(this.endCollectTime)
                                 .endTime(this.endTime)
@@ -96,7 +134,7 @@ public class ExperimentDb {
         this.name = description.name();
         this.description = description.description();
         this.featureKey = description.featureKey();
-        this.staticStatus = description.status().staticStatus();
+        this.setStaticStatusFromEnum(description.status().staticStatus());
         this.startTime = description.status().getStartTime();
         this.endTime = description.status().getEndTime();
         this.endCollectTime = description.status().getEndCollectTime();

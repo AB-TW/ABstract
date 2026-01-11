@@ -18,5 +18,8 @@
       "sourceType": "cn.dpc.ab.api.file.config.FileProperties"
     }
   ],
-  "hints": []
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
 }
