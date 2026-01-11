@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '3.4.1'
+        springBootVersion = '4.0.1'
         caffeineVersion = '3.1.8'
         springAiVersion = '1.0.0-M6'
     }

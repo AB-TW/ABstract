@@ -5,9 +5,11 @@ import cn.dpc.ab.api.experiment.dto.AssignmentResult;
 import cn.dpc.ab.domain.experiment.Assignment;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Experiments;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
@@ -18,6 +20,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -33,8 +36,13 @@ public class AssignmentApiTest {
     @MockitoBean
     Experiments experiments;
 
-    @Mock
     Experiment.Assignments assignments;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        assignments = mock(Experiment.Assignments.class);
+    }
 
     @Test
     void should_getAssignmentById_return_empty_when_assignments_return_empty() {

@@ -18,5 +18,8 @@
       "sourceType": "cn.dpc.ab.persistent.cache.LocalCacheProperties"
     }
   ],
-  "hints": []
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
 }

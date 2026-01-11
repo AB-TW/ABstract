@@ -26,5 +26,8 @@
       "sourceType": "cn.dpc.ab.api.customer.config.RsocketConfigProperties"
     }
   ],
-  "hints": []
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
 }

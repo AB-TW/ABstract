@@ -16,10 +16,25 @@ spring:
     url: jdbc:h2:file:./tmp/test-database
     locations: classpath:db/migration
     enabled: true
-#  rsocket:
-#    server:
-#      port: 7001
+
+---
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  r2dbc:
+    url: ${R2DBC_URL:r2dbc:postgresql://localhost:5432/abstract}
+    username: ${R2DBC_USERNAME:abstract}
+    password: ${R2DBC_PASSWORD:abstract}
+  flyway:
+    enabled: true
+    url: ${FLYWAY_URL:jdbc:postgresql://localhost:5432/abstract}
+    user: ${FLYWAY_USER:abstract}
+    password: ${FLYWAY_PASSWORD:abstract}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
 logging:
   level:
-    root: debug
+    root: info
+    cn.dpc.ab: debug

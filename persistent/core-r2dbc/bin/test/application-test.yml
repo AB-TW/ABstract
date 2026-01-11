@@ -1,0 +1,8 @@
+spring:
+  r2dbc:
+    url: r2dbc:h2:mem:///testdb?DATABASE_TO_UPPER=FALSE
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always

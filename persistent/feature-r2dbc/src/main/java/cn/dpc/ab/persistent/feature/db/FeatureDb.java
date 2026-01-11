@@ -5,6 +5,7 @@ import cn.dpc.ab.persistent.utils.JsonUtil;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
@@ -18,29 +19,34 @@ import java.util.Optional;
 public class FeatureDb {
 
     @Id
+    @org.springframework.data.relational.core.mapping.Column("ID")
     private Long id;
 
+    @org.springframework.data.relational.core.mapping.Column("FEATURE_KEY")
     private String featureKey;
 
+    @org.springframework.data.relational.core.mapping.Column("NAME")
     private String name;
 
+    @org.springframework.data.relational.core.mapping.Column("DESCRIPTION")
     private String description;
 
+    @org.springframework.data.relational.core.mapping.Column("TEMPLATE")
     private String template;
 
+    @org.springframework.data.relational.core.mapping.Column("ENABLED")
     private boolean enabled;
 
+    @org.springframework.data.relational.core.mapping.Column("CREATED_AT")
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @org.springframework.data.relational.core.mapping.Column("UPDATED_AT")
     private LocalDateTime updatedAt;
 
+    @Transient
     public void setTemplate(Feature.FeatureTemplate template) {
         this.template = JsonUtil.toJson(template);
-    }
-
-    public void setTemplate(String template) {
-        this.template = template;
     }
 
     /**

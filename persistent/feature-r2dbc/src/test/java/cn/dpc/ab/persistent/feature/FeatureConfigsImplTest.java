@@ -97,7 +97,7 @@ class FeatureConfigsImplTest {
                 .as(StepVerifier::create)
                 .verifyComplete();
 
-        assertEquals(db.getStaticStatus(), FeatureConfig.Status.StaticStatus.DELETED);
+        assertEquals(db.getStatusAsEnum(), FeatureConfig.Status.StaticStatus.DELETED);
     }
 
     @Test
@@ -111,7 +111,7 @@ class FeatureConfigsImplTest {
                 .as(StepVerifier::create)
                 .verifyComplete();
 
-        assertEquals(db.getStaticStatus(), FeatureConfig.Status.StaticStatus.PUBLISHED);
+        assertEquals(db.getStatusAsEnum(), FeatureConfig.Status.StaticStatus.PUBLISHED);
     }
 
     @Test
@@ -125,7 +125,7 @@ class FeatureConfigsImplTest {
                 .as(StepVerifier::create)
                 .verifyComplete();
 
-        assertEquals(db.getStaticStatus(), FeatureConfig.Status.StaticStatus.DISABLED);
+        assertEquals(db.getStatusAsEnum(), FeatureConfig.Status.StaticStatus.DISABLED);
     }
 
     @Test

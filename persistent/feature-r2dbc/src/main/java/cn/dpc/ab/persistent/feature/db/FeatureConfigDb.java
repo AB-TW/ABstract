@@ -5,8 +5,10 @@ import cn.dpc.ab.domain.feature.Feature;
 import cn.dpc.ab.domain.feature.FeatureConfig;
 import cn.dpc.ab.persistent.r2dbc.ObjectAdapter;
 import cn.dpc.ab.persistent.utils.JsonUtil;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
@@ -18,32 +20,48 @@ import java.util.Optional;
 /**
  * FeatureConfigDb represents a feature config in database.
  */
-@Data
+@Getter
+@Setter
 @Table("feature_config")
 public class FeatureConfigDb {
     @Id
+    @Column("ID")
     private Long id;
+    @Column("FEATURE_KEY")
     private String featureKey;
-    private String description;
-    private String dataAdapter;
-    @Column("config_key")
+    @Column("CONFIG_KEY")
     private String key;
+    @Column("TITLE")
     private String title;
+    @Column("DESCRIPTION")
+    private String description;
+    @Column("DATA_ADAPTER")
+    private String dataAdapter;
+    @Column("DATA_ADAPTER_TYPE")
     private ObjectAdapter.DataType dataAdapterType;
+    @Column("SA_DATA")
     private String saData;
-    private FeatureConfig.Status.StaticStatus staticStatus;
+    @Column("STATIC_STATUS")
+    private String staticStatus;
+    @Column("START_TIME")
     private LocalDateTime startTime;
+    @Column("END_TIME")
     private LocalDateTime endTime;
-    private long priority;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    @Column("FILTER_CONDITION")
     private String filterCondition;
+    @Column("PRIORITY")
+    private long priority;
+    @Column("CREATED_AT")
+    private LocalDateTime createdAt;
+    @Column("UPDATED_AT")
+    private LocalDateTime updatedAt;
 
     /**
      * Set data.
      *
      * @param data the data to be set
      */
+    @Transient
     public void setData(Object data) {
         ObjectAdapter objectAdapter = new ObjectAdapter(data);
         this.dataAdapter = objectAdapter.getData();
@@ -55,8 +73,32 @@ public class FeatureConfigDb {
      *
      * @return the data
      */
+    @Transient
     public Object getData() {
         return new ObjectAdapter(this.dataAdapterType, this.dataAdapter).toObject();
+    }
+
+    /**
+     * Get static status as enum (for domain use only).
+     * R2DBC uses the String field directly.
+     */
+    public FeatureConfig.Status.StaticStatus getStatusAsEnum() {
+        if (staticStatus == null || staticStatus.trim().isEmpty()) {
+            return FeatureConfig.Status.StaticStatus.DRAFT;
+        }
+        try {
+            return FeatureConfig.Status.StaticStatus.valueOf(staticStatus);
+        } catch (IllegalArgumentException e) {
+            return FeatureConfig.Status.StaticStatus.DRAFT;
+        }
+    }
+
+    /**
+     * Set static status from enum (for domain use only).
+     * R2DBC uses the String field directly.
+     */
+    public void setStatusFromEnum(FeatureConfig.Status.StaticStatus status) {
+        this.staticStatus = status != null ? status.name() : null;
     }
 
     /**
@@ -77,7 +119,7 @@ public class FeatureConfigDb {
         featureConfigDb.setDescription(featureConfig.getDescription().description());
         featureConfigDb.setData(featureConfig.getDescription().data());
         featureConfigDb.setSaData(JsonUtil.toJson(featureConfig.getDescription().saData()));
-        featureConfigDb.setStaticStatus(featureConfig.getDescription().status().getStaticStatus());
+        featureConfigDb.setStatusFromEnum(featureConfig.getDescription().status().getStaticStatus());
         featureConfigDb.setStartTime(featureConfig.getDescription().status().getStartTime());
         featureConfigDb.setEndTime(featureConfig.getDescription().status().getEndTime());
         featureConfigDb.setPriority(featureConfig.getDescription().priority());
@@ -102,7 +144,12 @@ public class FeatureConfigDb {
                         this.description,
                         this.getData(),
                         JsonUtil.fromJson(this.saData, Map.class),
-                        new FeatureConfig.Status(this.staticStatus, this.startTime, this.endTime),
+                        new FeatureConfig.Status(
+                                this.staticStatus != null
+                                        ? FeatureConfig.Status.StaticStatus.valueOf(this.staticStatus)
+                                        : FeatureConfig.Status.StaticStatus.DRAFT,
+                                this.startTime,
+                                this.endTime),
                         this.priority,
                         this.createdAt,
                         this.updatedAt,
@@ -121,7 +168,7 @@ public class FeatureConfigDb {
         this.description = description.description();
         this.setData(description.data());
         this.setSaData(JsonUtil.toJson(description.saData()));
-        this.staticStatus = description.status().getStaticStatus();
+        this.setStatusFromEnum(description.status().getStaticStatus());
         this.startTime = description.status().getStartTime();
         this.endTime = description.status().getEndTime();
         this.filterCondition = JsonUtil.toJson(description.filterCondition());
