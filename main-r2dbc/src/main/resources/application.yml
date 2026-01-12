@@ -4,24 +4,11 @@ server:
 spring:
   r2dbc:
     url:
-
 ---
 spring:
   config:
     activate:
       on-profile: default
-  r2dbc:
-    url: r2dbc:h2:file:///./tmp/test-database
-  flyway:
-    url: jdbc:h2:file:./tmp/test-database
-    locations: classpath:db/migration
-    enabled: true
-
----
-spring:
-  config:
-    activate:
-      on-profile: postgres
   r2dbc:
     url: ${R2DBC_URL:r2dbc:postgresql://localhost:5432/abstract}
     username: ${R2DBC_USERNAME:abstract}

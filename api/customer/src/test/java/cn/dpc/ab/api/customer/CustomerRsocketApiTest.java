@@ -5,9 +5,9 @@ import cn.dpc.ab.domain.core.CustomerId;
 import cn.dpc.ab.domain.customer.Customer;
 import cn.dpc.ab.domain.customer.Customers;
 import cn.dpc.ab.domain.feature.Feature;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
@@ -22,19 +22,26 @@ import static org.mockito.Mockito.when;
 /**
  * CustomerRsocketApiTest.
  *
- * <p>DISABLED: Spring Boot 4.0.1 中 RSocket 测试支持发生了变化，
- * 需要使用新的测试方式。此测试类暂时禁用。
+ * <p>Note: Tests are disabled due to RSocket keep-alive timeout issues in Spring Boot 4.x
+ * test environment. See TEST_COMPATIBILITY.md for details.
  */
-@Disabled("Spring Boot 4.0.1 changed RSocket test support. Needs to be updated.")
+@Disabled("RSocket keep-alive timeout issue - see TEST_COMPATIBILITY.md")
 class CustomerRsocketApiTest extends RsocketBaseTest {
     @MockitoBean
     Customers customers;
 
-    @Mock
     Customer.FeatureConfigs configs;
-
-    @Mock
     Customer.Assignments assignments;
+
+    @BeforeEach
+    @Override
+    public void init() {
+        // 先初始化 mocks
+        configs = Mockito.mock(Customer.FeatureConfigs.class);
+        assignments = Mockito.mock(Customer.Assignments.class);
+        // 再调用父类初始化
+        super.init();
+    }
 
     @Test
     void should_getFeatureConfigs_return_empty_when_customers_return_empty() {

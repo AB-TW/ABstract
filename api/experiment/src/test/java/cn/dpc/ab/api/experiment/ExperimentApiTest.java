@@ -5,7 +5,6 @@ import cn.dpc.ab.api.experiment.dto.ExperimentRequest;
 import cn.dpc.ab.api.experiment.dto.ExperimentResponse;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.domain.experiment.Experiments;
-import cn.dpc.ab.persistent.experiment.db.ExperimentDb;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -56,11 +55,17 @@ class ExperimentApiTest {
 
     @Test
     void delete() {
-        ExperimentDb experimentDb = ExperimentDb.builder()
-                .id("123")
-                .buckets(List.of(ExperimentDb.BucketDb.builder().key("key").percentage(100).name("test").build()))
+        Experiment.Description description = Experiment.Description.builder()
+                .name("test")
+                .featureKey("test")
+                .buckets(List.of(Experiment.Bucket.builder().key("key").percentage(100).name("test").build()))
+                .status(Experiment.Status.builder().staticStatus(Experiment.Status.StaticStatus.PUBLISHED).build())
                 .build();
-        Experiment experiment = experimentDb.toExperiment();
+
+        Experiment experiment = new Experiment(
+                Experiment.ExperimentId.builder().id("123").build(),
+                description
+        );
 
         when(experiments.get(Mockito.any())).thenReturn(Mono.just(experiment));
 

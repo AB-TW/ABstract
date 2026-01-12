@@ -50,13 +50,40 @@ Web框架：Spring WebFlux、Spring RSocket
 
 ### 本地运行
 
+**Couchbase 版本 (默认):**
+
 ```shell
-# 启动数据库
-# docker-compose up -d
-# 引入了spring-boot-docker-compose插件，可以直接运行不需要手动启动数据库容器
+# 启动 Couchbase 数据库
+docker-compose up -d
 
-
+# 运行应用 (spring-boot-docker-compose 会自动检测并启动数据库)
 ./gradlew bootrun
+```
+
+**PostgreSQL 版本 (R2DBC):**
+
+```shell
+# 启动 PostgreSQL 数据库
+docker-compose -f docker-compose-r2dbc.yml up -d
+
+# 运行 R2DBC 应用
+./gradlew :main-r2dbc:bootRun
+
+# 或者指定环境变量运行
+R2DBC_URL=r2dbc:postgresql://localhost:5432/abstract \
+R2DBC_USERNAME=abstract \
+R2DBC_PASSWORD=abstract \
+./gradlew :main-r2dbc:bootRun
+```
+
+**停止数据库:**
+
+```shell
+# 停止 Couchbase
+docker-compose down
+
+# 停止 PostgreSQL
+docker-compose -f docker-compose-r2dbc.yml down
 ```
 
 ### Build Image

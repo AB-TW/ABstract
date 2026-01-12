@@ -5,6 +5,7 @@
 build
 /lib/
 /bin/
+**/bin/
 /.idea/
 /docs/
 out
@@ -12,3 +13,4 @@ out
 # Ignore .DS_Store
 .DS_Store
 /tmp/
+.playwright-mcp/

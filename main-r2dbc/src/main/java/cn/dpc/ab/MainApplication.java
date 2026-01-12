@@ -4,9 +4,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Main application.
+ * Main application for R2DBC (PostgreSQL/H2).
+ * Excludes Couchbase auto-configuration to prevent conflicts with R2DBC.
  */
-@SpringBootApplication
+@SpringBootApplication(excludeName = {
+        "org.springframework.boot.autoconfigure.couchbase.CouchbaseAutoConfiguration",
+        "org.springframework.boot.autoconfigure.data.couchbase.CouchbaseDataAutoConfiguration",
+        "org.springframework.boot.autoconfigure.data.couchbase.CouchbaseRepositoriesAutoConfiguration"
+})
 public class MainApplication {
 
     /**

@@ -2,14 +2,21 @@ plugins {
     id 'api'
 }
 
+// Add Netty macOS native DNS resolver for proper DNS resolution on macOS
+def osName = System.getProperty('os.name').toLowerCase()
+def osArch = System.getProperty('os.arch')
+if (osName.contains('mac')) {
+    def classifier = (osArch.contains('aarch64') || osArch.contains('arm64')) ? 'osx-aarch_64' : 'osx-x86_64'
+    dependencies {
+        runtimeOnly group: 'io.netty', name: 'netty-resolver-dns-native-macos', classifier: classifier
+    }
+}
 
 dependencies {
     implementation project(':domain:feature')
     implementation project(':domain:core')
     implementation project(':domain:customer')
     implementation project(':domain:experiment')
-    implementation project(':persistent:persistent-feature')
-    implementation project(':persistent:persistent-customer')
     implementation project(':api:api-core')
     testImplementation  project(':api:api-core').sourceSets.test.output
     implementation 'org.springframework.boot:spring-boot-starter-rsocket'
