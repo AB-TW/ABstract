@@ -8,6 +8,4 @@ dependencies {
     implementation project(':domain:experiment')
     implementation project(':domain:customer')
     implementation project(':persistent:persistent-core')
-    implementation project(':persistent:persistent-core-couchbase')
-    testImplementation  project(':persistent:persistent-core-couchbase').sourceSets.test.output
 }

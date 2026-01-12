@@ -4,12 +4,24 @@ plugins {
 }
 
 dependencies {
+    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'org.postgresql:r2dbc-postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
     implementation project(':api:api-feature')
     implementation project(':api:api-experiment')
-    implementation project(':api:api-customer')
+    // Note: api-customer excluded - no R2DBC version of persistent-customer exists
+    implementation project(':persistent:persistent-core-r2dbc')
     implementation project(':persistent:persistent-feature-r2dbc')
-    implementation project(':persistent:persistent-customer')
     implementation project(':persistent:persistent-experiment-r2dbc')
 }
 
+bootRun {
+    workingDir = file('..')
+}
+
+tasks.named('bootRun') {
+    // Use custom docker-compose file for R2DBC
+    systemProperty 'spring.docker.compose.file', 'docker-compose-r2dbc.yml'
+    systemProperty 'spring.docker.compose.skip.in-dev', 'false'
+}

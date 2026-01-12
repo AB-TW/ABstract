@@ -26,10 +26,10 @@ public class DatabaseConfig {
     @Value("${spring.r2dbc.url}")
     private String r2dbcUrl;
 
-    @Value("${spring.r2dbc.username}")
+    @Value("${spring.r2dbc.username:sa}")
     private String username;
 
-    @Value("${spring.r2dbc.password}")
+    @Value("${spring.r2dbc.password:}")
     private String password;
 
     /**
