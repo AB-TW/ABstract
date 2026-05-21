@@ -187,7 +187,7 @@ public class ExperimentsImpl implements Experiments {
     public Mono<Void> delete(Experiment.ExperimentId id) {
         return repository.findById(id.id())
                 .flatMap(experimentDb -> {
-                    if (experimentDb.getStaticStatus().equals(Experiment.Status.StaticStatus.DRAFT)) {
+                    if (experimentDb.getStaticStatusAsEnum() == Experiment.Status.StaticStatus.DRAFT) {
                         return repository.deleteById(id.id());
                     }
                     return Mono.error(new RecordNotFoundException(id.id()));
