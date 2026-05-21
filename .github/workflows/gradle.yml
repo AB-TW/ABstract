@@ -39,7 +39,7 @@ jobs:
               echo "::error::NVD_API_KEY repository secret is required. Request a free key at https://nvd.nist.gov/developers/request-an-api-key and add it as a GitHub Actions secret."
               exit 1
             fi
-            ./gradlew dependencyCheckAnalyze --no-parallel
+            ./gradlew dependencyCheckAggregate --no-parallel --no-daemon
         - name: Build frontend with Gradle
           run: ./gradlew npmBuild
         - name: Build Docker image
