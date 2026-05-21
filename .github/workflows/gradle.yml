@@ -15,17 +15,31 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v2
-        - name: 'Set up JDK 17'
-          uses: actions/setup-java@v2
+        - name: 'Set up JDK 21'
+          uses: actions/setup-java@v4
           with:
-            java-version: '17'
-            distribution: 'adopt'
+            java-version: '21'
+            distribution: 'temurin'
         - name: Grant execute permission for gradlew
           run: chmod +x gradlew
         - name: Build with Gradle
           run: ./gradlew build
+        - name: Cache OWASP Dependency-Check NVD data
+          uses: actions/cache@v4
+          with:
+            path: .dependency-check-data
+            key: owasp-nvd-${{ runner.os }}-${{ hashFiles('**/gradle.lockfile', '**/*.gradle*', 'gradle/wrapper/gradle-wrapper.properties') }}
+            restore-keys: |
+              owasp-nvd-${{ runner.os }}-
         - name: Dependency Check
-          run: ./gradlew dependencyCheckAnalyze
+          env:
+            NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          run: |
+            if [ -z "${NVD_API_KEY}" ]; then
+              echo "::error::NVD_API_KEY repository secret is required. Request a free key at https://nvd.nist.gov/developers/request-an-api-key and add it as a GitHub Actions secret."
+              exit 1
+            fi
+            ./gradlew dependencyCheckAnalyze --no-parallel
         - name: Build frontend with Gradle
           run: ./gradlew npmBuild
         - name: Build Docker image
