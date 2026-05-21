@@ -108,7 +108,7 @@
               <el-button class="add-tag-value-button" @click="changeInputVisible(true)"> + Value</el-button>
               <el-upload
                 class="add-tag-value-button"
-                v-if="!props.diabled"
+                v-if="!props.disabled"
                 style="float: right"
                 action=""
                 :before-upload="(file) => updateWhitelist(file, conditionItem)"
@@ -139,7 +139,9 @@ import {
   CompareOperator,
   CustomAttributeCondition,
   defaultFilterCondition,
-  FilterCondition
+  FilterCondition,
+  isListCompareOperator,
+  isValidCustomAttributeCondition
 } from "@/domain/FilterConditions"
 import { Delete } from "@element-plus/icons-vue"
 import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormRules } from "element-plus"
@@ -169,7 +171,7 @@ const filterCondition = reactive<FilterCondition>(props.modelValue)
 // watch reactive object then assign parent bind object
 watch<FilterCondition>(filterCondition, (cur, _) => emit("update:modelValue", cur))
 const validateCustomAttributeConditions = (rule: any, customAttribute: CustomAttributeCondition, callback: any) => {
-  if (_.isEmpty(customAttribute.value) || _.isEmpty(customAttribute.key)) {
+  if (!isValidCustomAttributeCondition(customAttribute)) {
     callback(new Error("请检查键或值是否填写～"))
   } else {
     callback()
@@ -197,7 +199,7 @@ const addCustomAttributeItem = () => {
   })
 }
 const conditionOperatorChanged = (val: CompareOperator, customAttribute: CustomAttributeCondition) => {
-  if (_.includes([CompareOperator.IN, CompareOperator.NOT_IN], val)) {
+  if (isListCompareOperator(val)) {
     customAttribute.items = []
   } else {
     customAttribute.value = ""

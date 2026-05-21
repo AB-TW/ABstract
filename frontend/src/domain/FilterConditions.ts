@@ -22,7 +22,7 @@ export interface CustomAttributeCondition {
 }
 
 export enum CompareOperator {
-  EQUALS = "EQUALS ",
+  EQUALS = "EQUALS",
   NOT_EQUALS = "NOT_EQUALS",
   GREATER_THAN = "GREATER_THAN",
   GREATER_THAN_OR_EQUALS = "GREATER_THAN_OR_EQUALS",
@@ -34,6 +34,21 @@ export enum CompareOperator {
   VERSION_GREATER_THAN_EQUALS = "VERSION_GREATER_THAN_EQUALS",
   VERSION_LESS_THAN = "VERSION_LESS_THAN",
   VERSION_LESS_THAN_OR_EQUALS = "VERSION_LESS_THAN_OR_EQUALS"
+}
+
+export const isListCompareOperator = (operator: CompareOperator): boolean =>
+  [CompareOperator.IN, CompareOperator.NOT_IN].includes(operator)
+
+export const isValidCustomAttributeCondition = (condition: CustomAttributeCondition): boolean => {
+  if (!condition?.key) {
+    return false
+  }
+
+  if (isListCompareOperator(condition.operator)) {
+    return condition.items?.length > 0
+  }
+
+  return !!condition.value
 }
 
 export interface FilterConditionTemplate {
