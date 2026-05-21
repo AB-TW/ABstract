@@ -10,7 +10,6 @@ import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -79,7 +78,7 @@ public class ExperimentDb {
      */
     public static ExperimentDb from(Experiment experiment) {
         ExperimentDb experimentDb = new ExperimentDb();
-        experimentDb.setId(toDatabaseId(experiment.getId()));
+        experimentDb.setId(databaseIdFrom(experiment.getId()));
         experimentDb.setName(experiment.getDescription().name());
         experimentDb.setDescription(experiment.getDescription().description());
         experimentDb.setFeatureKey(experiment.getDescription().featureKey());
@@ -94,17 +93,6 @@ public class ExperimentDb {
         experimentDb.setConfigVersion(experiment.getDescription().configVersion());
         return experimentDb;
     }
-
-    private static Long toDatabaseId(Experiment.ExperimentId id) {
-        String value = Optional.ofNullable(id)
-                .map(Experiment.ExperimentId::id)
-                .orElse(null);
-        if (!StringUtils.hasText(value) || !value.chars().allMatch(Character::isDigit)) {
-            return null;
-        }
-        return Long.valueOf(value);
-    }
-
 
     /**
      * to converts an ExperimentDb to an Experiment.
@@ -124,7 +112,7 @@ public class ExperimentDb {
                                 .endCollectTime(this.endCollectTime)
                                 .endTime(this.endTime)
                                 .build(),
-                        JsonUtil.fromJson(buckets, List.class),
+                        JsonUtil.fromJsonList(buckets, Experiment.Bucket.class),
                         this.createdAt,
                         this.updatedAt,
                         JsonUtil.fromJson(this.filterCondition, FilterCondition.class),
@@ -152,5 +140,14 @@ public class ExperimentDb {
         this.updatedAt = LocalDateTime.now();
         this.filterCondition = JsonUtil.toJson(description.filterCondition());
         this.configVersion = description.configVersion();
+    }
+
+    private static Long databaseIdFrom(Experiment.ExperimentId id) {
+        return Optional.ofNullable(id)
+                .map(Experiment.ExperimentId::id)
+                .filter(StringUtils::hasText)
+                .filter(value -> value.chars().allMatch(Character::isDigit))
+                .map(Long::valueOf)
+                .orElse(null);
     }
 }
