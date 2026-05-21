@@ -9,7 +9,7 @@ buildscript {
 plugins {
     id "org.springframework.boot" version "${springBootVersion}" apply false
     id "io.spring.dependency-management" version "1.1.7" apply false
-    id "org.owasp.dependencycheck" version "11.1.1" apply false
+    id "org.owasp.dependencycheck" version "12.2.2"
     id "org.flywaydb.flyway" version "9.22.1" apply false
 }
 
@@ -18,15 +18,34 @@ repositories {
     maven { url 'https://repo.spring.io/milestone' }
 }
 
+def configureDependencyCheck = { project ->
+    project.dependencyCheck {
+        nvd {
+            apiKey = System.getenv('NVD_API_KEY') ?: ''
+        }
+        data {
+            directory = "${rootDir}/.dependency-check-data"
+        }
+        analyzers {
+            ossIndex {
+                enabled = false
+            }
+            nodeAudit {
+                enabled = false
+            }
+            assemblyEnabled = false
+            msbuildEnabled = false
+            nuspecEnabled = false
+        }
+        failBuildOnCVSS = 11
+        skipTestGroups = true
+    }
+}
+
+configureDependencyCheck(project)
+
 subprojects { sub ->
     sub.plugins.withId('org.owasp.dependencycheck') {
-        sub.dependencyCheck {
-            nvd {
-                apiKey = System.getenv('NVD_API_KEY') ?: ''
-            }
-            data {
-                directory = file("${rootDir}/.dependency-check-data")
-            }
-        }
+        configureDependencyCheck(sub)
     }
 }
