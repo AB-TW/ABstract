@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 public interface AssignmentRepository extends R2dbcRepository<AssignmentDb, String> {
     Mono<AssignmentDb> findAssignmentDbByExperimentIdAndClientId(String experimentId, String clientId);
 
-    @Query("SELECT bucket_key as bucketKey, COUNT(1) as `count`  FROM assignment WHERE experiment_id = :experimentId")
+    @Query("SELECT bucket_key AS \"bucketKey\", COUNT(1) AS \"count\" "
+            + "FROM assignment WHERE experiment_id = :experimentId GROUP BY bucket_key")
     Flux<BucketCount> statisticCountByBucketKey(String experimentId);
 }

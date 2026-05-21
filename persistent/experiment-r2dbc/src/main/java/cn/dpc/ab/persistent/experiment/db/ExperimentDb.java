@@ -4,6 +4,7 @@ import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.utils.JsonUtil;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
@@ -18,6 +19,7 @@ import java.util.Optional;
 @Data
 @Table("experiment")
 public class ExperimentDb {
+    @Id
     @Column("id")
     private Long id;
     @Column("name")
@@ -77,10 +79,7 @@ public class ExperimentDb {
      */
     public static ExperimentDb from(Experiment experiment) {
         ExperimentDb experimentDb = new ExperimentDb();
-        experimentDb.setId(Optional.ofNullable(experiment.getId())
-                .map(Experiment.ExperimentId::id)
-                .map(Long::valueOf)
-                .orElse(null));
+        experimentDb.setId(toDatabaseId(experiment.getId()));
         experimentDb.setName(experiment.getDescription().name());
         experimentDb.setDescription(experiment.getDescription().description());
         experimentDb.setFeatureKey(experiment.getDescription().featureKey());
@@ -94,6 +93,16 @@ public class ExperimentDb {
         experimentDb.setFilterCondition(JsonUtil.toJson(experiment.getDescription().filterCondition()));
         experimentDb.setConfigVersion(experiment.getDescription().configVersion());
         return experimentDb;
+    }
+
+    private static Long toDatabaseId(Experiment.ExperimentId id) {
+        String value = Optional.ofNullable(id)
+                .map(Experiment.ExperimentId::id)
+                .orElse(null);
+        if (!StringUtils.hasText(value) || !value.chars().allMatch(Character::isDigit)) {
+            return null;
+        }
+        return Long.valueOf(value);
     }
 
 
