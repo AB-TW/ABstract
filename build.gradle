@@ -22,15 +22,26 @@ def configureDependencyCheck = { project ->
     project.dependencyCheck {
         nvd {
             apiKey = System.getenv('NVD_API_KEY') ?: ''
+            validForHours = 24
         }
         data {
             directory = "${rootDir}/.dependency-check-data"
         }
+        // Only scan Java resources; skip frontend/remotion package manifests (no node_modules in CI).
+        scanSet = ['src/main/resources', 'src/main/webapp']
         analyzers {
             ossIndex {
                 enabled = false
             }
+            nodePackage {
+                enabled = false
+            }
             nodeAudit {
+                enabled = false
+                pnpmEnabled = false
+                yarnEnabled = false
+            }
+            retirejs {
                 enabled = false
             }
             assemblyEnabled = false
