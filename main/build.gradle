@@ -1,7 +1,7 @@
 plugins {
     id 'api'
     id 'org.springframework.boot'
-    id 'ai'
+//    id 'ai'  // Temporarily disabled - Spring AI 2.0.0-M4 not yet available
 }
 
 repositories {
@@ -22,8 +22,8 @@ dependencies {
     implementation project(':persistent:persistent-customer')
     implementation project(':persistent:persistent-experiment')
     implementation project(':persistent:persistent-filterCondition')
-    implementation project(':api:api-ai')
-    implementation project(':persistent:ai-openai')
+//    implementation project(':api:api-ai')  // Temporarily disabled
+//    implementation project(':persistent:ai-openai')  // Temporarily disabled
 //    implementation project(':persistent:ai-zhipu')
 //    implementation project(':persistent:ai-ollama')
 }
