@@ -4,6 +4,7 @@ import cn.dpc.ab.domain.core.FilterCondition;
 import cn.dpc.ab.domain.experiment.Experiment;
 import cn.dpc.ab.persistent.utils.JsonUtil;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
@@ -17,6 +18,7 @@ import java.util.Optional;
 @Data
 @Table("experiment")
 public class ExperimentDb {
+    @Id
     @Column("id")
     private Long id;
     @Column("name")
@@ -91,7 +93,6 @@ public class ExperimentDb {
         experimentDb.setConfigVersion(experiment.getDescription().configVersion());
         return experimentDb;
     }
-
 
     /**
      * to converts an ExperimentDb to an Experiment.

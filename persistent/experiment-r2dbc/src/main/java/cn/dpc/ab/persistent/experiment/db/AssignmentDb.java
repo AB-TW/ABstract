@@ -38,7 +38,9 @@ public class AssignmentDb {
         AssignmentDb assignmentDb = new AssignmentDb();
         assignmentDb.setExperimentId(assignment.getId().experimentId().id());
         assignmentDb.setClientId(assignment.getId().clientId());
-        assignmentDb.setBucketKey(assignment.getDescription().bucket().key());
+        assignmentDb.setBucketKey(Optional.ofNullable(assignment.getDescription().bucket())
+                .map(Experiment.Bucket::key)
+                .orElse(null));
         assignmentDb.setExperimentConfigVersion(assignment.getDescription().experimentConfigVersion());
         assignmentDb.setExtraInfo(JsonUtil.toJson(assignment.getDescription().extraInfo()));
         assignmentDb.setUpdatedAt(LocalDateTime.now());
@@ -77,6 +79,7 @@ public class AssignmentDb {
                 .map(Experiment.Bucket::key).orElse(null);
         this.experimentConfigVersion = description.experimentConfigVersion();
         this.extraInfo = JsonUtil.toJson(description.extraInfo());
+        this.updatedAt = LocalDateTime.now();
     }
 
 }
