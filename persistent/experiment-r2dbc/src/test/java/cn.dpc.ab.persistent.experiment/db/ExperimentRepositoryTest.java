@@ -51,7 +51,7 @@ class ExperimentRepositoryTest extends PostgresTestcontainerBase {
 
     @Test
     public void should_find_all_success() {
-        experimentRepository.save(createExperimentDb("key", "1213")).block();
+        experimentRepository.save(createExperimentDb("key", null)).block();
 
         experimentRepository.findAll()
                 .as(StepVerifier::create)
