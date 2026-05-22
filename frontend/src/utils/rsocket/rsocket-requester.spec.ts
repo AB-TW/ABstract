@@ -42,14 +42,8 @@ export class RsocketRequesterSpec {
           },
           onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {},
           onNext(payload: Payload, isComplete: boolean) {
-            let result
             const data = payload?.data?.toString("utf-8") || ""
-            try {
-              result = eval(data)
-            } catch (err) {
-              result = data
-            }
-            subscriber.onComplete(result)
+            subscriber.onComplete(RsocketRequesterSpec.parsePayloadData(data))
           }
         })
         subscriber.onSubscribe()
@@ -59,6 +53,14 @@ export class RsocketRequesterSpec {
 
   private isString(data: any) {
     return Object.prototype.toString.call(data) === "[object String]"
+  }
+
+  private static parsePayloadData(data: string) {
+    try {
+      return JSON.parse(data)
+    } catch (err) {
+      return data
+    }
   }
 
   public retrieveFlowable(): Flowable<any> {
@@ -107,14 +109,8 @@ export class RsocketRequesterSpec {
                 },
                 onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {},
                 onNext(payload: Payload, isComplete: boolean) {
-                  let result
                   const data = payload?.data?.toString("utf-8") || ""
-                  try {
-                    result = eval(data)
-                  } catch (err) {
-                    result = data
-                  }
-                  subscriber.onNext(result)
+                  subscriber.onNext(RsocketRequesterSpec.parsePayloadData(data))
                 }
               })
             })
@@ -149,14 +145,8 @@ export class RsocketRequesterSpec {
           },
           onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {},
           onNext(payload: Payload, isComplete: boolean) {
-            let result
             const data = payload?.data?.toString("utf-8") || ""
-            try {
-              result = eval(data)
-            } catch (err) {
-              result = data
-            }
-            subscriber.onNext(result)
+            subscriber.onNext(RsocketRequesterSpec.parsePayloadData(data))
           }
         })
         subscriber.onSubscribe()

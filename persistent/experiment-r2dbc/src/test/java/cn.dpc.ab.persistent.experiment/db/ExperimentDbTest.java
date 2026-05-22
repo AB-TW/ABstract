@@ -23,6 +23,13 @@ class ExperimentDbTest {
     }
 
     @Test
+    void shouldPreserveNumericDatabaseIdForExistingExperiment() {
+        ExperimentDb experimentDb = ExperimentDb.from(newExperiment(new Experiment.ExperimentId("42")));
+
+        assertEquals(42L, experimentDb.getId());
+    }
+
+    @Test
     void shouldRestoreBucketsAsDomainBuckets() {
         ExperimentDb experimentDb = ExperimentDb.from(newExperiment(new Experiment.ExperimentId("12")));
 
