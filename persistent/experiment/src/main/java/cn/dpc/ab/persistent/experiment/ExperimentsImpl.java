@@ -89,7 +89,7 @@ public class ExperimentsImpl implements Experiments {
         return experimentDbRepository.findById(id.id())
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
                 .flatMap(experimentDb -> {
-                    experimentDb.getStatus().updateStatus(Experiment.Status.StaticStatus.PUBLISHED);
+                    experimentDb.updateDescription(experimentDb.toExperiment().publish().getDescription());
                     return experimentDbRepository.save(experimentDb);
                 })
                 .publishOn(Schedulers.boundedElastic())
@@ -102,7 +102,7 @@ public class ExperimentsImpl implements Experiments {
         return experimentDbRepository.findById(id.id())
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Experiment not found: " + id.id())))
                 .flatMap(experimentDb -> {
-                    experimentDb.getStatus().updateStatus(Experiment.Status.StaticStatus.PAUSED);
+                    experimentDb.updateDescription(experimentDb.toExperiment().pause().getDescription());
                     return experimentDbRepository.save(experimentDb);
                 })
                 .publishOn(Schedulers.boundedElastic())
