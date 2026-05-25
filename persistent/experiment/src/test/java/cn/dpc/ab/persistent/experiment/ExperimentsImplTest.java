@@ -18,6 +18,7 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -76,6 +77,36 @@ public class ExperimentsImplTest {
 
         verify(experimentDbRepository, never()).save(any(ExperimentDb.class));
         verifyNoInteractions(localCacheManager);
+    }
+
+    @Test
+    void should_preserve_static_status_when_updating_experiment() {
+        when(experimentDbRepository.findById(EXPERIMENT_ID))
+                .thenReturn(Mono.just(experimentDb(Experiment.Status.StaticStatus.STOPPED)));
+        when(experimentDbRepository.save(any(ExperimentDb.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(localCacheManager.clearCache(any()))
+                .thenReturn(Mono.empty());
+
+        experiments.update(new Experiment.ExperimentId(EXPERIMENT_ID), Experiment.Description.builder()
+                        .name("Updated Experiment")
+                        .description("Updated description")
+                        .featureKey("feature-key")
+                        .status(Experiment.Status.builder()
+                                .staticStatus(Experiment.Status.StaticStatus.PUBLISHED)
+                                .build())
+                        .buckets(List.of(
+                                Experiment.Bucket.builder().key("a").percentage(50).build(),
+                                Experiment.Bucket.builder().key("b").percentage(50).build()))
+                        .filterCondition(FilterCondition.builder()
+                                .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
+                                .build())
+                        .build())
+                .as(StepVerifier::create)
+                .verifyComplete();
+
+        verify(experimentDbRepository).save(argThat(db ->
+                db.getStatus().staticStatus().equals(Experiment.Status.StaticStatus.STOPPED)));
     }
 
     private ExperimentDb experimentDb(Experiment.Status.StaticStatus status) {

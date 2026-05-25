@@ -158,6 +158,13 @@ public class Experiment {
      * @return the experiment
      */
     public Experiment update(Description description) {
+        Status status = Optional.ofNullable(this.description.status).orElseGet(Status::new);
+        if (description.status != null) {
+            status.setStartTime(description.status.getStartTime());
+            status.setEndCollectTime(description.status.getEndCollectTime());
+            status.setEndTime(description.status.getEndTime());
+        }
+
         this.description = Description.builder()
                 .buckets(description.buckets)
                 .createdAt(this.description.createdAt)
@@ -165,7 +172,7 @@ public class Experiment {
                 .description(description.description)
                 .featureKey(description.featureKey)
                 .name(description.name)
-                .status(description.status)
+                .status(status)
                 .filterCondition(description.filterCondition)
                 .configVersion(shouldUpdateConfigVersion(this.description, description)
                         ? this.description.configVersion + 1
