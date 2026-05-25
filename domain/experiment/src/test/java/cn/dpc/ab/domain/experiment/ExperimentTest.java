@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -205,6 +206,44 @@ class ExperimentTest {
                 .build());
 
         assertThrows(IllegalStateException.class, experiment::publish);
+    }
+
+    @Test
+    public void should_update_preserve_static_status() {
+        Experiment experiment = new Experiment(Experiment.Description.builder()
+                .name("name")
+                .description("description")
+                .status(Experiment.Status.builder()
+                        .staticStatus(Experiment.Status.StaticStatus.STOPPED)
+                        .build())
+                .featureKey("key")
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
+                        .build())
+                .configVersion(0L)
+                .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
+                        Experiment.Bucket.builder().key("key2").name("name2").percentage(50).build()))
+                .build());
+        LocalDateTime newStartTime = LocalDateTime.now().plusDays(1);
+
+        experiment.update(Experiment.Description.builder()
+                .name("updated name")
+                .description("updated description")
+                .status(Experiment.Status.builder()
+                        .staticStatus(Experiment.Status.StaticStatus.PUBLISHED)
+                        .startTime(newStartTime)
+                        .build())
+                .featureKey("key")
+                .filterCondition(FilterCondition.builder()
+                        .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(99))
+                        .build())
+                .configVersion(0L)
+                .buckets(List.of(Experiment.Bucket.builder().key("key1").name("name1").percentage(50).build(),
+                        Experiment.Bucket.builder().key("key2").name("name2").percentage(50).build()))
+                .build());
+
+        assertEquals(Experiment.Status.StaticStatus.STOPPED, experiment.getDescription().status().staticStatus());
+        assertEquals(newStartTime, experiment.getDescription().status().getStartTime());
     }
 
     @Test
