@@ -68,6 +68,8 @@ public class FilterConditionTemplateDb {
                 .templateId(filterConditionTemplateDb.getId())
                 .templateName(filterConditionTemplateDb.getTemplateName())
                 .attributeConditions(filterConditionTemplateDb.getAttributeConditions())
+                .createdAt(filterConditionTemplateDb.getCreatedAt())
+                .updatedAt(filterConditionTemplateDb.getUpdatedAt())
                 .build();
     }
 

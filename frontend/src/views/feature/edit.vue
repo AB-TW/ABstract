@@ -201,7 +201,7 @@ const submitForm = async () => {
 }
 
 watch(
-  feature.value.dataSource,
+  () => feature.value.dataSource,
   (newValue, oldValue) => {
     console.log("值发生了变更", newValue, oldValue)
   },

@@ -2,7 +2,7 @@
   <el-card>
     <div class="header">
       <el-select v-model="pageSearchParams.featureKey" @change="getExperiments" placeholder="特性" style="width: 240px">
-        <el-option key="000" label="全部特性" style="font-weight: bold" :value="null" />
+        <el-option key="000" label="全部特性" style="font-weight: bold" value="" />
         <el-option v-for="item in featureList" :key="item.featureKey" :label="item.name" :value="item.featureKey" />
       </el-select>
       <el-input
