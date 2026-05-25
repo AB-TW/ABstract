@@ -47,7 +47,7 @@ export class Customers {
         .retrieveFlowable()
         .map((data) => {
           console.log("customers.featureConfigs receive: " + data)
-          result.push(JSON.parse(data) as CustomerFeatureConfig)
+          result.push((typeof data === "string" ? JSON.parse(data) : data) as CustomerFeatureConfig)
         })
         .subscribe({
           onComplete: () => {
