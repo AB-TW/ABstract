@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 import static cn.dpc.ab.domain.experiment.Assignment.EMPTY;
@@ -44,7 +45,7 @@ public class CustomerAssignments implements Customer.Assignments {
                                 // 如果实验版本号有变化 则重新分组
                                 if (shouldReassign(experiment, assignment)) {
                                     // experiment version updated  do reassign
-                                    return Mono.empty();
+                                    return reassign(experiment, assignment);
                                 }
                                 //   assignment result with no customerId or customerId not match
                                 if (shouldUpdateCustomerId(customerId, assignment)) {
@@ -64,6 +65,29 @@ public class CustomerAssignments implements Customer.Assignments {
     private Mono<Experiment> getExperimentByFeatureKeyWithCache(Feature.FeatureId featureKey) {
         String key = LocalCacheManager.EXPERIMENT_KEY_PREFIX + featureKey.featureKey();
         return localCacheManager.cacheMono(key, () -> experiments.getByFeatureKey(featureKey.featureKey()));
+    }
+
+    private Mono<Assignment> reassign(Experiment experiment, Assignment currentAssignment) {
+        return Assignment.createAssignment(experiment, customerId)
+                .flatMap(newAssignment -> {
+                    if (EMPTY == newAssignment) {
+                        return Mono.just(currentAssignment);
+                    }
+                    return experiment.getAssignments().addOrUpdate(
+                            withExtraInfo(newAssignment, currentAssignment.getDescription().extraInfo()));
+                });
+    }
+
+    private Assignment withExtraInfo(Assignment assignment, Map<String, Object> extraInfo) {
+        if (extraInfo == null) {
+            return assignment;
+        }
+        assignment.updateDescription(Assignment.Description.builder()
+                .bucket(assignment.getDescription().bucket())
+                .experimentConfigVersion(assignment.getDescription().experimentConfigVersion())
+                .extraInfo(extraInfo)
+                .build());
+        return assignment;
     }
 
     private boolean shouldReassign(Experiment experiment, Assignment assignment) {
