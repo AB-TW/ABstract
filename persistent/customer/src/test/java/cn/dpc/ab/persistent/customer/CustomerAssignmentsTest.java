@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,14 +72,58 @@ class CustomerAssignmentsTest {
         verify(assignments).addOrUpdate(any(Assignment.class));
     }
 
+    @Test
+    void should_keep_existing_assignment_when_version_changes_outside_collecting() {
+        Experiment experiment = experiment(1L, Experiment.Status.StaticStatus.PAUSED);
+        Assignment staleAssignment = assignment(experiment, 0L);
+
+        when(localCacheManager.cacheMono(eq(LocalCacheManager.EXPERIMENT_KEY_PREFIX + FEATURE_KEY), any()))
+                .thenAnswer(invocation -> ((Supplier<Mono<Experiment>>) invocation.getArgument(1)).get());
+        when(experiments.getByFeatureKey(FEATURE_KEY)).thenReturn(Mono.just(experiment));
+        when(assignments.get(new Assignment.AssignmentId(experiment.getId(), CLIENT_ID)))
+                .thenReturn(Mono.just(staleAssignment));
+
+        customerAssignments.getByFeatureKey(Feature.FeatureId.builder().featureKey(FEATURE_KEY).build())
+                .as(StepVerifier::create)
+                .expectNext(staleAssignment)
+                .verifyComplete();
+
+        verify(assignments, never()).addOrUpdate(any(Assignment.class));
+    }
+
+    @Test
+    void should_preserve_assignment_extra_info_when_reassigning() {
+        Experiment experiment = collectingExperiment(1L);
+        Assignment staleAssignment = assignment(experiment, 0L, Map.of("customerIds", List.of("customer-a")));
+
+        when(localCacheManager.cacheMono(eq(LocalCacheManager.EXPERIMENT_KEY_PREFIX + FEATURE_KEY), any()))
+                .thenAnswer(invocation -> ((Supplier<Mono<Experiment>>) invocation.getArgument(1)).get());
+        when(experiments.getByFeatureKey(FEATURE_KEY)).thenReturn(Mono.just(experiment));
+        when(assignments.get(new Assignment.AssignmentId(experiment.getId(), CLIENT_ID)))
+                .thenReturn(Mono.just(staleAssignment));
+        when(assignments.addOrUpdate(any(Assignment.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        customerAssignments.getByFeatureKey(Feature.FeatureId.builder().featureKey(FEATURE_KEY).build())
+                .as(StepVerifier::create)
+                .expectNextMatches(assignment ->
+                        assignment.getDescription().experimentConfigVersion() == 1L
+                                && assignment.getDescription().extraInfo().equals(staleAssignment.getDescription().extraInfo()))
+                .verifyComplete();
+    }
+
     private Experiment collectingExperiment(long configVersion) {
+        return experiment(configVersion, Experiment.Status.StaticStatus.PUBLISHED);
+    }
+
+    private Experiment experiment(long configVersion, Experiment.Status.StaticStatus status) {
         Experiment experiment = new Experiment(new Experiment.ExperimentId("experiment-1"),
                 Experiment.Description.builder()
                         .name("Experiment")
                         .description("Experiment description")
                         .featureKey(FEATURE_KEY)
                         .status(Experiment.Status.builder()
-                                .staticStatus(Experiment.Status.StaticStatus.PUBLISHED)
+                                .staticStatus(status)
                                 .build())
                         .buckets(List.of(
                                 Experiment.Bucket.builder().key("a").percentage(100).build()))
@@ -89,11 +134,16 @@ class CustomerAssignmentsTest {
     }
 
     private Assignment assignment(Experiment experiment, long configVersion) {
+        return assignment(experiment, configVersion, null);
+    }
+
+    private Assignment assignment(Experiment experiment, long configVersion, Map<String, Object> extraInfo) {
         return Assignment.builder()
                 .id(new Assignment.AssignmentId(experiment.getId(), CLIENT_ID))
                 .description(Assignment.Description.builder()
                         .bucket(Experiment.Bucket.builder().key("a").percentage(100).build())
                         .experimentConfigVersion(configVersion)
+                        .extraInfo(extraInfo)
                         .build())
                 .build();
     }
