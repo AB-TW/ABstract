@@ -135,6 +135,7 @@
 import _ from "lodash"
 import lodash from "lodash"
 import { reactive, ref, watch } from "vue"
+import type { PropType } from "vue"
 import {
   CompareOperator,
   CustomAttributeCondition,
@@ -151,7 +152,7 @@ defineOptions({
 })
 const props = defineProps({
   modelValue: {
-    type: Object,
+    type: [Object, null] as PropType<FilterCondition | null>,
     required: true,
     default: () => {
       return defaultFilterCondition()
@@ -166,7 +167,19 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"])
 
 // code about filter condition
-const filterCondition = reactive<FilterCondition>(props.modelValue)
+const normalizeFilterCondition = (filterCondition?: FilterCondition | null): FilterCondition => {
+  const defaultValue = defaultFilterCondition()
+  return {
+    ...defaultValue,
+    ...(filterCondition ?? {}),
+    grayReleaseCondition: {
+      ...defaultValue.grayReleaseCondition,
+      ...(filterCondition?.grayReleaseCondition ?? {})
+    },
+    attributeConditions: filterCondition?.attributeConditions ?? defaultValue.attributeConditions
+  }
+}
+const filterCondition = reactive<FilterCondition>(normalizeFilterCondition(props.modelValue))
 
 // watch reactive object then assign parent bind object
 watch<FilterCondition>(filterCondition, (cur, _) => emit("update:modelValue", cur))
@@ -179,7 +192,7 @@ const validateCustomAttributeConditions = (rule: any, customAttribute: CustomAtt
 }
 watch(
   () => props.modelValue,
-  (cur, _) => lodash.assign(filterCondition, cur)
+  (cur, _) => lodash.assign(filterCondition, normalizeFilterCondition(cur))
 )
 const filterConditionRules: FormRules = {
   "grayReleaseCondition.releasePercentage": [{ required: true, message: "灰度发布比例不可为空", trigger: "blur" }]
