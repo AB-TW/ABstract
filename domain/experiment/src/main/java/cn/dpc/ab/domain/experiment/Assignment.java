@@ -61,7 +61,8 @@ public class Assignment {
             percentage.set(percentage.get() + bucket.percentage());
             if (Optional.ofNullable(customerId.clientId())
                     .filter(id -> !id.isEmpty())
-                    .map(id -> Math.floorMod((experiment.getId().id() + id).hashCode(), 100) < percentage.get())
+                    .map(id -> Math.floorMod((experiment.getId().id() + id).hashCode() / 100, 100)
+                            < percentage.get())
                     .orElse(false)) {
                 return Mono.just(Assignment.builder()
                         .id(new AssignmentId(experiment.getId(), customerId.clientId()))
