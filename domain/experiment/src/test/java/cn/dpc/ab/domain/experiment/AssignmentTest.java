@@ -45,6 +45,20 @@ public class AssignmentTest {
         assertEquals("rest", assignment.getDescription().bucket().key());
     }
 
+    @Test
+    public void should_preserve_positive_hash_bucket_when_normalizing_assignment_hash() {
+        Experiment experiment = generateCollectingExperimentWithEvenBuckets("experiment-1");
+
+        Assignment assignment = Assignment.createAssignment(experiment, CustomerId.builder()
+                        .customerId("customer-10")
+                        .clientId("client-10")
+                        .attributes(Map.of())
+                        .build())
+                .block();
+
+        assertEquals("second", assignment.getDescription().bucket().key());
+    }
+
     private Assignment generateAssignment(String experimentId, String clientId) {
         return Assignment.builder()
                 .id(new Assignment.AssignmentId(
@@ -98,6 +112,26 @@ public class AssignmentTest {
                         .configVersion(0L)
                         .buckets(List.of(Experiment.Bucket.builder().key("first").name("first").percentage(1).build(),
                                 Experiment.Bucket.builder().key("rest").name("rest").percentage(99).build()))
+                        .build());
+    }
+
+    private Experiment generateCollectingExperimentWithEvenBuckets(String id) {
+        return new Experiment(Experiment.ExperimentId.builder()
+                .id(id)
+                .build(),
+                Experiment.Description.builder()
+                        .name("name")
+                        .description("description")
+                        .status(Experiment.Status.builder()
+                                .staticStatus(Experiment.Status.StaticStatus.PUBLISHED)
+                                .build())
+                        .featureKey("key")
+                        .filterCondition(FilterCondition.builder()
+                                .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
+                                .build())
+                        .configVersion(0L)
+                        .buckets(List.of(Experiment.Bucket.builder().key("first").name("first").percentage(50).build(),
+                                Experiment.Bucket.builder().key("second").name("second").percentage(50).build()))
                         .build());
     }
 }
