@@ -53,7 +53,7 @@ public class FilterCondition {
 
             return Optional.ofNullable(clientId)
                     .filter(id -> !id.isEmpty())
-                    .map(id -> id.hashCode() % 100 < releasePercentage)
+                    .map(id -> Math.floorMod(id.hashCode(), 100) < releasePercentage)
                     .orElse(false);
         }
     }

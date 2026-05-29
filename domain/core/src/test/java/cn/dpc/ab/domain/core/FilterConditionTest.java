@@ -48,6 +48,20 @@ class FilterConditionTest {
                 .build()));
     }
 
+    @Test
+    void gray_release_should_not_match_negative_hash_outside_percentage() {
+        CustomerId customerId = CustomerId.builder()
+                .customerId("customer-10")
+                .clientId("client-10")
+                .attributes(Map.of())
+                .build();
+        FilterCondition filterCondition = FilterCondition.builder()
+                .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(1))
+                .build();
+
+        assertFalse(filterCondition.match(customerId));
+    }
+
     @Nested
     class InMatchTest {
         @Test
