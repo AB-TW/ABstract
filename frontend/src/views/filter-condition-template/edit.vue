@@ -30,7 +30,8 @@
 
         <FilterConditionComponent
           ref="filterConditionRef"
-          v-model="filterConditionTemplateForm"
+          :model-value="filterConditionTemplateForm"
+          @update:modelValue="(value) => Object.assign(filterConditionTemplateForm, value)"
           :disabled="isViewMode"
         />
         <el-form-item v-if="!isViewMode">
