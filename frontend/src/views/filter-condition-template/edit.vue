@@ -30,7 +30,8 @@
 
         <FilterConditionComponent
           ref="filterConditionRef"
-          v-model="filterConditionTemplateForm"
+          :model-value="filterConditionTemplateForm"
+          @update:modelValue="updateFilterCondition"
           :disabled="isViewMode"
         />
         <el-form-item v-if="!isViewMode">
@@ -53,7 +54,7 @@ import { ElButton, ElForm, ElFormItem, ElInput, ElMessage, FormInstance } from "
 import FilterConditionComponent from "@/components/FilterCondition.vue"
 import { computed, onBeforeMount, reactive, ref } from "vue"
 import _ from "lodash"
-import { FilterConditions, FilterConditionTemplate } from "@/domain/FilterConditions"
+import { FilterCondition, FilterConditions, FilterConditionTemplate } from "@/domain/FilterConditions"
 import { FilterConditionAddRequest } from "@/model/request/FilterConditionAddRequest"
 import { useRoute, useRouter } from "vue-router"
 
@@ -73,7 +74,7 @@ const isAddMode = computed(() => !isEditMode.value)
 
 const filterConditionTemplateRef = ref<FormInstance>()
 const filterConditionRef = ref<FormInstance>()
-const filterConditionTemplateForm = reactive<FilterConditionAddRequest>({
+const filterConditionTemplateForm = reactive<FilterConditionAddRequest & FilterCondition>({
   templateName: "",
   attributeConditions: [],
   grayReleaseCondition: {
@@ -99,6 +100,11 @@ const resetFilterConditionTemplateForm = (
   if (!filterConditionTemplateRef || !filterConditionRef) return
   filterConditionTemplateRef.resetFields()
   filterConditionRef.$refs.filterConditionFormRef.resetFields()
+}
+
+const updateFilterCondition = (filterCondition: FilterCondition) => {
+  filterConditionTemplateForm.attributeConditions = filterCondition.attributeConditions ?? []
+  filterConditionTemplateForm.grayReleaseCondition = filterCondition.grayReleaseCondition
 }
 
 const submitFilterConditionForm = async (
