@@ -1,6 +1,6 @@
 <template>
   <div>
-    <chat-box v-model="messages" ref="chatBoxRef" @send-message="sendMessage" @clear-history="clearHistory" />
+    <chat-box :model-value="messages" ref="chatBoxRef" @send-message="sendMessage" @clear-history="clearHistory" />
   </div>
 </template>
 
