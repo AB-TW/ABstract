@@ -49,6 +49,22 @@ class FilterConditionTest {
     }
 
     @Test
+    void numeric_comparisons_should_use_number_ordering_for_multiple_digits() {
+        Map<String, String> attributes = Map.of("age", "10", "score", "2", "limit", "10");
+        CustomerId customerId = CustomerId.builder().customerId("111").clientId("222").attributes(attributes).build();
+
+        FilterCondition filterCondition = FilterCondition.builder()
+                .attributeConditions(List.of(
+                        new CustomAttributeCondition("age", "age", GREATER_THAN_OR_EQUALS, "2", null),
+                        new CustomAttributeCondition("score", "score", LESS_THAN, "10", null),
+                        new CustomAttributeCondition("limit", "limit", LESS_THAN_OR_EQUALS, "10", null)))
+                .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
+                .build();
+
+        assertTrue(filterCondition.match(customerId));
+    }
+
+    @Test
     void gray_release_should_not_match_negative_hash_outside_percentage() {
         CustomerId customerId = CustomerId.builder()
                 .customerId("customer-10")

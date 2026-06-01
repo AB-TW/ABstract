@@ -98,9 +98,12 @@ public class FilterCondition {
                 case NOT_EQUALS -> !attributeValue.equals(value);
                 case GREATER_THAN ->
                         StringUtils.isNumeric(attributeValue) && Double.parseDouble(attributeValue) > Double.parseDouble(value);
-                case GREATER_THAN_OR_EQUALS -> StringUtils.isNumeric(attributeValue)  && attributeValue.compareTo(value) >= 0;
-                case LESS_THAN -> StringUtils.isNumeric(attributeValue)  && attributeValue.compareTo(value) < 0;
-                case LESS_THAN_OR_EQUALS -> StringUtils.isNumeric(attributeValue)  && attributeValue.compareTo(value) <= 0;
+                case GREATER_THAN_OR_EQUALS ->
+                        StringUtils.isNumeric(attributeValue) && Double.parseDouble(attributeValue) >= Double.parseDouble(value);
+                case LESS_THAN ->
+                        StringUtils.isNumeric(attributeValue) && Double.parseDouble(attributeValue) < Double.parseDouble(value);
+                case LESS_THAN_OR_EQUALS ->
+                        StringUtils.isNumeric(attributeValue) && Double.parseDouble(attributeValue) <= Double.parseDouble(value);
                 case IN -> Optional.ofNullable(items).map(list -> list.contains(attributeValue)).orElse(false);
                 case NOT_IN -> Optional.ofNullable(items).map(list -> !list.contains(attributeValue)).orElse(true);
                 case VERSION_GREATER_THAN ->
