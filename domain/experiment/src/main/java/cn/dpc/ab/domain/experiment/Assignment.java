@@ -52,7 +52,7 @@ public class Assignment {
                 .map(Experiment.Description::filterCondition)
                 .map(filterCondition -> filterCondition.match(customerId))
                 .orElse(true)) {
-            return Mono.just(getDefaultAssignment(experiment, customerId));
+            return Mono.just(createDefaultAssignment(experiment, customerId));
         }
 
         AtomicInteger percentage = new AtomicInteger(0);
@@ -74,10 +74,13 @@ public class Assignment {
             }
         }
 
-        return Mono.just(getDefaultAssignment(experiment, customerId));
+        return Mono.just(createDefaultAssignment(experiment, customerId));
     }
 
-    private static Assignment getDefaultAssignment(Experiment experiment, CustomerId customerId) {
+    /**
+     * createDefaultAssignment creates an assignment without a bucket.
+     */
+    public static Assignment createDefaultAssignment(Experiment experiment, CustomerId customerId) {
         Assignment assignment = Assignment.builder()
                 .id(new AssignmentId(experiment.getId(), customerId.clientId()))
                 .description(Description.builder()

@@ -42,6 +42,9 @@ public class CustomerAssignments implements Customer.Assignments {
                     return experiment.getAssignments().get(new Assignment.AssignmentId(experiment.getId(),
                                     customerId.clientId()))
                             .flatMap(assignment -> {
+                                if (shouldClearBucketForCurrentFilter(experiment, assignment)) {
+                                    return updateWithDefaultAssignment(experiment);
+                                }
                                 // 如果实验版本号有变化 则重新分组
                                 if (shouldReassign(experiment, assignment)) {
                                     // experiment version updated  do reassign
@@ -54,10 +57,7 @@ public class CustomerAssignments implements Customer.Assignments {
                                 }
 
                                 return Mono.just(assignment);
-                            }).switchIfEmpty(Assignment.createAssignment(experiment, customerId)
-                                    .flatMap(assignment ->
-                                            EMPTY == assignment ? Mono.just(assignment)
-                                                    : experiment.getAssignments().addOrUpdate(assignment)));
+                            }).switchIfEmpty(createAndSaveAssignment(experiment));
                 })
                 .defaultIfEmpty(EMPTY);
     }
@@ -71,6 +71,35 @@ public class CustomerAssignments implements Customer.Assignments {
         return !Objects.equals(experiment.getDescription().configVersion(), assignment.getDescription().experimentConfigVersion())
                 && (Optional.ofNullable(assignment.getDescription().bucket()).map(bucket -> bucket.key() == null)
                 .orElse(true));
+    }
+
+    private boolean shouldClearBucketForCurrentFilter(Experiment experiment, Assignment assignment) {
+        return Optional.ofNullable(assignment.getDescription())
+                .map(Assignment.Description::bucket)
+                .isPresent()
+                && !matchesCurrentFilter(experiment);
+    }
+
+    private boolean matchesCurrentFilter(Experiment experiment) {
+        return Optional.ofNullable(experiment.getDescription())
+                .map(Experiment.Description::filterCondition)
+                .map(filterCondition -> filterCondition.match(customerId))
+                .orElse(true);
+    }
+
+    private Mono<Assignment> createAndSaveAssignment(Experiment experiment) {
+        return Assignment.createAssignment(experiment, customerId)
+                .flatMap(assignment -> addOrUpdateAssignment(experiment, assignment));
+    }
+
+    private Mono<Assignment> updateWithDefaultAssignment(Experiment experiment) {
+        return addOrUpdateAssignment(experiment, Assignment.createDefaultAssignment(experiment, customerId));
+    }
+
+    private Mono<Assignment> addOrUpdateAssignment(Experiment experiment, Assignment assignment) {
+        return EMPTY == assignment
+                ? Mono.just(assignment)
+                : experiment.getAssignments().addOrUpdate(assignment).cast(Assignment.class);
     }
 
     private boolean shouldUpdateCustomerId(CustomerId customerId, Assignment assignment) {
