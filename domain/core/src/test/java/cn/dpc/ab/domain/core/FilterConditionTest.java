@@ -65,6 +65,28 @@ class FilterConditionTest {
     }
 
     @Test
+    void numeric_comparisons_should_not_throw_when_threshold_is_not_numeric() {
+        CustomerId customerId = CustomerId.builder()
+                .customerId("111")
+                .clientId("222")
+                .attributes(Map.of("age", "10"))
+                .build();
+
+        for (CustomAttributeCondition.Operator operator : List.of(
+                GREATER_THAN,
+                GREATER_THAN_OR_EQUALS,
+                LESS_THAN,
+                LESS_THAN_OR_EQUALS)) {
+            FilterCondition filterCondition = FilterCondition.builder()
+                    .attributeConditions(List.of(new CustomAttributeCondition("age", "age", operator, "adult", null)))
+                    .grayReleaseCondition(new FilterCondition.GrayReleaseCondition(100))
+                    .build();
+
+            assertFalse(filterCondition.match(customerId));
+        }
+    }
+
+    @Test
     void gray_release_should_not_match_negative_hash_outside_percentage() {
         CustomerId customerId = CustomerId.builder()
                 .customerId("customer-10")
