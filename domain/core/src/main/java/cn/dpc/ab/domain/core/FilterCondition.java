@@ -1,12 +1,12 @@
 package cn.dpc.ab.domain.core;
 
 import lombok.*;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
 /**
@@ -97,13 +97,13 @@ public class FilterCondition {
                 case EQUALS -> attributeValue.equals(value);
                 case NOT_EQUALS -> !attributeValue.equals(value);
                 case GREATER_THAN ->
-                        StringUtils.isNumeric(attributeValue) && Double.parseDouble(attributeValue) > Double.parseDouble(value);
+                        compareNumbers(attributeValue, value, (attribute, threshold) -> attribute > threshold);
                 case GREATER_THAN_OR_EQUALS ->
-                        StringUtils.isNumeric(attributeValue) && Double.parseDouble(attributeValue) >= Double.parseDouble(value);
+                        compareNumbers(attributeValue, value, (attribute, threshold) -> attribute >= threshold);
                 case LESS_THAN ->
-                        StringUtils.isNumeric(attributeValue) && Double.parseDouble(attributeValue) < Double.parseDouble(value);
+                        compareNumbers(attributeValue, value, (attribute, threshold) -> attribute < threshold);
                 case LESS_THAN_OR_EQUALS ->
-                        StringUtils.isNumeric(attributeValue) && Double.parseDouble(attributeValue) <= Double.parseDouble(value);
+                        compareNumbers(attributeValue, value, (attribute, threshold) -> attribute <= threshold);
                 case IN -> Optional.ofNullable(items).map(list -> list.contains(attributeValue)).orElse(false);
                 case NOT_IN -> Optional.ofNullable(items).map(list -> !list.contains(attributeValue)).orElse(true);
                 case VERSION_GREATER_THAN ->
@@ -115,6 +115,27 @@ public class FilterCondition {
                 case VERSION_LESS_THAN_OR_EQUALS ->
                         new DefaultArtifactVersion(attributeValue).compareTo(new DefaultArtifactVersion(value)) <= 0;
             };
+        }
+
+        private static boolean compareNumbers(String attributeValue, String threshold,
+                                              BiPredicate<Double, Double> predicate) {
+            return parseFiniteDouble(attributeValue)
+                    .flatMap(attribute -> parseFiniteDouble(threshold)
+                            .map(limit -> predicate.test(attribute, limit)))
+                    .orElse(false);
+        }
+
+        private static Optional<Double> parseFiniteDouble(String value) {
+            if (value == null || value.isBlank()) {
+                return Optional.empty();
+            }
+
+            try {
+                double parsed = Double.parseDouble(value);
+                return Double.isFinite(parsed) ? Optional.of(parsed) : Optional.empty();
+            } catch (NumberFormatException ignored) {
+                return Optional.empty();
+            }
         }
     }
 
