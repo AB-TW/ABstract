@@ -42,8 +42,13 @@ public class CustomerAssignments implements Customer.Assignments {
                     return experiment.getAssignments().get(new Assignment.AssignmentId(experiment.getId(),
                                     customerId.clientId()))
                             .flatMap(assignment -> {
+                                if (!matchesFilterCondition(experiment)) {
+                                    return hasBucket(assignment)
+                                            ? clearAssignmentBucket(experiment, assignment)
+                                            : Mono.just(assignment);
+                                }
                                 // 如果实验版本号有变化 则重新分组
-                                if (shouldReassign(experiment, assignment)) {
+                                if (shouldReassign(experiment, assignment) || !hasBucket(assignment)) {
                                     // experiment version updated  do reassign
                                     return Mono.empty();
                                 }
@@ -71,6 +76,29 @@ public class CustomerAssignments implements Customer.Assignments {
         return !Objects.equals(experiment.getDescription().configVersion(), assignment.getDescription().experimentConfigVersion())
                 && (Optional.ofNullable(assignment.getDescription().bucket()).map(bucket -> bucket.key() == null)
                 .orElse(true));
+    }
+
+    private boolean hasBucket(Assignment assignment) {
+        return Optional.ofNullable(assignment.getDescription())
+                .map(Assignment.Description::bucket)
+                .map(bucket -> bucket.key() != null)
+                .orElse(false);
+    }
+
+    private boolean matchesFilterCondition(Experiment experiment) {
+        return Optional.ofNullable(experiment.getDescription())
+                .map(Experiment.Description::filterCondition)
+                .map(filterCondition -> filterCondition.match(customerId))
+                .orElse(true);
+    }
+
+    private Mono<Assignment> clearAssignmentBucket(Experiment experiment, Assignment assignment) {
+        assignment.setDescription(Assignment.Description.builder()
+                .bucket(null)
+                .experimentConfigVersion(experiment.getDescription().configVersion())
+                .extraInfo(assignment.getDescription().extraInfo())
+                .build());
+        return experiment.getAssignments().update(assignment);
     }
 
     private boolean shouldUpdateCustomerId(CustomerId customerId, Assignment assignment) {

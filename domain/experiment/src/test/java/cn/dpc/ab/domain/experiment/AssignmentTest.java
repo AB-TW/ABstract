@@ -9,6 +9,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * AssignmentTest represents a test of assignment.
@@ -57,6 +58,19 @@ public class AssignmentTest {
                 .block();
 
         assertEquals("second", assignment.getDescription().bucket().key());
+    }
+
+    @Test
+    public void should_find_customer_id_after_adding_it_to_assignment_extra_info() {
+        Assignment assignment = generateAssignment("111", "222");
+
+        assignment.addCustomerId("customer-1");
+
+        assertTrue(assignment.containsCustomerId(CustomerId.builder()
+                .customerId("customer-1")
+                .clientId("222")
+                .attributes(Map.of())
+                .build()));
     }
 
     private Assignment generateAssignment(String experimentId, String clientId) {
