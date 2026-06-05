@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * AssignmentTest represents a test of assignment.
@@ -57,6 +59,21 @@ public class AssignmentTest {
                 .block();
 
         assertEquals("second", assignment.getDescription().bucket().key());
+    }
+
+    @Test
+    public void should_check_customer_id_when_extra_info_customer_ids_is_set() {
+        Assignment assignment = Assignment.builder()
+                .description(Assignment.Description.builder()
+                        .extraInfo(Map.of("customerIds", Set.of("customer-1")))
+                        .build())
+                .build();
+
+        assertTrue(assignment.containsCustomerId(CustomerId.builder()
+                .customerId("customer-1")
+                .clientId("client-1")
+                .attributes(Map.of())
+                .build()));
     }
 
     private Assignment generateAssignment(String experimentId, String clientId) {
