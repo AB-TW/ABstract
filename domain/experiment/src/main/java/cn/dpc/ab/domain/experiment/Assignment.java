@@ -98,10 +98,10 @@ public class Assignment {
      * @param customerId the customerId to add
      */
     public void addCustomerId(String customerId) {
-        Map<String, Object> extraInfo = Optional.ofNullable(this.description)
+        Map<String, Object> extraInfo = new HashMap<>(Optional.ofNullable(this.description)
                 .flatMap(d -> Optional.ofNullable(d.extraInfo))
-                .orElse(new HashMap<>());
-        Set<String> customerIds = new HashSet<>((ArrayList<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new ArrayList<>()));
+                .orElse(new HashMap<>()));
+        Set<String> customerIds = customerIdsFrom(extraInfo.get(CUSTOMER_ID_KEY));
 
         if (Optional.ofNullable(customerId).filter(s -> !s.isEmpty()).isEmpty()) {
             return;
@@ -131,8 +131,23 @@ public class Assignment {
                 .flatMap(d -> Optional.ofNullable(d.extraInfo))
                 .orElse(new HashMap<>());
 
-        Set<String> customerIds = new HashSet<>((ArrayList<String>) extraInfo.getOrDefault(CUSTOMER_ID_KEY, new ArrayList<>()));
+        Set<String> customerIds = customerIdsFrom(extraInfo.get(CUSTOMER_ID_KEY));
         return customerIds.contains(customerId.customerId());
+    }
+
+    private static Set<String> customerIdsFrom(Object value) {
+        if (value instanceof Collection<?> customerIds) {
+            Set<String> result = new HashSet<>();
+            customerIds.stream()
+                    .filter(Objects::nonNull)
+                    .map(String::valueOf)
+                    .forEach(result::add);
+            return result;
+        }
+        if (value instanceof String customerId && !customerId.isEmpty()) {
+            return new HashSet<>(Set.of(customerId));
+        }
+        return new HashSet<>();
     }
 
     /**

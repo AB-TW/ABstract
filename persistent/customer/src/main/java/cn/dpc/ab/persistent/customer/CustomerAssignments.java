@@ -68,9 +68,26 @@ public class CustomerAssignments implements Customer.Assignments {
     }
 
     private boolean shouldReassign(Experiment experiment, Assignment assignment) {
-        return !Objects.equals(experiment.getDescription().configVersion(), assignment.getDescription().experimentConfigVersion())
-                && (Optional.ofNullable(assignment.getDescription().bucket()).map(bucket -> bucket.key() == null)
-                .orElse(true));
+        boolean assignedCustomerNoLongerMatchesFilter = hasAssignedBucket(assignment) && !matchesCurrentFilter(experiment);
+        boolean versionChangedWithoutBucket = !Objects.equals(experiment.getDescription().configVersion(),
+                assignment.getDescription().experimentConfigVersion())
+                && Optional.ofNullable(assignment.getDescription().bucket())
+                .map(bucket -> bucket.key() == null)
+                .orElse(true);
+        return assignedCustomerNoLongerMatchesFilter || versionChangedWithoutBucket;
+    }
+
+    private boolean hasAssignedBucket(Assignment assignment) {
+        return Optional.ofNullable(assignment.getDescription().bucket())
+                .map(bucket -> StringUtils.hasLength(bucket.key()))
+                .orElse(false);
+    }
+
+    private boolean matchesCurrentFilter(Experiment experiment) {
+        return Optional.ofNullable(experiment.getDescription())
+                .map(Experiment.Description::filterCondition)
+                .map(filterCondition -> filterCondition.match(customerId))
+                .orElse(true);
     }
 
     private boolean shouldUpdateCustomerId(CustomerId customerId, Assignment assignment) {
