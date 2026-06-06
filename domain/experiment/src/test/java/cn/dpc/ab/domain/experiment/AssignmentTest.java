@@ -4,11 +4,14 @@ import cn.dpc.ab.domain.core.CustomerId;
 import cn.dpc.ab.domain.core.FilterCondition;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * AssignmentTest represents a test of assignment.
@@ -57,6 +60,30 @@ public class AssignmentTest {
                 .block();
 
         assertEquals("second", assignment.getDescription().bucket().key());
+    }
+
+    @Test
+    public void should_read_customer_ids_from_any_collection_type() {
+        Assignment assignment = Assignment.builder()
+                .id(new Assignment.AssignmentId(new Experiment.ExperimentId("experiment-1"), "client-1"))
+                .description(Assignment.Description.builder()
+                        .extraInfo(new HashMap<>(Map.of("customerIds", Set.of("customer-1"))))
+                        .build())
+                .build();
+
+        assertTrue(assignment.containsCustomerId(CustomerId.builder()
+                .customerId("customer-1")
+                .clientId("client-1")
+                .attributes(Map.of())
+                .build()));
+
+        assignment.addCustomerId("customer-2");
+
+        assertTrue(assignment.containsCustomerId(CustomerId.builder()
+                .customerId("customer-2")
+                .clientId("client-1")
+                .attributes(Map.of())
+                .build()));
     }
 
     private Assignment generateAssignment(String experimentId, String clientId) {

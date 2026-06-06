@@ -42,6 +42,9 @@ public class CustomerAssignments implements Customer.Assignments {
                     return experiment.getAssignments().get(new Assignment.AssignmentId(experiment.getId(),
                                     customerId.clientId()))
                             .flatMap(assignment -> {
+                                if (!matchesFilterCondition(experiment)) {
+                                    return Mono.empty();
+                                }
                                 // 如果实验版本号有变化 则重新分组
                                 if (shouldReassign(experiment, assignment)) {
                                     // experiment version updated  do reassign
@@ -60,6 +63,12 @@ public class CustomerAssignments implements Customer.Assignments {
                                                     : experiment.getAssignments().addOrUpdate(assignment)));
                 })
                 .defaultIfEmpty(EMPTY);
+    }
+
+    private boolean matchesFilterCondition(Experiment experiment) {
+        return Optional.ofNullable(experiment.getDescription().filterCondition())
+                .map(filterCondition -> filterCondition.match(customerId))
+                .orElse(true);
     }
 
     private Mono<Experiment> getExperimentByFeatureKeyWithCache(Feature.FeatureId featureKey) {
