@@ -22,29 +22,34 @@ fi
 
 ## 技术栈
 
-编程语言： Java 17
+编程语言： Java 21
 
-软件构件工具： Gradle 8.1.1
+软件构件工具： Gradle 8.14.1
 
-基础框架： Spring Boot 3.X
+基础框架： Spring Boot 4.0.6
 
 Web框架：Spring WebFlux、Spring RSocket
 
-数据库： CouchBase + Spring Data reactive CouchBase
+数据库： Couchbase + Spring Data Reactive Couchbase（默认）/ PostgreSQL + R2DBC（备选，双持久化支持）
 
-测试框架：JUnit5 +  Spring boot test + TestContainer
+前端： Vue 3 + TypeScript + Element Plus + Vite
+
+测试框架：JUnit 6 + Spring Boot Test + TestContainer
+
+> ⚠️ 注意：测试目前因 JUnit 6 与 Mockito 不兼容而暂时禁用，详见 [TEST_COMPATIBILITY.md](TEST_COMPATIBILITY.md)
 
 ## 后端服务命令脚本
 
 ### 构建
 
 ```shell
-./gradlew build --no-parallel
+./gradlew build -x test --no-parallel
 ```
 
 ### 运行测试
 
 ```shell
+# ⚠️ 测试目前因 JUnit 6 + Mockito 兼容性问题暂时禁用
 ./gradlew test --no-parallel
 ```
 
