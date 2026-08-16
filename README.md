@@ -5,7 +5,6 @@
 # ABstract
 An scaffold project for AB testing 
 
-
 ## TestContainer config
 if use colima as test container, you need add the following system environment variables:
 ```shell
@@ -103,7 +102,6 @@ docker build -t a_bstract/abstract:latest .
 
 ![domain](resource/domain.png)
 
-
 ## C端Rsocket接口RSC脚本示例
 
 RSC是类似与curl命令的RSocket客户端命令行工具，方便对RSocket API进行调试，具体安装使用方法可以查看[GitHub - RSocket Client CLI (RSC)
@@ -132,15 +130,13 @@ RSC是类似与curl命令的RSocket客户端命令行工具，方便对RSocket A
 
 ## 项目介绍视频
 
-![](resource/abstract-intro.mp4)
+![](https://github.com/user-attachments/assets/1470d2ed-d6f7-4205-b4da-22b37da5d450)
 
 44秒 | 全面了解 ABtract 平台的核心功能与技术架构（含真实界面演示）
 
 ---
 
 ## 系统功能
-
-[![ABStract](https://i9.ytimg.com/vi_webp/VEW3CP06tvs/mqdefault.webp?v=66c1d49b&sqp=CPDnj7YG&rs=AOn4CLALt57yk4xqkOVNCbgko5NkwjPqdA)](https://www.youtube.com/watch?v=VEW3CP06tvs)
 
 ### 特性管理
 
