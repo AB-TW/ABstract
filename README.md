@@ -130,7 +130,7 @@ RSC是类似与curl命令的RSocket客户端命令行工具，方便对RSocket A
 
 ## 项目介绍视频
 
-![](https://github.com/user-attachments/assets/1470d2ed-d6f7-4205-b4da-22b37da5d450)
+https://github.com/user-attachments/assets/1470d2ed-d6f7-4205-b4da-22b37da5d450
 
 44秒 | 全面了解 ABtract 平台的核心功能与技术架构（含真实界面演示）
 
