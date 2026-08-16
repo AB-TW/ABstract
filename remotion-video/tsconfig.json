@@ -10,8 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "incremental": true,
-    "types": ["@remotion/types"]
+    "incremental": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
