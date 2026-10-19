@@ -14,7 +14,7 @@ services:
     container_name: server
     restart: on-failure
     image: ab-stract:latest
-#    image: registry.cn-wulanchabu.aliyuncs.com/pc-dong/ab-stract:latest
+    # Optional private registry image. Public checkouts should build and tag locally.
     ports:
       - "8080:8080"
       - "7001:7001"
