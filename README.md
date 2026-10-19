@@ -1,6 +1,6 @@
 ![logo.png](resource/ABstractLogo.png)
 
-[![ci](https://github.com/AB-TW/ABstract/actions/workflows/gradle.yml/badge.svg)](https://github.com/pc-dong/ABstract/actions/gradle.yml)
+[![ci](https://github.com/AB-TW/ABstract/actions/workflows/gradle.yml/badge.svg)](https://github.com/AB-TW/ABstract/actions/workflows/gradle.yml)
 
 # ABstract
 An scaffold project for AB testing 
@@ -8,16 +8,19 @@ An scaffold project for AB testing
 ## TestContainer config
 if use colima as test container, you need add the following system environment variables:
 ```shell
-export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/Users/peichao.dong/.colima/docker.sock
-export DOCKER_HOST=unix:///{rootpath}/.colima/docker.sock
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=$HOME/.colima/docker.sock
+export DOCKER_HOST=unix://$HOME/.colima/docker.sock
 export TESTCONTAINERS_RYUK_DISABLED=true
 ```
+
 add them to ~/.bash_profile and add add the follow config to the top of ~/.zshrc
 ```shell
 if [ -f ~/.bash_profile ]; then
    source ~/.bash_profile
 fi
 ```
+
+The socket path depends on the Colima profile. A current default install often uses `$HOME/.colima/default/docker.sock` instead.
 
 ## 技术栈
 
@@ -90,6 +93,18 @@ docker-compose down
 docker-compose -f docker-compose-r2dbc.yml down
 ```
 
+### 本地演示口令
+
+下面的账号只用于本机 Docker Compose 和示例配置，**不是生产口令**。部署到任何共享环境前请换成自己的密钥，不要把真实 `.env`、数据库文件或主机地址提交进仓库。
+
+| 用途 | 用户 | 口令 | 位置 |
+| --- | --- | --- | --- |
+| Couchbase 管理员 | `Administrator` | `password` | `couchbase.Dockerfile` |
+| Couchbase bucket | `bucket1` | `bucket1pass` | `couchbase.Dockerfile`、`main/src/main/resources/application.yml` |
+| PostgreSQL | `abstract` | `abstract` | `docker-compose-r2dbc.yml` |
+
+前端环境变量从 [`frontend/.env.example`](frontend/.env.example) 复制为 `frontend/.env.development`（或 `.env.staging` / `.env.production`）。这些文件已被忽略，示例里只有 localhost。
+
 ### Build Image
 
 ```shell
@@ -151,3 +166,9 @@ https://github.com/user-attachments/assets/1470d2ed-d6f7-4205-b4da-22b37da5d450
 ### C端接口
 
 实验和和固定配置通过统一接口获取，C端对是否有实验无感。可以顺畅的切换实验到实验后的固定配置。
+
+## Licenses
+
+仓库根目录的 [`LICENSE`](LICENSE) 是本项目的 MIT 许可。
+
+[`frontend/LICENSE`](frontend/LICENSE) 保留管理端模板的上游 MIT 声明（Copyright (c) 2022 pany，<https://github.com/pany-ang>）。前端常量里的 `v3-admin-vite` 表明 UI 脚手架来自该模板。这份文件只说明模板归属，不替代根目录许可，也不表示模板作者拥有 ABstract 其余代码。

@@ -7,11 +7,46 @@ build
 /lib/
 /bin/
 **/bin/
-/.idea/
-/docs/
 out
 
-# Ignore .DS_Store
-.DS_Store
+# Runtime uploads and local notes (not source)
+/upload-files/
+/txt_docs/
+/docs/
+
+# Local databases
+*.mv.db
+snapadmin_internal.mv.db
+**/tmp/
 /tmp/
+
+# Env and secrets. Commit only *.env.example templates.
+.env
+.env.*
+!.env.example
+!**/.env.example
+frontend/.env.local
+frontend/.env.*.local
+
+# IDE
+*.iml
+.idea/
+/.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Node
+node_modules/
+dist/
+frontend/dist/
+remotion-video/out/
+remotion-video/node_modules/
+
+# Optional local AI tooling. Already tracked files stay tracked.
+.serena/
+.claude/
 .playwright-mcp/
+
+# OS / misc
+.DS_Store
+*.log
