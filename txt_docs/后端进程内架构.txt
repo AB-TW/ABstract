@@ -1,3 +1,0 @@
--   {{embed \[\[Smart Domain\]\]}}
--   Gradle 脚手架搭件 collapsed:: true
-    -   {{embed \[\[Gradle 脚手架搭建\]\]}}

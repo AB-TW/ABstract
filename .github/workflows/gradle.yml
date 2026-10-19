@@ -44,9 +44,37 @@ jobs:
           run: ./gradlew npmBuild
         - name: Build Docker image
           run: docker build -t a_bstract/abstract:latest .
+        # Publish is opt-in. Public forks should leave these secrets unset and skip the push.
+        # Do not store the registry password in Actions variables.
+        # All four secrets are required before login/push runs:
+        #   REGISTRY_HOST, REGISTRY_USERNAME, REGISTRY_PASSWORD, REGISTRY_IMAGE
+        # REGISTRY_IMAGE is the full reference, for example registry.example.com/org/ab-stract:latest
+        - name: Detect registry credentials
+          id: registry
+          env:
+            REGISTRY_HOST: ${{ secrets.REGISTRY_HOST }}
+            REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+            REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+            REGISTRY_IMAGE: ${{ secrets.REGISTRY_IMAGE }}
+          run: |
+            if [ -n "${REGISTRY_HOST}" ] && [ -n "${REGISTRY_USERNAME}" ] && [ -n "${REGISTRY_PASSWORD}" ] && [ -n "${REGISTRY_IMAGE}" ]; then
+              echo "push=true" >> "${GITHUB_OUTPUT}"
+            else
+              echo "push=false" >> "${GITHUB_OUTPUT}"
+              echo "Registry secrets are incomplete. Skipping docker login and push."
+              echo "Public forks should keep this skipped."
+            fi
         - name: Login Docker registry
-          run: docker login --username ${{ vars.REGISTRY_USERNAME }} --password ${{ vars.REGISTRY_PASSWORD }} registry.cn-wulanchabu.aliyuncs.com
-        - name: Tag Docker image
-          run: docker tag a_bstract/abstract:latest registry.cn-wulanchabu.aliyuncs.com/pc-dong/ab-stract:latest
-        - name: Push Docker image
-          run: docker push registry.cn-wulanchabu.aliyuncs.com/pc-dong/ab-stract:latest
+          if: steps.registry.outputs.push == 'true'
+          env:
+            REGISTRY_HOST: ${{ secrets.REGISTRY_HOST }}
+            REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+            REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          run: echo "${REGISTRY_PASSWORD}" | docker login --username "${REGISTRY_USERNAME}" --password-stdin "${REGISTRY_HOST}"
+        - name: Tag and push Docker image
+          if: steps.registry.outputs.push == 'true'
+          env:
+            REGISTRY_IMAGE: ${{ secrets.REGISTRY_IMAGE }}
+          run: |
+            docker tag a_bstract/abstract:latest "${REGISTRY_IMAGE}"
+            docker push "${REGISTRY_IMAGE}"
